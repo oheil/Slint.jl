@@ -3,22 +3,29 @@ Slint GUI for Julia
 
 
 # download/install
+
+```julia
 using Pkg
 Pkg.add(url="https://github.com/oheil/Slint.jl.git")
-dev Slint
+Pkg.develop("Slint")
+```
 
 # build
+```julia
+using Pkg
 cd(".julia/dev/Slint")
-activate .
-using Pkg; Pkg.build("Slint"; verbose = true);
+Pkg.activate(".")
+Pkg.build("Slint"; verbose = true);
 include("contrib\\generator.jl")
+```
 
 # run examples
+```julia
 include("examples\\7guis\\booker.jl")
 include("examples\\7guis\\cells.jl")
+```
 
 # REPL examples
-
 ```julia
 using Slint
 s = "export component MyWin inherits Window {
