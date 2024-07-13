@@ -1,0 +1,10 @@
+C:\Users\Oli\.julia\dev\Slint\deps\SlintWrapper\target\debug\deps\libi_slint_common-a3e299b022043c15.rmeta: C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\lib.rs C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\builtin_structs.rs C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\enums.rs C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\key_codes.rs C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\sharedfontdb.rs C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\README.md
+
+C:\Users\Oli\.julia\dev\Slint\deps\SlintWrapper\target\debug\deps\i_slint_common-a3e299b022043c15.d: C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\lib.rs C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\builtin_structs.rs C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\enums.rs C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\key_codes.rs C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\sharedfontdb.rs C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\README.md
+
+C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\lib.rs:
+C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\builtin_structs.rs:
+C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\enums.rs:
+C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\key_codes.rs:
+C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\sharedfontdb.rs:
+C:\Users\Oli\.cargo\registry\src\index.crates.io-6f17d22bba15001f\i-slint-common-1.6.0\README.md:

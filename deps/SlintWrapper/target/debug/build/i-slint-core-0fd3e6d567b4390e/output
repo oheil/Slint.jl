@@ -1,0 +1,3 @@
+cargo:rustc-check-cfg=cfg(slint_debug_property)
+cargo:rustc-check-cfg=cfg(cbindgen)
+cargo:rustc-check-cfg=cfg(slint_int_coord)

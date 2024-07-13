@@ -1,0 +1,22 @@
+[package]
+name = "SlintWrapper"
+version = "0.1.0"
+edition = "2021"
+authors = ["oheil <git@heilbit.de>"]
+build="build/build.rs"
+
+[dependencies]
+slint = "1.3.2"
+slint-interpreter = { version = "1.3.2", features = ["display-diagnostics"] }
+spin_on = "0.1.1"
+once_cell = "1.19.0"
+log = "0.4.20"
+env_logger = "0.11.1"
+
+[lib]
+name = "slintwrapper"
+crate-type = ["staticlib", "cdylib"]
+
+[build-dependencies]
+cbindgen = "0.26"
+regex = "1.10"

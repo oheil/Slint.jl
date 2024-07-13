@@ -1,0 +1,5 @@
+cargo:rustc-check-cfg=cfg(enable_skia_renderer)
+cargo:rustc-check-cfg=cfg(enable_accesskit)
+cargo:rustc-check-cfg=cfg(enable_skia_renderer)
+cargo:rustc-check-cfg=cfg(enable_accesskit)
+cargo:rustc-cfg=enable_accesskit

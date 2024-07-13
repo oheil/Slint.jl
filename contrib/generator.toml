@@ -1,0 +1,3 @@
+[general]
+library_name = "slintwrapper"
+output_file_path = "./api.jl"

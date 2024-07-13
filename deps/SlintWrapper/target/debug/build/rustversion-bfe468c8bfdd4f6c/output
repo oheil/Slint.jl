@@ -1,0 +1,2 @@
+cargo:rerun-if-changed=build/build.rs
+cargo:rustc-cfg=host_os="windows"
