@@ -478,10 +478,10 @@ pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalu
 pub unsafe extern "C" fn r_set_cell_value(id: *const c_char, mut row: i32, mut col: i32, new_value: JRvalue) {    
     debug!("r_set_cell_value");
     if row == 0 {
-        warn!("r_get_cell_value: row index is <{}>, please provide 1-based indices as in Julia",row);
+        warn!("r_set_cell_value: row index is <{}>, please provide 1-based indices as in Julia",row);
     }
     if col == 0 {
-        warn!("r_get_cell_value: column index is <{}>, please provide 1-based indices as in Julia",col);
+        warn!("r_set_cell_value: column index is <{}>, please provide 1-based indices as in Julia",col);
     }
     row -= 1;
     col -= 1;
