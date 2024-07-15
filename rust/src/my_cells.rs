@@ -4,10 +4,17 @@
 use log::*;
 use env_logger::Env;
 
+
+use slint::{Model, ModelRc, ModelTracker, ModelNotify};
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::ffi::{CStr, CString, c_char};
+
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
 use slint_interpreter::ComponentCompiler;
 use slint_interpreter::ComponentHandle;
 use slint_interpreter::Value;
+
 
 pub fn main() {
     let env = Env::default()
@@ -22,19 +29,13 @@ pub fn main() {
     
     import { Button, LineEdit, ScrollView, GridBox} from "std-widgets.slint";
     
-    struct SlintValue  { value: string }
+    struct SlintValue  { value_s: string, value_i: int }
     
     export component MainWindow inherits Window {
         width: 500px;
         height: 500px;
-
-        in-out property <[SlintValue]> _row1: [{}, {},];
-        in-out property <[SlintValue]> _row2: [{}, {},];
-        in property <[[SlintValue]]> cells: [
-            root._row1, root._row2,
-        ];
-
-        //in property <[[SlintValue]]> cells;
+        
+        in property <[[SlintValue]]> cells;
     
         private property <length> cell-height: 32px;
         private property <length> cell-width: 100px;
@@ -82,7 +83,7 @@ pub fn main() {
         
                         Text {
                             visible: !is-active;
-                            text: " " + cell.value;
+                            text: " " + cell.value_s;
                             vertical-alignment: center;
                             width: 100%;
                             height: 100%;
@@ -90,7 +91,7 @@ pub fn main() {
         
                         TouchArea {
                             clicked => {
-                                l.text = cell.value;
+                                l.text = cell.value_s;
                                 root.active-cell = {r: row-idx, c: col-idx};
                                 l.focus();
                             }
@@ -98,7 +99,7 @@ pub fn main() {
         
                         l := LineEdit {
                             edited => {
-                                cell = { value: self.text };
+                                cell = { value_s: self.text };
                             }
                             accepted => {
                                 root.active-cell = { r: -1, c: -1};
@@ -114,14 +115,14 @@ pub fn main() {
         } 
     }
     
-    //export component Cell inherits MainWindow {
-    //    // initialize the cells with demy value to be viewed in the preview
-    //    in-out property <[SlintValue]> _row1: [{}, {},];
-    //    in-out property <[SlintValue]> _row2: [{}, {},];
-    //    cells: [
-    //        root._row1, root._row2,
-    //    ];
-    //}
+//    export component Cell inherits MainWindow {
+//        // initialize the cells with demy value to be viewed in the preview
+//        in-out property <[SlintValue]> _row1: [{}, {},];
+//        in-out property <[SlintValue]> _row2: [{}, {},];
+//        cells: [
+//            root._row1, root._row2,
+//        ];
+//    }
 
     "#;
 
@@ -131,6 +132,14 @@ pub fn main() {
     slint_interpreter::print_diagnostics(&compiler.diagnostics());
 
     let instance = definition.unwrap().create().unwrap();
+
+    let cells_model = CellsModel::new(2,2);
+    
+    let r = instance.set_property("cells", Value::Model(cells_model.clone().into()) );
+    match r {
+        Ok(_) => (),
+        Err(error) => warn!("main:setting model for property <{}> failed: {:?}", "cells", error),
+    };
 
     let instance_weak = instance.as_weak();
     let _ = instance.set_callback("add_row",move |_| {
@@ -161,3 +170,281 @@ pub fn main() {
     */
 
 }
+
+// debug output
+fn print_type_of<T>(_: &T) {
+    debug!("print_type_of:type: {}", std::any::type_name::<T>())
+}
+
+//
+// JRvalue is used to receive return value from Julia callbacks
+//   and as a return value to calls from Julia (e.g. r_get_cell_value) if helpfull
+//
+const JRMAGIC: i32 = 123456;
+#[no_mangle]
+pub unsafe extern "C" fn r_get_magic() -> i32 {
+    debug!("r_get_magic");
+    JRMAGIC
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct JRvalue {
+    magic: i32,
+    rtype: *const c_char,
+    int_value: i32,
+    string_value: *const c_char,
+}
+impl JRvalue {
+    fn new_bool(b: bool) -> Self {
+        debug!("JRvalue.new_bool");
+        JRvalue {
+            magic: JRMAGIC,
+            rtype: CString::new("Bool").unwrap().into_raw(),
+            int_value: b.into(),
+            string_value: CString::new("").unwrap().into_raw()
+        }
+    }
+    fn new_undefined() -> Self {
+        debug!("JRvalue.new_undefined");
+        JRvalue {
+            magic: JRMAGIC,
+            rtype: CString::new("Unknown").unwrap().into_raw(),
+            int_value: 0,
+            string_value: CString::new("").unwrap().into_raw()
+        }
+    }
+    /*
+    fn from_ref(rv_ref: &Self) -> Self {
+        debug!("JRvalue.from_ref");
+        JRvalue {
+            magic: (*rv_ref).magic,
+            rtype: (*rv_ref).rtype,
+            int_value: (*rv_ref).int_value,
+            string_value: (*rv_ref).string_value,
+        }
+    }
+    */
+}
+
+//
+// below the generic model for every slint 2-dimensional vector property
+//   1-dimension vectors are handled like 2 dimensions with length 1 of one dimension
+//   cell/element values are always strings
+//
+#[derive(Clone)]
+struct SlintValue  { 
+    value_s: String,
+    value_i: i32,
+}
+impl Default for SlintValue {
+    fn default() -> SlintValue {
+        debug!("SlintValue");
+        SlintValue{
+            value_s: String::from(""),
+            value_i: 0,
+        }
+    }
+}
+
+struct CellsModel {
+    rows: Vec<Rc<RowModel>>,
+}
+impl Model for CellsModel {
+    type Data = Value;  // Data is Value
+
+    fn row_count(&self) -> usize {
+        debug!("CellsModel.row_count");
+        debug!("CellsModel.row_count: {}",self.rows.len());
+        self.rows.len()
+    }
+
+    fn row_data(&self, row: usize) -> Option<Self::Data> {
+        debug!("CellsModel.row_data");
+        // maps the data to a Value
+        self.rows.get(row).map(|x| Value::Model(ModelRc::new(x.clone())))
+    }
+    fn model_tracker(&self) -> &dyn ModelTracker {
+        debug!("CellsModel.model_tracker");
+        &()
+    }
+}
+impl CellsModel {
+    fn new(nrows: usize, ncols: usize) -> Rc<Self> {
+        debug!("CellsModel.new");
+        Rc::new_cyclic(|w| Self {
+            rows: (0..nrows)
+                .map(|row| {
+                    Rc::new(RowModel {
+                        row,
+                        row_elements: vec![SlintValue::default(); ncols].into(),
+                        base_model: w.clone(),
+                        notify: Default::default(),
+                    })
+                })
+                .collect(),
+        })
+    }
+
+    fn col_count(&self) -> usize {
+        debug!("CellsModel.col_count");
+        debug!("CellsModel.col_count: {}",self.rows.len());
+        let mut r: usize = 0;
+        if self.rows.len() > 0 {
+            r = self.rows.get(0).unwrap().row_count()
+        }
+        r
+    }
+
+    //fn get_cell_value(&self, row: usize, col: usize) -> Option<String> {
+    fn get_cell_value(&self, row: usize, col: usize) -> Option<JRvalue> {
+        debug!("CellsModel.get_cell_value");
+        debug!("CellsModel.get_cell_value: row={} col={}",row+1,col+1);
+        if row >= self.row_count() {
+            warn!("CellsModel.get_cell_value: row index <{}> not in range of existing row indices <1..{}>",row+1,self.row_count());
+        }
+        if col >= self.col_count() {
+            warn!("CellsModel.get_cell_value: col index <{}> not in range of existing column indices <1..{}>",col+1,self.col_count());
+        }
+        //let v: String = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
+        let mut rv = JRvalue::new_undefined();
+        //rv.string_value = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
+        rv.string_value = CString::new(self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone()).unwrap().into_raw();
+        rv.int_value = self.rows.get(row)?.row_elements.borrow().get(col)?.value_i;
+        Some(rv)
+    }
+
+    //fn update_cell(&self, row: usize, col: usize, new_value: Option<SharedString>) -> Option<()> {
+    fn update_cell(&self, row: usize, col: usize, new_value: Option<JRvalue>) -> Option<()> {
+        debug!("CellsModel.update_cell");
+        //debug!("CellsModel.update_cell: row={} col={} new_value={}",row+1,col+1,new_value.as_ref().unwrap());
+        match new_value {
+            Some(new_v) => {
+                debug!("CellsModel.update_cell: row={} col={}",row+1,col+1);
+                debug!("CellsModel.update_cell: new_v.int_value={}",new_v.int_value);
+                debug!("CellsModel.update_cell: new_v.string_value={:p}",new_v.string_value);
+                if row >= self.row_count() {
+                    warn!("CellsModel.update_cell: row index <{}> not in range of existing row indices <1..{}>",row+1,self.row_count());
+                }
+                if col >= self.col_count() {
+                    warn!("CellsModel.update_cell: col index <{}> not in range of existing column indices <1..{}>",col+1,self.col_count());
+                }
+                let r_model = self.rows.get(row)?;
+                let mut row_el = r_model.row_elements.borrow_mut();
+                let data = row_el.get_mut(col)?;
+
+                let mut rv = JRvalue::new_bool(true);
+                unsafe {
+                    let args = &[
+                        Value::Number(((row+1) as i32).into()),
+                        Value::Number(((col+1) as i32).into()),
+                        //Value::String(new_value.as_ref().unwrap().clone()),
+                        Value::String(CStr::from_ptr(new_v.string_value).to_string_lossy().into_owned().into()),
+                        Value::String(data.value_s.clone().into())
+                        ];
+            
+                    drop(row_el);
+                }
+        
+                // debug JRvalue returned
+                print_type_of(&rv);
+                debug!("CellsModel.update_cell:return value magic is: {}", rv.magic);
+                debug!("CellsModel.update_cell:return value type is: {:p}", rv.rtype);
+                debug!("CellsModel.update_cell:return value int_value is: {}", rv.int_value);
+                debug!("CellsModel.update_cell:return value string_value is: {:p}", rv.string_value);
+                // debug end
+        
+                // valid JRvalue only if magic == 123456
+                if rv.magic == JRMAGIC {
+                    unsafe {
+                        // get the type of the return value
+                        let rv_cstr = CStr::from_ptr(rv.rtype);
+                        let rv_type: String = rv_cstr.to_string_lossy().into_owned();
+        
+                        debug!("CellsModel.update_cell: rv_type={}", rv_type);
+        
+                        // create a Slint::Value from JRvalue as a valid Slint return value of a callback
+                        if rv_type == "Bool" {
+                            if rv.int_value == 0 { // false => do not change cell value
+                                return Some(());
+                            }
+                        } else {
+                            error!("CellsModel.update_cell:callback return value of type {} is not implemented",rv_type);
+                        }
+                    }
+                } else {
+                    error!("CellsModel.update_cell:callback must return a valid JRvalue, JRvalue.magic must equal {}",JRMAGIC);
+                }
+        
+                let mut row_el = r_model.row_elements.borrow_mut();
+                let data = row_el.get_mut(col)?;
+        
+                debug!("CellsModel.update_cell: data.value_s={}",data.value_s);
+                debug!("CellsModel.update_cell: data.value_i={}",data.value_i);
+
+                unsafe {
+                    data.value_s = CStr::from_ptr(new_v.string_value).to_string_lossy().into_owned();
+                }
+        
+                drop(row_el);
+                r_model.notify.row_changed(col);
+        
+            },
+            None => {
+                debug!("update_cell:no new value");
+
+            },
+        }
+        Some(())
+    }
+}
+struct RowModel {
+    row: usize,
+    row_elements: RefCell<Vec<SlintValue>>,
+    base_model: std::rc::Weak<CellsModel>,
+    notify: ModelNotify,
+}
+impl slint::Model for RowModel {
+    type Data = Value; // again, Data must be Value
+
+    fn row_count(&self) -> usize {
+        debug!("RowModel.row_count");
+        debug!("RowModel.row_count: {}",self.row_elements.borrow().len());
+        self.row_elements.borrow().len()
+    }
+
+    fn row_data(&self, row: usize) -> Option<Self::Data> {
+        debug!("RowModel.row_data");
+        debug!("RowModel.row_data: row={}",row+1);
+        self.row_elements.borrow().get(row).map(|row_element| {
+            debug!("RowModel.row_data: row_element.value_s={}",row_element.value_s);
+            let mut stru = slint_interpreter::Struct::default();
+            stru.set_field("value_s".into(), Value::String(row_element.value_s.clone().into()));
+            stru.set_field("value_i".into(), Value::Number(row_element.value_i.into()));
+            stru.into()
+        })
+    }
+
+    fn model_tracker(&self) -> &dyn ModelTracker {
+        debug!("RowModel.model_tracker");
+        &self.notify
+    }
+
+    fn set_row_data(&self, row: usize, data: Value) {
+        debug!("RowModel.set_row_data");
+        debug!("RowModel.set_row_data: row={} data.value_type={:#?}",row+1,data.value_type());
+        if let Some(cells) = self.base_model.upgrade() {
+            let stru = slint_interpreter::Struct::try_from(data).unwrap();
+            let val = stru.get_field("value_s".into()).unwrap().clone();
+            let shstr = slint_interpreter::SharedString::try_from(val).unwrap();
+            let mut rv = JRvalue::new_undefined();
+            rv.string_value = CString::new(shstr.as_str()).unwrap().into_raw();
+            //cells.update_cell(self.row, row, Some(shstr));
+            cells.update_cell(self.row, row, Some(rv));
+        }
+    }
+}
+
+//
+// API to models for arrays/matrices ends here
+//
+
