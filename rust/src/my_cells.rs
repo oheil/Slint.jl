@@ -150,8 +150,13 @@ pub fn main() {
         debug!("on_add_row {:#?}",cells);
         debug!("on_add_row {:#?}",cells_model.rows[0].row_data(0) );
         
-        //let the_model = &mut cells_model.as_any().downcast_ref::<CellsModel>().expect("We know we set it");
-        //let _ = the_model.add_row();
+        //Unfortunately you can't get a mutable reference to `the_model`. 
+        //You'll have to stay with an immutable `&` reference, change `add_row` to take `&self`, 
+        //and use interior mutability for any mutations needed in `CellsModel`. 
+        //For example if `self.rows` as a `slint::VecModel`, you could call `push` with `&self`, `&mut self` is not required.
+
+        let the_model = &mut cells_model.as_any().downcast_ref::<CellsModel>().expect("We know we set it");
+        let _ = the_model.add_row();
 
         return Value::Void;
     });
@@ -291,7 +296,7 @@ impl CellsModel {
         })
     }
     
-    pub fn add_row(&mut self) {
+    fn add_row(&self) {
         let row_count = self.row_count() + 1;
         let col_count = self.col_count();
         
@@ -304,7 +309,8 @@ impl CellsModel {
             notify: Default::default(),
         });
 
-        self.rows.push(row);
+        let row_mut: &mut Vec<Rc<RowModel>> = self.rows.borrow_mut();
+        row_mut.push(row);
     }
 
     fn col_count(&self) -> usize {
