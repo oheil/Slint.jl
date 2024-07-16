@@ -6,9 +6,11 @@ use env_logger::Env;
 
 
 use slint::{Model, ModelRc, ModelTracker, ModelNotify};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::ffi::{CStr, CString, c_char};
+use std::borrow::BorrowMut;
+use std::rc::Weak;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
 use slint_interpreter::ComponentCompiler;
@@ -142,13 +144,16 @@ pub fn main() {
     };
 
     let instance_weak = instance.as_weak();
-    let _ = instance.set_callback("add_row",move |_| {
-        let cells = instance_weak.unwrap().get_property("cells").unwrap();
+    let _ = instance.set_callback("add_row", move |_| {
+        let mut cells = instance_weak.unwrap().get_property("cells").unwrap();
 
         debug!("on_add_row {:#?}",cells);
+        debug!("on_add_row {:#?}",cells_model.rows[0].row_data(0) );
+        
+        //let the_model = &mut cells_model.as_any().downcast_ref::<CellsModel>().expect("We know we set it");
+        //let _ = the_model.add_row();
 
-
-        return Value::from(Value::Void);
+        return Value::Void;
     });
 
     instance.run().unwrap();
@@ -249,6 +254,7 @@ impl Default for SlintValue {
 struct CellsModel {
     rows: Vec<Rc<RowModel>>,
 }
+
 impl Model for CellsModel {
     type Data = Value;  // Data is Value
 
@@ -283,6 +289,22 @@ impl CellsModel {
                 })
                 .collect(),
         })
+    }
+    
+    pub fn add_row(&mut self) {
+        let row_count = self.row_count() + 1;
+        let col_count = self.col_count();
+        
+        let w = Weak::<CellsModel>::new();
+
+        let row = Rc::new(RowModel {
+            row: row_count,
+            row_elements: vec![SlintValue::default(); col_count].into(),
+            base_model: w.clone(),
+            notify: Default::default(),
+        });
+
+        self.rows.push(row);
     }
 
     fn col_count(&self) -> usize {
