@@ -9,7 +9,6 @@ use slint::{Model, ModelRc, ModelTracker, ModelNotify};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::ffi::{CStr, CString, c_char};
-use std::borrow::BorrowMut;
 use std::rc::Weak;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
@@ -148,17 +147,21 @@ pub fn main() {
         let mut cells = instance_weak.unwrap().get_property("cells").unwrap();
 
         debug!("on_add_row {:#?}",cells);
-        //let rows = cells_model.rows.borrow();
-        //debug!("on_add_row {:#?}",rows[0].row_data(0) );
+        debug!("on_add_row {:#?}",cells_model.rows.borrow()[0].row_data(0) );
         
         //Unfortunately you can't get a mutable reference to `the_model`. 
         //You'll have to stay with an immutable `&` reference, change `add_row` to take `&self`, 
         //and use interior mutability for any mutations needed in `CellsModel`. 
         //For example if `self.rows` as a `slint::VecModel`, you could call `push` with `&self`, `&mut self` is not required.
+        //https://chat.slint.dev/public/pl/85hgpz9rf3fwxdjt5exktu16ic
 
         //let the_model = &mut cells_model.as_any().downcast_ref::<Rc<CellsModel>>().expect("We know we set it");
         
         let _ = cells_model.add_row();
+        
+        cells_model.notify.row_changed( cells_model.rows.borrow().len() );
+
+        instance_weak.unwrap().window().request_redraw();
 
         return Value::Void;
     });
@@ -260,6 +263,7 @@ impl Default for SlintValue {
 
 struct CellsModel {
     rows: RefCell<Vec<Rc<RowModel>>>,
+    notify: ModelNotify,
 }
 
 impl Model for CellsModel {
@@ -295,6 +299,7 @@ impl CellsModel {
                     })
                 })
                 .collect()),
+                notify: Default::default(),
         })
     }
     
@@ -313,6 +318,7 @@ impl CellsModel {
 
         let mut row_mut = self.rows.borrow_mut();
         row_mut.push(row);
+        self.notify.row_added(row_count, col_count)
     }
 
     fn col_count(&self) -> usize {
