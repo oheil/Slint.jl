@@ -28,7 +28,7 @@ pub fn main() {
     // Copyright © SixtyFPS GmbH <info@slint.dev>
     // SPDX-License-Identifier: MIT
     
-    import { Button, LineEdit, ScrollView, GridBox} from "std-widgets.slint";
+    import { Button, LineEdit, ScrollView, ListView, GridBox} from "std-widgets.slint";
     
     struct SlintValue  { value_s: string, value_i: int }
     
@@ -303,7 +303,7 @@ impl CellsModel {
         })
     }
     
-    fn add_row(&self) {
+    fn add_row(&self) -> Option<()> {
         let row_count = self.row_count() + 1;
         let col_count = self.col_count();
         
@@ -316,9 +316,19 @@ impl CellsModel {
             notify: Default::default(),
         });
 
-        let mut row_mut = self.rows.borrow_mut();
-        row_mut.push(row);
-        self.notify.row_added(row_count, col_count)
+        let mut rows_mut = self.rows.borrow_mut();
+        rows_mut.push(row);
+        
+        let row_model = rows_mut.get(row_count)?;
+        row_model.notify.row_changed(2);
+
+        self.notify.row_added(row_count, col_count);
+
+        //let rows = self.rows.borrow();
+        //let r_model = rows.get(row_count)?;
+        //r_model.notify.row_changed(0);
+
+        Some(())
     }
 
     fn col_count(&self) -> usize {
