@@ -17,4 +17,6 @@ env_logger = "0.11.1"
 [[bin]]
 path = "src/my_cells.rs"
 name = "my_cells"
-
+[[bin]]
+path = "src/my_cells_listbox.rs"
+name = "my_cells_listbox"
