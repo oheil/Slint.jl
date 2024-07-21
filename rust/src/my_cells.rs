@@ -9,7 +9,6 @@ use slint::{Model, ModelRc, ModelTracker, ModelNotify};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::ffi::{CStr, CString, c_char};
-use std::borrow::BorrowMut;
 use std::rc::Weak;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
@@ -29,7 +28,7 @@ pub fn main() {
     // Copyright © SixtyFPS GmbH <info@slint.dev>
     // SPDX-License-Identifier: MIT
     
-    import { Button, LineEdit, ScrollView, GridBox} from "std-widgets.slint";
+    import { Button, LineEdit, ScrollView, ListView, GridBox} from "std-widgets.slint";
     
     struct SlintValue  { value_s: string, value_i: int }
     
@@ -148,15 +147,21 @@ pub fn main() {
         let mut cells = instance_weak.unwrap().get_property("cells").unwrap();
 
         debug!("on_add_row {:#?}",cells);
-        debug!("on_add_row {:#?}",cells_model.rows[0].row_data(0) );
+        debug!("on_add_row {:#?}",cells_model.rows.borrow()[0].row_data(0) );
         
         //Unfortunately you can't get a mutable reference to `the_model`. 
         //You'll have to stay with an immutable `&` reference, change `add_row` to take `&self`, 
         //and use interior mutability for any mutations needed in `CellsModel`. 
         //For example if `self.rows` as a `slint::VecModel`, you could call `push` with `&self`, `&mut self` is not required.
+        //https://chat.slint.dev/public/pl/85hgpz9rf3fwxdjt5exktu16ic
 
-        let the_model = &mut cells_model.as_any().downcast_ref::<CellsModel>().expect("We know we set it");
-        let _ = the_model.add_row();
+        //let the_model = &mut cells_model.as_any().downcast_ref::<Rc<CellsModel>>().expect("We know we set it");
+        
+        let _ = cells_model.add_row();
+        
+        cells_model.notify.row_changed( cells_model.rows.borrow().len() );
+
+        instance_weak.unwrap().window().request_redraw();
 
         return Value::Void;
     });
@@ -257,7 +262,8 @@ impl Default for SlintValue {
 }
 
 struct CellsModel {
-    rows: Vec<Rc<RowModel>>,
+    rows: RefCell<Vec<Rc<RowModel>>>,
+    notify: ModelNotify,
 }
 
 impl Model for CellsModel {
@@ -265,14 +271,14 @@ impl Model for CellsModel {
 
     fn row_count(&self) -> usize {
         debug!("CellsModel.row_count");
-        debug!("CellsModel.row_count: {}",self.rows.len());
-        self.rows.len()
+        debug!("CellsModel.row_count: {}",self.rows.borrow().len());
+        self.rows.borrow().len()
     }
 
     fn row_data(&self, row: usize) -> Option<Self::Data> {
         debug!("CellsModel.row_data");
         // maps the data to a Value
-        self.rows.get(row).map(|x| Value::Model(ModelRc::new(x.clone())))
+        self.rows.borrow().get(row).map(|x| Value::Model(ModelRc::new(x.clone())))
     }
     fn model_tracker(&self) -> &dyn ModelTracker {
         debug!("CellsModel.model_tracker");
@@ -283,7 +289,7 @@ impl CellsModel {
     fn new(nrows: usize, ncols: usize) -> Rc<Self> {
         debug!("CellsModel.new");
         Rc::new_cyclic(|w| Self {
-            rows: (0..nrows)
+            rows: RefCell::new((0..nrows)
                 .map(|row| {
                     Rc::new(RowModel {
                         row,
@@ -292,11 +298,12 @@ impl CellsModel {
                         notify: Default::default(),
                     })
                 })
-                .collect(),
+                .collect()),
+                notify: Default::default(),
         })
     }
     
-    fn add_row(&self) {
+    fn add_row(&self) -> Option<()> {
         let row_count = self.row_count() + 1;
         let col_count = self.col_count();
         
@@ -309,16 +316,27 @@ impl CellsModel {
             notify: Default::default(),
         });
 
-        let row_mut: &mut Vec<Rc<RowModel>> = self.rows.borrow_mut();
-        row_mut.push(row);
+        let mut rows_mut = self.rows.borrow_mut();
+        rows_mut.push(row);
+        
+        let row_model = rows_mut.get(row_count)?;
+        row_model.notify.row_changed(2);
+
+        self.notify.row_added(row_count, col_count);
+
+        //let rows = self.rows.borrow();
+        //let r_model = rows.get(row_count)?;
+        //r_model.notify.row_changed(0);
+
+        Some(())
     }
 
     fn col_count(&self) -> usize {
         debug!("CellsModel.col_count");
-        debug!("CellsModel.col_count: {}",self.rows.len());
+        debug!("CellsModel.col_count: {}",self.rows.borrow().len());
         let mut r: usize = 0;
-        if self.rows.len() > 0 {
-            r = self.rows.get(0).unwrap().row_count()
+        if self.rows.borrow().len() > 0 {
+            r = self.rows.borrow().get(0).unwrap().row_count()
         }
         r
     }
@@ -336,8 +354,8 @@ impl CellsModel {
         //let v: String = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
         let mut rv = JRvalue::new_undefined();
         //rv.string_value = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
-        rv.string_value = CString::new(self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone()).unwrap().into_raw();
-        rv.int_value = self.rows.get(row)?.row_elements.borrow().get(col)?.value_i;
+        rv.string_value = CString::new(self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_s.clone()).unwrap().into_raw();
+        rv.int_value = self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_i;
         Some(rv)
     }
 
@@ -356,7 +374,8 @@ impl CellsModel {
                 if col >= self.col_count() {
                     warn!("CellsModel.update_cell: col index <{}> not in range of existing column indices <1..{}>",col+1,self.col_count());
                 }
-                let r_model = self.rows.get(row)?;
+                let rows = self.rows.borrow();
+                let r_model = rows.get(row)?;
                 let mut row_el = r_model.row_elements.borrow_mut();
                 let data = row_el.get_mut(col)?;
 
