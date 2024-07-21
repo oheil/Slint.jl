@@ -12,7 +12,7 @@ use std::ffi::{CStr, CString, c_char};
 use std::rc::Weak;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
-use slint_interpreter::ComponentCompiler;
+use slint_interpreter::{Compiler, ComponentDefinition};
 use slint_interpreter::ComponentHandle;
 use slint_interpreter::Value;
 
@@ -22,7 +22,7 @@ pub fn main() {
         .filter_or("RUST_LOG", "info");
     env_logger::init_from_env(env);
 
-    let mut compiler = ComponentCompiler::default();
+    let mut compiler = Compiler::default();
 
     let code = r#"
     // Copyright © SixtyFPS GmbH <info@slint.dev>
@@ -127,10 +127,15 @@ pub fn main() {
 
     "#;
 
-    let definition = spin_on::spin_on(
+    let compresult = spin_on::spin_on(
         compiler.build_from_source(code.into(), Default::default()));
 
-    slint_interpreter::print_diagnostics(&compiler.diagnostics());
+    //slint_interpreter::print_diagnostics(&compiler.diagnostics());
+    compresult.print_diagnostics();
+    let mut comps = compresult.components();
+
+    //get the first definition is probably a bad idea 
+    let definition = comps.next();    
 
     let instance = definition.unwrap().create().unwrap();
 

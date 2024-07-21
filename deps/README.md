@@ -4,13 +4,13 @@
 
 https://github.com/slint-ui/slint
 
-https://slint.dev/releases/1.3.2/docs/slint/
+https://slint.dev/releases/1.7.0/docs/slint/
 
 https://docs.rs/
 
-https://slint.dev/releases/1.3.2/docs/rust/slint/
+https://slint.dev/releases/1.7.0/docs/rust/slint/
 
-https://slint.dev/releases/1.3.2/editor/
+https://slint.dev/releases/1.7.0/editor/
 
 https://jakegoulding.com/rust-ffi-omnibus/objects/
 
