@@ -29,8 +29,9 @@ cd c:\Users\oheil\.julia\dev\Slint\deps\SlintWrapper
 cargo update
 cargo add slint-interpreter
 
-cd c:\Users\oheil\.julia\dev\Slint\rust\src
-cargo run --release --target-dir "../../deps/" --bin my_cells
+cd c:\Users\oheil\.julia\dev\Slint\rust
+cargo run --release --bin my_cells
+cargo run --release --bin my_cells_listview
 ```
 
 ```shell
@@ -148,3 +149,12 @@ Slint.set_callback("button-clicked", print_callback, :Cint, :(Slint.SharedString
 
 Slint.run()
 ```
+
+# Old snippets
+
+```
+cargo run --release --target-dir "../../deps/" --bin my_cells
+```
+
+
+
