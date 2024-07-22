@@ -22,7 +22,7 @@ pub fn main() {
         .filter_or("RUST_LOG", "info");
     env_logger::init_from_env(env);
 
-    let mut compiler = Compiler::default();
+    let compiler = Compiler::default();
 
     let code = r#"
     // Copyright © SixtyFPS GmbH <info@slint.dev>
@@ -149,7 +149,7 @@ pub fn main() {
 
     let instance_weak = instance.as_weak();
     let _ = instance.set_callback("add_row", move |_| {
-        let mut cells = instance_weak.unwrap().get_property("cells").unwrap();
+        let cells = instance_weak.unwrap().get_property("cells").unwrap();
 
         debug!("on_add_row {:#?}",cells);
         debug!("on_add_row {:#?}",cells_model.rows.borrow()[0].row_data(0) );
