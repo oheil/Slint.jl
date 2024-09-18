@@ -85,13 +85,17 @@ end
 
 @doc raw"""
 See also: `Slint.compile_from_string(slint_string::AbstractString)`
-# `Slint.compile_from_file(slint_file::AbstractString)`
+# `Slint.compile_from_file(slint_file::AbstractString, start_comp::AbstractString)`
 Compile a `.slint` file, which contains your user interface, written in the Slint language.
 
 ## Parameter:
     slint_file::AbstractString
 
 The path and file name of your `.slint` file.
+
+    start_comp::AbstractString
+
+The start component to run
 
 ## Return value:
     none
@@ -104,9 +108,9 @@ Slint.compile_from_file(slintFile)
 Slint.run()
 ```
 """
-function compile_from_file(slint_file::AbstractString)
+function compile_from_file(slint_file::AbstractString, start_comp::AbstractString)
     check_init()
-    r_compile_from_file(slint_file)
+    r_compile_from_file(slint_file, start_comp)
 end
 
 @doc raw"""
@@ -135,9 +139,9 @@ Slint.compile_from_string(s)
 Slint.run()
 ```
 """
-function compile_from_string(slint_string::AbstractString)
+function compile_from_string(slint_string::AbstractString, start_comp::AbstractString)
     check_init()
-    r_compile_from_string(slint_string)
+    r_compile_from_string(slint_string, start_comp)
 end
 
 #

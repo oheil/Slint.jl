@@ -5,7 +5,8 @@ use std::ffi::{CStr, CString, c_void, c_char};
 use log::*;
 use env_logger::Env;
 
-use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
+//use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
+use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, SharedString};
 
 // only hold a single instance at index 0
 static INSTANCES: Lazy<Mutex<Vec<Weak<ComponentInstance>>>> = Lazy::new(|| {
@@ -31,15 +32,18 @@ pub extern "C" fn r_init() {
 // but do not run it yet, to be able to set callbacks
 //
 #[no_mangle]
-pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char) {
+pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: *const c_char) {
     debug!("r_compile_from_file");
     let cstr = CStr::from_ptr(slint_file);
     let filename: String = cstr.to_string_lossy().into_owned();
+
+    let start_component = CStr::from_ptr(slint_comp).to_string_lossy().into_owned();
     
-    let mut compiler = ComponentCompiler::default();
+    //let mut compiler = ComponentCompiler::default();
+    let compiler = Compiler::default();
     //compilers.push(&compiler);
 
-    let definition = spin_on::spin_on(
+    let result = spin_on::spin_on(
         compiler.build_from_path(filename)
     );
     //definitions.push(&definition);
@@ -49,9 +53,9 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char) {
     //"#;
     //let definition = spin_on::spin_on(
     //    compiler.build_from_source(code.into(), Default::default()));
-
-    if compiler.diagnostics().is_empty() {
-        if let Some(definition) = definition {
+    let diagnostics : Vec<_> = result.diagnostics().collect();
+    if diagnostics.is_empty() {
+        if let Some(definition) = result.component(start_component) {
             let instance = definition.create().unwrap();
             if ! INSTANCES.lock().unwrap().is_empty() {
                 INSTANCES.lock().unwrap().pop();
@@ -62,7 +66,8 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char) {
             let _ = instance.show();
         }
     } else {
-        slint_interpreter::print_diagnostics(&compiler.diagnostics());
+        //slint_interpreter::print_diagnostics(&compiler.diagnostics());
+        result.print_diagnostics();
     }
 }
 
@@ -71,17 +76,21 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char) {
 // but do not run it yet, to be able to set callbacks
 //
 #[no_mangle]
-pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char) {
+pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_comp: *const c_char) {
     debug!("r_compile_from_string");
     let cstr = CStr::from_ptr(slint_string);
     let slint_code: String = cstr.to_string_lossy().into_owned();
 
-    let mut compiler = ComponentCompiler::default();
+    let start_component = CStr::from_ptr(slint_comp).to_string_lossy().into_owned();
 
-    let definition = spin_on::spin_on(compiler.build_from_source(slint_code.into(), Default::default()));
+    //let mut compiler = ComponentCompiler::default();
+    let compiler = Compiler::default();
 
-    if compiler.diagnostics().is_empty() {
-        if let Some(definition) = definition {
+    let result = spin_on::spin_on(compiler.build_from_source(slint_code.into(), Default::default()));
+
+    let diagnostics : Vec<_> = result.diagnostics().collect();
+    if diagnostics.is_empty() {
+        if let Some(definition) = result.component(start_component) {
             let instance = definition.create().unwrap();
             if ! INSTANCES.lock().unwrap().is_empty() {
                 INSTANCES.lock().unwrap().pop();
@@ -92,7 +101,8 @@ pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char) {
             let _ = instance.show();
         }
     } else {
-        slint_interpreter::print_diagnostics(&compiler.diagnostics());
+        //slint_interpreter::print_diagnostics(&compiler.diagnostics());
+        result.print_diagnostics();
     }
 }
 

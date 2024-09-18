@@ -1,8 +1,9 @@
 using Slint
 
 slintFile = "examples\\7guis\\cells.slint"
+startComponent = "MainWindow"
 
-Slint.compile_from_file(slintFile)
+Slint.compile_from_file(slintFile, startComponent)
 
 function on_changed_element(params...)
     row = Int(params[1])  # 1-based
