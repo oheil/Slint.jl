@@ -11,12 +11,12 @@ function r_init()
     ccall((:r_init, slintwrapper), Cvoid, ())
 end
 
-function r_compile_from_file(slint_file)
-    ccall((:r_compile_from_file, slintwrapper), Cvoid, (Ptr{Cchar},), slint_file)
+function r_compile_from_file(slint_file, slint_comp)
+    ccall((:r_compile_from_file, slintwrapper), Cvoid, (Ptr{Cchar}, Ptr{Cchar}), slint_file, slint_comp)
 end
 
-function r_compile_from_string(slint_string)
-    ccall((:r_compile_from_string, slintwrapper), Cvoid, (Ptr{Cchar},), slint_string)
+function r_compile_from_string(slint_string, slint_comp)
+    ccall((:r_compile_from_string, slintwrapper), Cvoid, (Ptr{Cchar}, Ptr{Cchar}), slint_string, slint_comp)
 end
 
 function r_get_magic()

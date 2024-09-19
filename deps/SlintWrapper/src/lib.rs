@@ -37,7 +37,7 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
     let cstr = CStr::from_ptr(slint_file);
     let filename: String = cstr.to_string_lossy().into_owned();
 
-    let start_component = CStr::from_ptr(slint_comp).to_string_lossy().into_owned();
+    let start_component = CStr::from_ptr(slint_comp).to_str().unwrap();
     
     //let mut compiler = ComponentCompiler::default();
     let compiler = Compiler::default();
@@ -81,7 +81,7 @@ pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slin
     let cstr = CStr::from_ptr(slint_string);
     let slint_code: String = cstr.to_string_lossy().into_owned();
 
-    let start_component = CStr::from_ptr(slint_comp).to_string_lossy().into_owned();
+    let start_component = CStr::from_ptr(slint_comp).to_str().unwrap();
 
     //let mut compiler = ComponentCompiler::default();
     let compiler = Compiler::default();

@@ -2,7 +2,7 @@ using Slint, Dates
 
 slintFile = "examples\\7guis\\booker.slint"
 
-Slint.compile_from_file(slintFile)
+Slint.compile_from_file(slintFile,"Booker")
 
 function on_validate_date(params...)
     if isnothing(match(r"^\d\d\.\d\d.\d\d\d\d$",params[1]))

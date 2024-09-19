@@ -14,9 +14,9 @@ typedef struct JRvalue {
 
 void r_init(void);
 
-void r_compile_from_file(const char *slint_file);
+void r_compile_from_file(const char *slint_file, const char *slint_comp);
 
-void r_compile_from_string(const char *slint_string);
+void r_compile_from_string(const char *slint_string, const char *slint_comp);
 
 int32_t r_get_magic(void);
 
