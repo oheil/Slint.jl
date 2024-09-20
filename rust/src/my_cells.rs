@@ -12,7 +12,7 @@ use std::ffi::{CStr, CString, c_char};
 use std::rc::Weak;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
-use slint_interpreter::ComponentCompiler;
+use slint_interpreter::Compiler;
 use slint_interpreter::ComponentHandle;
 use slint_interpreter::Value;
 
@@ -22,7 +22,7 @@ pub fn main() {
         .filter_or("RUST_LOG", "info");
     env_logger::init_from_env(env);
 
-    let mut compiler = ComponentCompiler::default();
+    let compiler = Compiler::default();
 
     let code = r#"
     // Copyright © SixtyFPS GmbH <info@slint.dev>
@@ -127,11 +127,12 @@ pub fn main() {
 
     "#;
 
-    let definition = spin_on::spin_on(
+    let result = spin_on::spin_on(
         compiler.build_from_source(code.into(), Default::default()));
 
-    slint_interpreter::print_diagnostics(&compiler.diagnostics());
+    result.print_diagnostics();
 
+    let definition = result.component("MainWindow");
     let instance = definition.unwrap().create().unwrap();
 
     let cells_model = CellsModel::new(2,2);
@@ -144,7 +145,7 @@ pub fn main() {
 
     let instance_weak = instance.as_weak();
     let _ = instance.set_callback("add_row", move |_| {
-        let mut cells = instance_weak.unwrap().get_property("cells").unwrap();
+        let cells = instance_weak.unwrap().get_property("cells").unwrap();
 
         debug!("on_add_row {:#?}",cells);
         debug!("on_add_row {:#?}",cells_model.rows.borrow()[0].row_data(0) );

@@ -11,8 +11,8 @@ use std::rc::Rc;
 use std::ffi::{CStr, CString, c_char};
 use std::rc::Weak;
 
-//use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
-use slint_interpreter::{Compiler, ComponentDefinition};
+//use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentDefinition, ComponentInstance, ComponentHandle, SharedString};
+use slint_interpreter::Compiler;
 use slint_interpreter::ComponentHandle;
 use slint_interpreter::Value;
 
