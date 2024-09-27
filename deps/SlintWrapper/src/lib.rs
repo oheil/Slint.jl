@@ -394,7 +394,7 @@ pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalu
         debug!("r_push_row: new_values size: {}",len);
         let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
         let row_count = model.row_count() + 1;
-        let some_row = model.rows[0].clone();
+        let some_row = model.rows.borrow()[0].clone();
 
         let mut values: Vec<SlintValue> = Vec::new();
         let new_values_vec = std::slice::from_raw_parts(new_values as *const JRvalue, len);
@@ -444,36 +444,10 @@ pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalu
             });
         
         set_skip_callback(true);
-
-
-
-
-
-
-        //model.rows.push( _new_row );
-
-        //let mut rows_reference = &mut model.rows;
-        //(*rows_reference).push( new_row );
-        /*
-        let rows = Rc::new(RefCell::new(model.rows.clone()));
-        {
-            let mut rows_reference = rows.borrow_mut();
-            debug!("{}",(*rows_reference).len());
-            (*rows_reference).push( new_row );
-            debug!("{}",(*rows_reference).len());
-        }
-        */
-
-
-
-
-        
+        model.rows.borrow_mut().push(_new_row);
         set_skip_callback(false);
 
-        debug!("{}",model.row_count());
-
-
-        
+        //debug!("{}",model.row_count());
     }
 }
 
@@ -599,21 +573,21 @@ impl Default for SlintValue {
 }
 
 struct CellsModel {
-    rows: Vec<Rc<RowModel>>,
+    rows: RefCell<Vec<Rc<RowModel>>>,
 }
 impl Model for CellsModel {
     type Data = Value;  // Data is Value
 
     fn row_count(&self) -> usize {
         debug!("CellsModel.row_count");
-        debug!("CellsModel.row_count: {}",self.rows.len());
-        self.rows.len()
+        debug!("CellsModel.row_count: {}",self.rows.borrow().len());
+        self.rows.borrow().len()
     }
 
     fn row_data(&self, row: usize) -> Option<Self::Data> {
         debug!("CellsModel.row_data");
         // maps the data to a Value
-        self.rows.get(row).map(|x| Value::Model(ModelRc::new(x.clone())))
+        self.rows.borrow().get(row).map(|x| Value::Model(ModelRc::new(x.clone())))
     }
     fn model_tracker(&self) -> &dyn ModelTracker {
         debug!("CellsModel.model_tracker");
@@ -624,7 +598,7 @@ impl CellsModel {
     fn new(nrows: usize, ncols: usize, func: extern fn(par_ptr: *const c_void, len: i32) -> JRvalue) -> Rc<Self> {
         debug!("CellsModel.new");
         Rc::new_cyclic(|w| Self {
-            rows: (0..nrows)
+            rows: RefCell::new((0..nrows)
                 .map(|row| {
                     Rc::new(RowModel {
                         row,
@@ -634,16 +608,16 @@ impl CellsModel {
                         func,
                     })
                 })
-                .collect(),
+                .collect()),
         })
     }
 
     fn col_count(&self) -> usize {
         debug!("CellsModel.col_count");
-        debug!("CellsModel.col_count: {}",self.rows.len());
+        debug!("CellsModel.col_count: {}",self.rows.borrow().len());
         let mut r: usize = 0;
-        if self.rows.len() > 0 {
-            r = self.rows.get(0).unwrap().row_count()
+        if self.rows.borrow().len() > 0 {
+            r = self.rows.borrow().get(0).unwrap().row_count()
         }
         r
     }
@@ -661,8 +635,8 @@ impl CellsModel {
         //let v: String = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
         let mut rv = JRvalue::new_undefined();
         //rv.string_value = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
-        rv.string_value = CString::new(self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone()).unwrap().into_raw();
-        rv.int_value = self.rows.get(row)?.row_elements.borrow().get(col)?.value_i;
+        rv.string_value = CString::new(self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_s.clone()).unwrap().into_raw();
+        rv.int_value = self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_i;
         Some(rv)
     }
 
@@ -681,7 +655,8 @@ impl CellsModel {
                 if col >= self.col_count() {
                     warn!("CellsModel.update_cell: col index <{}> not in range of existing column indices <1..{}>",col+1,self.col_count());
                 }
-                let r_model = self.rows.get(row)?;
+                let rows_tmp = self.rows.borrow();
+                let r_model = rows_tmp.get(row)?;
                 let mut row_el = r_model.row_elements.borrow_mut();
                 let data = row_el.get_mut(col)?;
 

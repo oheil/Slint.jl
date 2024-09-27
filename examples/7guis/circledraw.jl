@@ -2,7 +2,7 @@ using Slint
 
 slintFile = "examples\\7guis\\circledraw.slint"
 
-Slint.compile_from_file(slintFile)
+Slint.compile_from_file(slintFile,"MainWindow")
 
 function on_undo_clicked(params...)
     println("on_undo_clicked")

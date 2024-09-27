@@ -324,15 +324,13 @@ impl CellsModel {
         let mut rows_mut = self.rows.borrow_mut();
         rows_mut.push(row);
         
+        /*
         let row_model = rows_mut.get(row_count)?;
         row_model.notify.row_changed(2);
 
         self.notify.row_added(row_count, col_count);
-
-        //let rows = self.rows.borrow();
-        //let r_model = rows.get(row_count)?;
-        //r_model.notify.row_changed(0);
-
+        */
+        
         Some(())
     }
 
