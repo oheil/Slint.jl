@@ -21,3 +21,11 @@ name = "my_cells"
 [[bin]]
 path = "src/my_cells_listview.rs"
 name = "my_cells_listview"
+
+[[bin]]
+path = "src/circledraw.rs"
+name = "circledraw"
+
+[[bin]]
+path = "src/circledraw_2dim_array.rs"
+name = "circledraw_2dim_array"
