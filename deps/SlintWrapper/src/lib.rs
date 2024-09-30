@@ -596,6 +596,7 @@ impl Model for CellsModel {
     }
     fn model_tracker(&self) -> &dyn ModelTracker {
         debug!("CellsModel.model_tracker");
+        //&()
         &self.notify
     }
 }
