@@ -443,9 +443,13 @@ pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalu
                 func: some_row.func,
             });
         
-        set_skip_callback(true);
-        model.rows.borrow_mut().push(_new_row);
-        set_skip_callback(false);
+        model.push_row(_new_row);
+        //set_skip_callback(true);
+        //model.rows.borrow_mut().push(_new_row);
+        //set_skip_callback(false);
+
+        //model.rows.borrow()[0].notify.row_changed(0);
+        //model.rows.notify.row_changed(row_count);
 
         //debug!("{}",model.row_count());
     }
@@ -574,6 +578,7 @@ impl Default for SlintValue {
 
 struct CellsModel {
     rows: RefCell<Vec<Rc<RowModel>>>,
+    notify: ModelNotify,
 }
 impl Model for CellsModel {
     type Data = Value;  // Data is Value
@@ -609,7 +614,14 @@ impl CellsModel {
                     })
                 })
                 .collect()),
+            notify: Default::default(),
         })
+    }
+
+    fn push_row(&self, row: Rc<RowModel>) {
+        self.rows.borrow_mut().push(row);
+        let c = self.rows.borrow().len();
+        self.notify.row_added(c-1,c);
     }
 
     fn col_count(&self) -> usize {
