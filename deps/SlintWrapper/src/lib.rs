@@ -122,6 +122,7 @@ pub struct JRvalue {
     magic: i32,
     rtype: *const c_char,
     int_value: i32,
+    float_value: f64,
     string_value: *const c_char,
 }
 impl JRvalue {
@@ -131,6 +132,7 @@ impl JRvalue {
             magic: JRMAGIC,
             rtype: CString::new("Bool").unwrap().into_raw(),
             int_value: b.into(),
+            float_value: 0.0,
             string_value: CString::new("").unwrap().into_raw()
         }
     }
@@ -140,6 +142,7 @@ impl JRvalue {
             magic: JRMAGIC,
             rtype: CString::new("Unknown").unwrap().into_raw(),
             int_value: 0,
+            float_value: 0.0,
             string_value: CString::new("").unwrap().into_raw()
         }
     }
@@ -418,6 +421,12 @@ pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalu
                     debug!("r_push_row: sv.value_i is {}",sv.value_i);
                     values.push(sv);
                 }        
+                if rv_type == "Float" {
+                    let mut sv = SlintValue::default();
+                    sv.value_f = value.float_value;
+                    debug!("r_push_row: sv.value_f is {}",sv.value_f);
+                    values.push(sv);
+                }        
                 if rv_type == "String" {
                     let mut sv = SlintValue::default();
                     sv.value_s = CStr::from_ptr(value.string_value).to_string_lossy().into_owned().into();
@@ -427,8 +436,10 @@ pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalu
                 if rv_type == "Unknown" {
                     let mut sv = SlintValue::default();
                     sv.value_i = value.int_value;
+                    sv.value_f = value.float_value;
                     sv.value_s = CStr::from_ptr(value.string_value).to_string_lossy().into_owned().into();
                     debug!("r_push_row: sv.value_i is {}",sv.value_i);
+                    debug!("r_push_row: sv.value_f is {}",sv.value_f);
                     debug!("r_push_row: sv.value_s is {}",sv.value_s);
                     values.push(sv);
                 }
@@ -565,13 +576,15 @@ pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols
 struct SlintValue  { 
     value_s: String,
     value_i: i32,
+    value_f: f64,
 }
 impl Default for SlintValue {
     fn default() -> SlintValue {
-        debug!("SlintValue");
+        debug!("SlintValue default");
         SlintValue{
             value_s: String::from(""),
             value_i: 0,
+            value_f: 0.0,
         }
     }
 }
@@ -648,8 +661,9 @@ impl CellsModel {
         //let v: String = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
         let mut rv = JRvalue::new_undefined();
         //rv.string_value = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
-        rv.string_value = CString::new(self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_s.clone()).unwrap().into_raw();
         rv.int_value = self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_i;
+        rv.float_value = self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_f;
+        rv.string_value = CString::new(self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_s.clone()).unwrap().into_raw();
         Some(rv)
     }
 
@@ -661,6 +675,7 @@ impl CellsModel {
             Some(new_v) => {
                 debug!("CellsModel.update_cell: row={} col={}",row+1,col+1);
                 debug!("CellsModel.update_cell: new_v.int_value={}",new_v.int_value);
+                debug!("CellsModel.update_cell: new_v.float_value={}",new_v.float_value);
                 debug!("CellsModel.update_cell: new_v.string_value={:p}",new_v.string_value);
                 if row >= self.row_count() {
                     warn!("CellsModel.update_cell: row index <{}> not in range of existing row indices <1..{}>",row+1,self.row_count());
@@ -701,6 +716,7 @@ impl CellsModel {
                 debug!("CellsModel.update_cell:return value magic is: {}", rv.magic);
                 debug!("CellsModel.update_cell:return value type is: {:p}", rv.rtype);
                 debug!("CellsModel.update_cell:return value int_value is: {}", rv.int_value);
+                debug!("CellsModel.update_cell:return value float_value is: {}", rv.float_value);
                 debug!("CellsModel.update_cell:return value string_value is: {:p}", rv.string_value);
                 // debug end
         
@@ -729,11 +745,19 @@ impl CellsModel {
                 let mut row_el = r_model.row_elements.borrow_mut();
                 let data = row_el.get_mut(col)?;
         
-                debug!("CellsModel.update_cell: data.value_s={}",data.value_s);
                 debug!("CellsModel.update_cell: data.value_i={}",data.value_i);
+                debug!("CellsModel.update_cell: data.value_f={}",data.value_f);
+                debug!("CellsModel.update_cell: data.value_s={}",data.value_s);
 
+                // set the new value
+                debug!("CellsModel.update_cell SET:");
+                debug!("CellsModel.update_cell: new_v.int_value={}",new_v.int_value);
+                debug!("CellsModel.update_cell: new_v.float_value={}",new_v.float_value);
+                debug!("CellsModel.update_cell: new_v.string_value={:p}",new_v.string_value);
                 unsafe {
                     data.value_s = CStr::from_ptr(new_v.string_value).to_string_lossy().into_owned();
+                    data.value_i = new_v.int_value;
+                    data.value_f = new_v.float_value;
                 }
         
                 drop(row_el);
@@ -768,10 +792,13 @@ impl slint::Model for RowModel {
         debug!("RowModel.row_data");
         debug!("RowModel.row_data: row={}",row+1);
         self.row_elements.borrow().get(row).map(|row_element| {
+            debug!("RowModel.row_data: row_element.value_i={}",row_element.value_i);
+            debug!("RowModel.row_data: row_element.value_f={}",row_element.value_f);
             debug!("RowModel.row_data: row_element.value_s={}",row_element.value_s);
             let mut stru = slint_interpreter::Struct::default();
-            stru.set_field("value_s".into(), Value::String(row_element.value_s.clone().into()));
             stru.set_field("value_i".into(), Value::Number(row_element.value_i.into()));
+            stru.set_field("value_f".into(), Value::Number(row_element.value_f.into()));
+            stru.set_field("value_s".into(), Value::String(row_element.value_s.clone().into()));
             stru.into()
         })
     }

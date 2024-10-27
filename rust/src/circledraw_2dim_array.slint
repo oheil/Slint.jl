@@ -3,12 +3,12 @@
 
 import { LineEdit, Button, Slider, StandardListView, VerticalBox } from "std-widgets.slint";
 
-//struct Circle  { x: length, y: length, d: length }
-struct Circle  { x: length }
+struct Circle  { x: length, y: length, d: length }
+//struct Circle  { x: length }
 
 export component MainWindow inherits Window {
-    //in property <[Circle]> model;
-    in property <[[Circle]]> model;
+    in property <[Circle]> model;
+    //in property <[[Circle]]> model;
     in property <bool> undoable: false;
     in property <bool> redoable: false;
 
@@ -18,8 +18,8 @@ export component MainWindow inherits Window {
     callback circle_resized(int, length);
 
     private property <int> clicked-idx: -1;
-    //private property <Circle> selected-circle;
-    private property <[Circle]> selected-circle;
+    private property <Circle> selected-circle;
+    //private property <[Circle]> selected-circle;
 
     preferred-width: 500px;
     preferred-height: 400px;
@@ -64,9 +64,9 @@ export component MainWindow inherits Window {
                 //width: circle.d;
                 //x: circle.x - self.width/2;
                 //y: circle.y - self.height/2;
-                width: circle[2].x;
-                x: circle[1].x - self.width/2;
-                y: circle[2].x - self.height/2;
+                width: circle.d;
+                x: circle.x - self.width/2;
+                y: circle.y - self.height/2;
 
                 TouchArea {
                     clicked => {
@@ -102,7 +102,7 @@ export component MainWindow inherits Window {
 
         VerticalBox {
             Text {
-                text: "Adjust diameter of circle at (" + root.selected-circle[0].x / 1px + ", " +  root.selected-circle[1].x / 1px + ").";
+                text: "Adjust diameter of circle at (" + root.selected-circle.x / 1px + ", " +  root.selected-circle.y / 1px + ").";
                 wrap: word-wrap;
             }
 
@@ -113,7 +113,7 @@ export component MainWindow inherits Window {
 
                 minimum: 4;
                 maximum: 100;
-                value: root.selected-circle[2].x / 1px;
+                value: root.selected-circle.d / 1px;
             }
         }
     }

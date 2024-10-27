@@ -4,6 +4,7 @@ struct JRvalue
     magic::Int32
     rtype::Ptr{Cchar}
     int_value::Int32
+    float_value::Cdouble
     string_value::Ptr{Cchar}
 end
 

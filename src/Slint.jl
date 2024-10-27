@@ -43,8 +43,8 @@ include("api.jl")
 const rMagic = r_get_magic()
 
 # globals for persistance of string return values of callbacks
-@enum Rtype rUnknown=1 rBool rString rInteger
-rtypes = ["Unknown","Bool","String","Integer"]
+@enum Rtype rUnknown=1 rBool rString rInteger rFloat
+rtypes = ["Unknown","Bool","String","Integer","Float"]
 rstring_value = [""]
 #struct JRvalue
 #   magic::Int32
@@ -57,6 +57,7 @@ function JRvalue(v::Int)
         Cint(rMagic),
         Base.unsafe_convert(Cstring,rtypes[Int(rInteger)]),
         Cint(v),
+        Cdouble(0.0),
         Base.unsafe_convert(Cstring,"")
     )
 end
@@ -65,6 +66,7 @@ function JRvalue(v::Bool)
         Cint(rMagic),
         Base.unsafe_convert(Cstring,rtypes[Int(rBool)]),
         Cint(v),
+        Cdouble(0.0),
         Base.unsafe_convert(Cstring,"")
     )
 end
@@ -73,7 +75,17 @@ function JRvalue(v::String)
         Cint(rMagic),
         Base.unsafe_convert(Cstring,rtypes[Int(rString)]),
         Cint(-1),
+        Cdouble(0.0),
         Base.unsafe_convert(Cstring,v)
+    )
+end
+function JRvalue(v::Float64)
+    JRvalue(
+        Cint(rMagic),
+        Base.unsafe_convert(Cstring,rtypes[Int(rFloat)]),
+        Cint(-1),
+        Cdouble(v),
+        Base.unsafe_convert(Cstring,"")
     )
 end
 
@@ -275,16 +287,19 @@ function create_callback_wrapper(user_callback)
             #   (unsure if this is really needed, it works with local strings too)
             if typeof(r) == Bool
                 rstring_value[1] = ""
-                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rBool)]),Cint(r),Base.unsafe_convert(Cstring,rstring_value[1]))
+                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rBool)]),Cint(r),Cdouble(0.0),Base.unsafe_convert(Cstring,rstring_value[1]))
                 #rptr = Ptr{Cvoid}(pointer_from_objref(Ref(test_rv)))
                 #return rptr
             elseif typeof(r) == Int
                 rstring_value[1] = ""
-                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rInteger)]),Cint(r),Base.unsafe_convert(Cstring,rstring_value[1]))
+                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rInteger)]),Cint(r),Cdouble(0.0),Base.unsafe_convert(Cstring,rstring_value[1]))
+            elseif typeof(r) == Float64
+                rstring_value[1] = ""
+                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rFloat)]),Cint(-1),Cdouble(r),Base.unsafe_convert(Cstring,rstring_value[1]))
             else
                 # The users return value is not implemented to be passed back to rust, return something empty:
                 rstring_value[1] = ""
-                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rUnknown)]),Cint(-1),Base.unsafe_convert(Cstring,rstring_value[1]))
+                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rUnknown)]),Cint(-1),Cdouble(0.0),Base.unsafe_convert(Cstring,rstring_value[1]))
             end
 
             # return to rust

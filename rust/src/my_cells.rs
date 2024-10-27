@@ -6,7 +6,7 @@ use env_logger::Env;
 
 
 use slint::{Model, ModelRc, ModelTracker, ModelNotify};
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::ffi::{CStr, CString, c_char};
 use std::rc::Weak;
@@ -380,9 +380,9 @@ impl CellsModel {
                 let mut row_el = r_model.row_elements.borrow_mut();
                 let data = row_el.get_mut(col)?;
 
-                let mut rv = JRvalue::new_bool(true);
+                let rv = JRvalue::new_bool(true);
                 unsafe {
-                    let args = &[
+                    let _args = &[
                         Value::Number(((row+1) as i32).into()),
                         Value::Number(((col+1) as i32).into()),
                         //Value::String(new_value.as_ref().unwrap().clone()),
