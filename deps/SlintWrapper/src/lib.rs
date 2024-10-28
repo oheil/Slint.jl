@@ -761,8 +761,8 @@ impl CellsModel {
                 }
         
                 drop(row_el);
+
                 r_model.notify.row_changed(col);
-        
             },
             None => {
                 debug!("update_cell:no new value");
