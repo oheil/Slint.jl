@@ -39,7 +39,7 @@ function on_circle_resized(params...)
     for p in params
         println(p," ",typeof(p))
     end
-    row=Int(params[1])+1
+    row=Int(params[1]) + 1
     col=3 
     value=Int(floor(params[2]))
     Slint.set_cell_value("model",row,col,value)
@@ -48,8 +48,8 @@ end
 Slint.set_callback("circle_resized", on_circle_resized)
 
 function on_circle(params...)
-    row = Int(params[1])  # 1-based
-    col = Int(params[2])  # 1-based
+    row = Int(params[1])  # 0-based
+    col = Int(params[2])  # 0-based
     new_value = params[3]
     old_value = params[4]
 

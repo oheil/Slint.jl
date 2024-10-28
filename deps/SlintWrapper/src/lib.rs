@@ -651,12 +651,12 @@ impl CellsModel {
     //fn get_cell_value(&self, row: usize, col: usize) -> Option<String> {
     fn get_cell_value(&self, row: usize, col: usize) -> Option<JRvalue> {
         debug!("CellsModel.get_cell_value");
-        debug!("CellsModel.get_cell_value: row={} col={}",row+1,col+1);
+        debug!("CellsModel.get_cell_value: row={} col={}",row,col);
         if row >= self.row_count() {
-            warn!("CellsModel.get_cell_value: row index <{}> not in range of existing row indices <1..{}>",row+1,self.row_count());
+            warn!("CellsModel.get_cell_value: row index <{}> not in range of existing row indices <1..{}>",row,self.row_count());
         }
         if col >= self.col_count() {
-            warn!("CellsModel.get_cell_value: col index <{}> not in range of existing column indices <1..{}>",col+1,self.col_count());
+            warn!("CellsModel.get_cell_value: col index <{}> not in range of existing column indices <1..{}>",col,self.col_count());
         }
         //let v: String = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
         let mut rv = JRvalue::new_undefined();
@@ -670,18 +670,18 @@ impl CellsModel {
     //fn update_cell(&self, row: usize, col: usize, new_value: Option<SharedString>) -> Option<()> {
     fn update_cell(&self, row: usize, col: usize, new_value: Option<JRvalue>) -> Option<()> {
         debug!("CellsModel.update_cell");
-        //debug!("CellsModel.update_cell: row={} col={} new_value={}",row+1,col+1,new_value.as_ref().unwrap());
+        //debug!("CellsModel.update_cell: row={} col={} new_value={}",row,col,new_value.as_ref().unwrap());
         match new_value {
             Some(new_v) => {
-                debug!("CellsModel.update_cell: row={} col={}",row+1,col+1);
+                debug!("CellsModel.update_cell: row={} col={}",row,col);
                 debug!("CellsModel.update_cell: new_v.int_value={}",new_v.int_value);
                 debug!("CellsModel.update_cell: new_v.float_value={}",new_v.float_value);
                 debug!("CellsModel.update_cell: new_v.string_value={:p}",new_v.string_value);
                 if row >= self.row_count() {
-                    warn!("CellsModel.update_cell: row index <{}> not in range of existing row indices <1..{}>",row+1,self.row_count());
+                    warn!("CellsModel.update_cell: row index <{}> not in range of existing row indices <1..{}>",row,self.row_count());
                 }
                 if col >= self.col_count() {
-                    warn!("CellsModel.update_cell: col index <{}> not in range of existing column indices <1..{}>",col+1,self.col_count());
+                    warn!("CellsModel.update_cell: col index <{}> not in range of existing column indices <1..{}>",col,self.col_count());
                 }
                 let rows_tmp = self.rows.borrow();
                 let r_model = rows_tmp.get(row)?;
@@ -691,8 +691,8 @@ impl CellsModel {
                 let mut rv = JRvalue::new_bool(true);
                 unsafe {
                     let args = &[
-                        Value::Number(((row+1) as i32).into()),
-                        Value::Number(((col+1) as i32).into()),
+                        Value::Number((row as i32).into()),
+                        Value::Number((col as i32).into()),
                         //Value::String(new_value.as_ref().unwrap().clone()),
                         Value::String(CStr::from_ptr(new_v.string_value).to_string_lossy().into_owned().into()),
                         Value::String(data.value_s.clone().into())
@@ -790,7 +790,7 @@ impl slint::Model for RowModel {
 
     fn row_data(&self, row: usize) -> Option<Self::Data> {
         debug!("RowModel.row_data");
-        debug!("RowModel.row_data: row={}",row+1);
+        debug!("RowModel.row_data: row={}",row);
         self.row_elements.borrow().get(row).map(|row_element| {
             debug!("RowModel.row_data: row_element.value_i={}",row_element.value_i);
             debug!("RowModel.row_data: row_element.value_f={}",row_element.value_f);
@@ -810,7 +810,7 @@ impl slint::Model for RowModel {
 
     fn set_row_data(&self, row: usize, data: Value) {
         debug!("RowModel.set_row_data");
-        debug!("RowModel.set_row_data: row={} data.value_type={:#?}",row+1,data.value_type());
+        debug!("RowModel.set_row_data: row={} data.value_type={:#?}",row,data.value_type());
         if let Some(cells) = self.base_model.upgrade() {
             let stru = slint_interpreter::Struct::try_from(data).unwrap();
             let val = stru.get_field("value_s".into()).unwrap().clone();

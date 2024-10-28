@@ -253,7 +253,7 @@ function create_callback_wrapper(user_callback)
     exprfunc = :( func = ( ptr, len ) -> 
         begin
 
-            #println("callback_wrapper")
+            println("callback_wrapper")
             #println(ptr)
             #println(len)
             

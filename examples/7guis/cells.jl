@@ -6,8 +6,8 @@ startComponent = "MainWindow"
 Slint.compile_from_file(slintFile, startComponent)
 
 function on_changed_element(params...)
-    row = Int(params[1])  # 1-based
-    col = Int(params[2])  # 1-based
+    row = Int(params[1])  # 0-based
+    col = Int(params[2])  # 0-based
     new_value = params[3]
     old_value = params[4]
 

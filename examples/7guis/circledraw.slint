@@ -104,7 +104,7 @@ export component MainWindow inherits Window {
         VerticalBox {
             Text {
                 //text: "Adjust diameter of circle at (" + root.selected-circle.x / 1px + ", " +  root.selected-circle.y / 1px + ").";
-                text: "Adjust diameter of circle at (" + root.selected-circle[0].value_i + ", " +  root.selected-circle[1].value_i + ").";
+                text: "Adjust diameter of circle (index=" + root.clicked-idx + ") at (" + root.selected-circle[0].value_i + ", " +  root.selected-circle[1].value_i + ").";
                 wrap: word-wrap;
             }
 
