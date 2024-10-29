@@ -1,6 +1,7 @@
 use std::sync::Mutex;
 use once_cell::sync::Lazy;
 use std::ffi::{CStr, CString, c_void, c_char};
+use std::convert::From;
 
 use log::*;
 use env_logger::Env;
@@ -157,6 +158,38 @@ impl JRvalue {
         }
     }
     */
+}
+
+impl From<JRvalue> for Value {
+    fn from(rv: JRvalue) -> Self {
+        if rv.magic == JRMAGIC {
+            unsafe {
+                let rv_cstr = CStr::from_ptr(rv.rtype);
+                let rv_type: String = rv_cstr.to_string_lossy().into_owned();
+                if rv_type == "Bool" {
+                    let bool_val: bool = rv.int_value != 0;
+                    return Value::from(bool_val);
+                }
+                if rv_type == "Integer" {
+                    return Value::from(rv.int_value);
+                }
+                if rv_type == "Float" {
+                    return Value::from(rv.float_value);
+                }
+                if rv_type == "String" {
+                    let cs: SharedString = CStr::from_ptr(rv.string_value).to_string_lossy().into_owned().into();
+                    return Value::from(cs);
+                }
+                if rv_type == "Unknown" {
+                    warn!("From<JRvalue>:can't set an unknown value type");
+                }
+            }
+        }
+        else {
+            warn!("From<JRvalue>:not a valid JRvalue, JRvalue.magic must equal {}",JRMAGIC);
+        }
+        return Value::Void;
+    }
 }
 
 //
@@ -392,7 +425,7 @@ pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalu
     debug!("r_push_row");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     if ! MODELS.lock().unwrap().contains_key(&propertyid) {
-        warn!("r_set_cell_value:no model available for property id <{}>",propertyid);
+        warn!("r_push_row:no model available for property id <{}>",propertyid);
     } else {
         debug!("r_push_row: new_values size: {}",len);
         let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
@@ -463,6 +496,30 @@ pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalu
         //model.rows.notify.row_changed(row_count);
 
         //debug!("{}",model.row_count());
+    }
+}
+
+//
+// set the value of a property
+//   the call_back is not called during this explicit update, as the caller already should know, that he updates the property
+// 
+#[no_mangle]
+pub unsafe extern "C" fn r_set_value(id: *const c_char, new_value: JRvalue) {    
+    debug!("r_set_value");
+    let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
+
+    if ! INSTANCES.lock().unwrap().is_empty() {
+        let instance = (&(INSTANCES.lock().unwrap())[0]).upgrade();
+        if instance.is_some() {
+            debug!("r_set_value: new_value.int_value={}",new_value.int_value);
+            debug!("r_set_value: new_value.float_value={}",new_value.float_value);
+            debug!("r_set_value: new_value.string_value={:p}",new_value.string_value);
+            let _ = instance.unwrap().set_property(&propertyid, Value::from(new_value));
+        } else {
+            warn!("r_set_value:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again");
+        }
+    } else {
+        warn!("r_set_value:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
     }
 }
 

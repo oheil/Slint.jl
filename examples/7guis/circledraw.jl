@@ -30,6 +30,7 @@ function on_background_clicked(params...)
     x=Int(params[1])
     y=Int(params[2])
     Slint.push_row("model",[x,y,30])
+    Slint.set_value("undoable",true)
     return true
 end
 Slint.set_callback("background_clicked", on_background_clicked)

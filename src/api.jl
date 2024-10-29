@@ -48,6 +48,10 @@ function r_push_row(id, new_values, len)
     ccall((:r_push_row, slintwrapper), Cvoid, (Ptr{Cchar}, Ptr{JRvalue}, Csize_t), id, new_values, len)
 end
 
+function r_set_value(id, new_value)
+    ccall((:r_set_value, slintwrapper), Cvoid, (Ptr{Cchar}, JRvalue), id, new_value)
+end
+
 function r_set_cell_value(id, row, col, new_value)
     ccall((:r_set_cell_value, slintwrapper), Cvoid, (Ptr{Cchar}, Int32, Int32, JRvalue), id, row, col, new_value)
 end

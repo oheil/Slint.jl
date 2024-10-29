@@ -172,6 +172,15 @@ function push_row(id, new_values)
 end
 
 #
+# set the value of a property 
+#  
+function set_value(id, new_value)
+    check_init()
+    rv = JRvalue(new_value)
+    r_set_value(id, rv)
+end
+
+#
 # get the value of a element/cell as string
 #  
 function get_cell_value(id, row, col)
