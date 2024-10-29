@@ -167,17 +167,21 @@ impl From<JRvalue> for Value {
                 let rv_cstr = CStr::from_ptr(rv.rtype);
                 let rv_type: String = rv_cstr.to_string_lossy().into_owned();
                 if rv_type == "Bool" {
+                    debug!("Value::From<JRvalue>:rv_type is Bool {}",rv.int_value);
                     let bool_val: bool = rv.int_value != 0;
                     return Value::from(bool_val);
                 }
                 if rv_type == "Integer" {
+                    debug!("Value::From<JRvalue>:rv_type is Integer {}",rv.int_value);
                     return Value::from(rv.int_value);
                 }
                 if rv_type == "Float" {
+                    debug!("Value::From<JRvalue>:rv_type is Float {}",rv.float_value);
                     return Value::from(rv.float_value);
                 }
                 if rv_type == "String" {
                     let cs: SharedString = CStr::from_ptr(rv.string_value).to_string_lossy().into_owned().into();
+                    debug!("Value::From<JRvalue>:rv_type is String {}",cs);
                     return Value::from(cs);
                 }
                 if rv_type == "Unknown" {
@@ -522,8 +526,6 @@ pub unsafe extern "C" fn r_set_value(id: *const c_char, new_value: JRvalue) {
         warn!("r_set_value:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
     }
 }
-
-
 
 //
 // set the string value of a cell
