@@ -425,6 +425,22 @@ unsafe fn get_skip_callback() -> bool {
 //
 //
 #[no_mangle]
+pub unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) {
+    debug!("r_pop_row");
+    let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
+    if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+        warn!("r_pop_row:no model available for property id <{}>",propertyid);
+    } else {
+        debug!("r_pop_row: index: {}",index);
+        let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+        model.remove_row(index);
+    }
+}
+
+//
+//
+//
+#[no_mangle]
 pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalue, len: usize) {
     debug!("r_push_row");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
@@ -588,12 +604,32 @@ pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut c
         match rv_tmp {
             Some(x) => {
                 debug!("r_get_cell_value:cell value: {:p}",x.string_value);
+                rv.rtype = x.rtype;
                 rv.string_value = x.string_value;
                 rv.int_value = x.int_value;
+                rv.float_value = x.float_value;
             },
             None => debug!("r_get_cell_value:no cell value"),
         }
     }
+
+
+
+
+    debug!("r_get_cell_value:return value: {}",rv.magic);
+    let rv_cstr = CStr::from_ptr(rv.rtype);
+    let rv_type: String = rv_cstr.to_string_lossy().into_owned();
+    debug!("r_get_cell_value:return value: {}",rv_type);
+    debug!("r_get_cell_value:return value: {}",rv.int_value);
+    debug!("r_get_cell_value:return value: {}",rv.float_value);
+    debug!("r_get_cell_value:return value: {:p}",rv.string_value);
+    let cs: SharedString = CStr::from_ptr(rv.string_value).to_string_lossy().into_owned().into();
+    debug!("r_get_cell_value:return value: {}",cs);
+
+
+    
+
+
 
     return rv;
 }
@@ -692,9 +728,17 @@ impl CellsModel {
     }
 
     fn push_row(&self, row: Rc<RowModel>) {
+        debug!("CellsModel.push_row");
         self.rows.borrow_mut().push(row);
         let c = self.rows.borrow().len();
         self.notify.row_added(c-1,c);
+    }
+
+    fn remove_row(&self, index: usize ) {
+        debug!("CellsModel.remove_row");
+        self.rows.borrow_mut().remove(index);
+        let c = self.rows.borrow().len();
+        self.notify.row_removed(index,c);
     }
 
     fn col_count(&self) -> usize {

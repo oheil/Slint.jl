@@ -157,6 +157,15 @@ function compile_from_string(slint_string::AbstractString, start_comp::AbstractS
 end
 
 #
+# remove a row at index from model
+#  
+function remove_row(id, index)
+    check_init()
+    r_remove_row(id, index)
+    nothing
+end
+
+#
 # push a full row into model
 #  
 function push_row(id, new_values)
