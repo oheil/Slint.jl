@@ -5,7 +5,7 @@ slintFile = "examples\\7guis\\circledraw.slint"
 Slint.compile_from_file(slintFile,"MainWindow")
 
 @enum Action draw=1 resize=2
-struct Undo
+mutable struct Undo
     a::Action
     index::Int
     width::Int
@@ -23,13 +23,18 @@ function on_undo_clicked(params...)
     i = length(UndoStack)
     if i > 0 
         u=pop!(UndoStack)
-        push!(RedoStack,u)
         Slint.set_value("redoable",true)
         if u.a == draw
             Slint.remove_row("model",i)
         elseif u.a == resize
-
+            row=u.index
+            col=3
+            old_width=u.width
+            new_width=Slint.get_cell_value(Int,"model",row,col)
+            Slint.set_cell_value("model",row,col,old_width)
+            u.width=new_width
         end
+        push!(RedoStack,u)
     end
     i = length(UndoStack)
     if i == 0
@@ -47,14 +52,19 @@ function on_redo_clicked(params...)
     i = length(RedoStack)
     if i > 0 
         u=pop!(RedoStack)
-        push!(UndoStack,u)
         Slint.set_value("undoable",true)
         if u.a == draw
             println(u.x," ",u.y," ",u.width)
             Slint.push_row("model",[u.x,u.y,u.width])
         elseif u.a == resize
-
+            row=u.index
+            col=3
+            new_width=u.width
+            old_width=Slint.get_cell_value(Int,"model",row,col)
+            Slint.set_cell_value("model",row,col,new_width)
+            u.width=old_width
         end
+        push!(UndoStack,u)
     end
     i = length(RedoStack)
     if i == 0
@@ -87,7 +97,7 @@ function on_circle_resized(params...)
     row=Int(params[1]) + 1
     col=3 
     value=Int(floor(params[2]))
-    old_value=parse(Float64,Slint.get_cell_value("model",row,col))
+    old_value=Slint.get_cell_value(Int,"model",row,col)
     Slint.set_cell_value("model",row,col,value)
     push!(UndoStack,Undo(resize,row,old_value,0,0))
     return true

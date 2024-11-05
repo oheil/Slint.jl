@@ -202,6 +202,51 @@ function get_cell_value(id, row, col)
 end
 
 #
+# get the value of a element/cell as Float64
+#  
+function get_cell_value(::Type{T}, id, row, col) where T<:Float64
+    check_init()
+    rv = r_get_cell_value(id,row,col)
+    rtype=unsafe_string(rv.rtype)
+    if rv.magic == Cint(rMagic) && 
+        ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rFloat)] )
+        return rv.float_value
+    end
+    error(raw"Slint.get_cell_value: return value is not a Float as expected")
+    return 0.0
+end
+
+#
+# get the value of a element/cell as Int
+#  
+function get_cell_value(::Type{T}, id, row, col) where T<:Int
+    check_init()
+    rv = r_get_cell_value(id,row,col)
+    rtype=unsafe_string(rv.rtype)
+    if rv.magic == Cint(rMagic) && 
+        ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rInteger)] )
+        return rv.int_value
+    end
+    error(raw"Slint.get_cell_value: return value is not an Int as expected")
+    return 0
+end
+
+#
+# get the value of a element/cell as Float64
+#  
+function get_cell_value(::Type{T}, id, row, col) where T<:String
+    check_init()
+    rv = r_get_cell_value(id,row,col)
+    rtype=unsafe_string(rv.rtype)
+    if rv.magic == Cint(rMagic) && 
+        ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rString)] )
+        return unsafe_string(rv.string_value)
+    end
+    error(raw"Slint.get_cell_value: return value is not a String as expected")
+    return ""
+end
+
+#
 # set the string value of a element/cell
 #  
 function set_cell_value(id, row, col, new_value)

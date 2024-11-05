@@ -613,23 +613,15 @@ pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut c
         }
     }
 
-
-
-
     debug!("r_get_cell_value:return value: {}",rv.magic);
     let rv_cstr = CStr::from_ptr(rv.rtype);
     let rv_type: String = rv_cstr.to_string_lossy().into_owned();
-    debug!("r_get_cell_value:return value: {}",rv_type);
-    debug!("r_get_cell_value:return value: {}",rv.int_value);
-    debug!("r_get_cell_value:return value: {}",rv.float_value);
-    debug!("r_get_cell_value:return value: {:p}",rv.string_value);
+    debug!("r_get_cell_value:return value type: {}",rv_type);
+    debug!("r_get_cell_value:return value int: {}",rv.int_value);
+    debug!("r_get_cell_value:return value float: {}",rv.float_value);
+    debug!("r_get_cell_value:return value string_p: {:p}",rv.string_value);
     let cs: SharedString = CStr::from_ptr(rv.string_value).to_string_lossy().into_owned().into();
-    debug!("r_get_cell_value:return value: {}",cs);
-
-
-    
-
-
+    debug!("r_get_cell_value:return value string: {}",cs);
 
     return rv;
 }
