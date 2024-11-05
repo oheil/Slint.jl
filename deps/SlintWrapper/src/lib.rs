@@ -728,9 +728,13 @@ impl CellsModel {
 
     fn remove_row(&self, index: usize ) {
         debug!("CellsModel.remove_row");
-        self.rows.borrow_mut().remove(index);
-        let c = self.rows.borrow().len();
-        self.notify.row_removed(index,c);
+        if index > 0 && index < self.rows.borrow().len() {
+            self.rows.borrow_mut().remove(index);
+            let c = self.rows.borrow().len();
+            self.notify.row_removed(index,c);
+        } else {
+            warn!("CellsModel.remove_row: trying to remove row index {} but length of rows is only {}",index,self.rows.borrow().len());
+        }
     }
 
     fn col_count(&self) -> usize {
