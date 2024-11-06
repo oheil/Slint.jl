@@ -1,6 +1,8 @@
 # Slint.jl
-Slint GUI for Julia
 
+### This package is in a VERY EARLY development state! You need rust installed if you want to try it out.
+
+Slint GUI for Julia
 
 # download/install
 
