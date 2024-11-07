@@ -29,3 +29,7 @@ name = "circledraw"
 [[bin]]
 path = "src/circledraw_2dim_array.rs"
 name = "circledraw_2dim_array"
+
+[[bin]]
+path = "src/crud.rs"
+name = "crud"
