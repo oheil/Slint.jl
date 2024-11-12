@@ -8,9 +8,10 @@
 typedef struct JRvalue {
   int32_t magic;
   const char *rtype;
+  const char *string_value;
   int32_t int_value;
   double float_value;
-  const char *string_value;
+  const char *slvi_value;
 } JRvalue;
 
 void r_init(void);
