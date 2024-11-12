@@ -25,9 +25,11 @@ rustup update
 ```
 
 ```shell
-cd c:\Users\oheil\.julia\dev\Slint\deps\SlintWrapper
+cd c:\Users\oheil\.julia\dev\Slint
+cd deps\SlintWrapper
 cargo update
 cargo add slint-interpreter
+cd ..\..
 
 cd c:\Users\oheil\.julia\dev\Slint\rust
 cargo run --release --bin my_cells
