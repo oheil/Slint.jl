@@ -435,14 +435,29 @@ use slint::{Model, ModelRc, ModelTracker, ModelNotify};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::collections::HashMap;
+use std::ptr;
 
 // all models are stored here
 static mut MODELS: Lazy<Mutex<HashMap<String,Rc<CellsModel>>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
 });
+unsafe fn model_contains(propertyid: &String) -> bool {
+    //let model = MODELS.lock().unwrap();
+    //return (*model).contains_key(&propertyid);
+    let mod_ptr = ptr::addr_of_mut!(MODELS);
+    return (*mod_ptr).lock().unwrap().contains_key(propertyid);
+}
+unsafe fn model_get(propertyid: &String) -> Rc<CellsModel> {
+    let mod_ptr = ptr::addr_of_mut!(MODELS);
+    return (*mod_ptr).lock().unwrap().get(propertyid).unwrap().clone();
+}
+unsafe fn model_insert(propertyid: String, model: Rc<CellsModel>) {
+    let mod_ptr = ptr::addr_of_mut!(MODELS);
+    (*mod_ptr).lock().unwrap().insert(propertyid,model);
+}
 
 // sometimes the update_cell callback should not be called, e.g. if changing a cell during update_cell
-static mut SKIP_CALLBACK: Lazy<Mutex<bool>> = Lazy::new(|| {
+static SKIP_CALLBACK: Lazy<Mutex<bool>> = Lazy::new(|| {
     Mutex::new(false)
 });
 unsafe fn set_skip_callback(b: bool) {
@@ -461,11 +476,13 @@ unsafe fn get_skip_callback() -> bool {
 pub unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) {
     debug!("r_pop_row");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
-    if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+    //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+    if ! model_contains(&propertyid) {
         warn!("r_pop_row:no model available for property id <{}>",propertyid);
     } else {
         debug!("r_pop_row: index: {}",index);
-        let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+        //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+        let model: Rc<CellsModel> = model_get(&propertyid);
         model.remove_row(index);
     }
 }
@@ -477,11 +494,13 @@ pub unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) {
 pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalue, len: usize) {
     debug!("r_push_row");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
-    if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+    //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+    if ! model_contains(&propertyid) {
         warn!("r_push_row:no model available for property id <{}>",propertyid);
     } else {
         debug!("r_push_row: new_values size: {}",len);
-        let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+        //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+        let model: Rc<CellsModel> = model_get(&propertyid);
         let row_count = model.row_count() + 1;
         let some_row = model.rows.borrow()[0].clone();
 
@@ -594,10 +613,12 @@ pub unsafe extern "C" fn r_set_cell_value(id: *const c_char, mut row: i32, mut c
     col -= 1;
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
 
-    if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+    //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+    if ! model_contains(&propertyid) {
         warn!("r_set_cell_value:no model available for property id <{}>",propertyid);
     } else {
-        let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+        //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+        let model: Rc<CellsModel> = model_get(&propertyid);
 
         //let v: String = CStr::from_ptr(new_value.string_value).to_string_lossy().into_owned();
         //let shstr = slint_interpreter::SharedString::try_from(v).unwrap();
@@ -627,10 +648,12 @@ pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut c
 
     let mut rv = JRvalue::new_undefined();
 
-    if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+    //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+    if ! model_contains(&propertyid) {
         warn!("r_get_cell_value:no model available for property id <{}>",propertyid);
     } else {
-        let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+        //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+        let model: Rc<CellsModel> = model_get(&propertyid);
         //let v: Option<String> = model.get_cell_value(row as usize, col as usize);
         let rv_tmp: Option<JRvalue> = model.get_cell_value(row as usize, col as usize);
         //match v {
@@ -673,7 +696,8 @@ pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols
         let instance = (&(INSTANCES.lock().unwrap())[0]).upgrade();
         if instance.is_some() {
             let model = CellsModel::new(rows as usize,cols as usize, func);
-            MODELS.lock().unwrap().insert(propertyid.clone(),model.clone());
+            //MODELS.lock().unwrap().insert(propertyid.clone(),model.clone());
+            model_insert(propertyid.clone(),model.clone());
             let r = instance.unwrap().set_property(&propertyid,Value::Model(model.clone().into()));
             match r {
                 Ok(_) => (),
