@@ -8,7 +8,7 @@ use env_logger::Env;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
 use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, SharedString };
-//use slint::StandardListViewItem;
+use slint::StandardListViewItem;
 
 // only hold a single instance at index 0
 static INSTANCES: Lazy<Mutex<Vec<Weak<ComponentInstance>>>> = Lazy::new(|| {
@@ -109,6 +109,30 @@ pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slin
 }
 
 //
+// SlintValue is the central value type for all Slint models
+//      see CellsModel and RowModel below
+//      JRvalue is the corresponding type to Julia
+//
+#[derive(Clone)]
+struct SlintValue  { 
+    value_s: String,
+    value_i: i32,
+    value_f: f64,
+    value_slvi: StandardListViewItem,
+}
+impl Default for SlintValue {
+    fn default() -> SlintValue {
+        debug!("SlintValue default");
+        SlintValue{
+            value_s: String::from(""),
+            value_i: 0,
+            value_f: 0.0,
+            value_slvi: StandardListViewItem::from(""),
+        }
+    }
+}
+
+//
 // JRvalue is used to receive return value from Julia callbacks
 //   and as a return value to calls from Julia (e.g. r_get_cell_value) if helpfull
 //
@@ -126,7 +150,6 @@ pub struct JRvalue {
     int_value: i32,
     float_value: f64,
     string_value: *const c_char,
-    //slvi_value: *const c_char,
 }
 impl JRvalue {
     fn new_bool(b: bool) -> Self {
@@ -137,7 +160,6 @@ impl JRvalue {
             int_value: b.into(),
             float_value: 0.0,
             string_value: CString::new("").unwrap().into_raw(),
-            //slvi_value: CString::new("").unwrap().into_raw()
         }
     }
     fn new_undefined() -> Self {
@@ -148,7 +170,6 @@ impl JRvalue {
             int_value: 0,
             float_value: 0.0,
             string_value: CString::new("").unwrap().into_raw(),
-            //slvi_value: CString::new("").unwrap().into_raw()
         }
     }
     /*
@@ -692,22 +713,6 @@ pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols
 //   1-dimension vectors are handled like 2 dimensions with length 1 of one dimension
 //   cell/element values are always strings
 //
-#[derive(Clone)]
-struct SlintValue  { 
-    value_s: String,
-    value_i: i32,
-    value_f: f64,
-}
-impl Default for SlintValue {
-    fn default() -> SlintValue {
-        debug!("SlintValue default");
-        SlintValue{
-            value_s: String::from(""),
-            value_i: 0,
-            value_f: 0.0,
-        }
-    }
-}
 struct CellsModel {
     rows: RefCell<Vec<Rc<RowModel>>>,
     notify: ModelNotify,
