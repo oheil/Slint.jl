@@ -4,6 +4,11 @@
 
 Slint GUI for Julia
 
+# prerequisites
+
+- Rust
+- Visual Studio Community 2017 (or later) with C++ Build Tools
+
 # download/install
 
 ```julia
@@ -21,10 +26,17 @@ Pkg.build("Slint"; verbose = true);
 include("contrib\\generator.jl")
 ```
 
-# run examples
+# working examples
 ```julia
 include("examples\\7guis\\booker.jl")
 include("examples\\7guis\\cells.jl")
+include("examples\\7guis\\circledraw.jl")
+include("examples\\7guis\\counter.jl")
+```
+
+# current example work in progress
+```julia
+include("examples\\7guis\\crud.jl")
 ```
 
 # REPL examples
