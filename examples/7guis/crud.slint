@@ -3,8 +3,12 @@
 
 import { LineEdit, Button, Slider, StandardListView, GridBox, HorizontalBox } from "std-widgets.slint";
 
+struct SlintValue  { value_s: string, value_i: int, value_f: float, value_slvi: StandardListViewItem }
+
 export component MainWindow inherits Window {
-    in property <[StandardListViewItem]> names-list;
+    //in property <[StandardListViewItem]> names-list;
+    in property <[[StandardListViewItem]]> names-list;
+    //in property <[[SlintValue]]> names-list;
     out property <int> current-item: list.current-item;
     out property <string> name;
     out property <string> surname;
@@ -30,7 +34,8 @@ export component MainWindow inherits Window {
             row: 1;
             rowspan: 3;
             colspan: 2;
-            model: root.names-list;
+            //model: root.names-list;
+            model: root.names-list[0];
         }
 
         Text {

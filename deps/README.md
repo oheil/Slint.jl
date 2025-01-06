@@ -4,13 +4,13 @@
 
 https://github.com/slint-ui/slint
 
-https://slint.dev/releases/1.8.0/docs/slint/
+https://slint.dev/releases/1.9.1/docs/slint/
 
 https://docs.rs/
 
-https://slint.dev/releases/1.8.0/docs/rust/slint/
+https://slint.dev/releases/1.9.1/docs/rust/slint/
 
-https://slint.dev/releases/1.8.0/editor/
+https://slint.dev/releases/1.9.1/editor/
 
 https://jakegoulding.com/rust-ffi-omnibus/objects/
 
@@ -36,6 +36,7 @@ cargo run --release --bin my_cells
 cargo run --release --bin my_cells_listview
 cargo run --release --bin circledraw
 cargo run --release --bin circledraw_2dim_array
+cargo run --release --bin crud
 ```
 
 ```shell
@@ -55,7 +56,7 @@ cargo run --release --bin cells
 ## Build
 How to build the projekt:
 ```julia
-using Pkg; Pkg.build("Slint"; verbose = true);
+using Pkg; Pkg.activate("."); Pkg.build("Slint"; verbose = true);
 include("contrib\\generator.jl")
 ```
 

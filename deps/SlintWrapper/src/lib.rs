@@ -8,7 +8,9 @@ use env_logger::Env;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
 use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, SharedString };
-use slint::StandardListViewItem;
+
+mod slint_value;
+pub use crate::slint_value::*;
 
 // only hold a single instance at index 0
 static INSTANCES: Lazy<Mutex<Vec<Weak<ComponentInstance>>>> = Lazy::new(|| {
@@ -105,30 +107,6 @@ pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slin
     } else {
         //slint_interpreter::print_diagnostics(&compiler.diagnostics());
         result.print_diagnostics();
-    }
-}
-
-//
-// SlintValue is the central value type for all Slint models
-//      see CellsModel and RowModel below
-//      JRvalue is the corresponding type to Julia
-//
-#[derive(Clone)]
-struct SlintValue  { 
-    value_s: String,
-    value_i: i32,
-    value_f: f64,
-    value_slvi: StandardListViewItem,
-}
-impl Default for SlintValue {
-    fn default() -> SlintValue {
-        debug!("SlintValue default");
-        SlintValue{
-            value_s: String::from(""),
-            value_i: 0,
-            value_f: 0.0,
-            value_slvi: StandardListViewItem::from(""),
-        }
     }
 }
 
@@ -692,6 +670,19 @@ pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols
         //let instance = i_ref.upgrade();
         let instance = (&(INSTANCES.lock().unwrap())[0]).upgrade();
         if instance.is_some() {
+
+            //test code start
+            let v = instance.as_ref().unwrap().get_property(&propertyid);
+            match v {
+                Ok(value) => {
+                    debug!("r_set_property_model:property <{}> has value: {:?}", propertyid, value);
+                    print_type_of(&value);
+                },
+                Err(error) => warn!("r_set_property_model:getting property <{}> failed: {:?}", propertyid, error),
+            };
+
+            //test code end
+
             let model = CellsModel::new(rows as usize,cols as usize, func);
             //MODELS.lock().unwrap().insert(propertyid.clone(),model.clone());
             model_insert(propertyid.clone(),model.clone());
@@ -931,10 +922,12 @@ impl slint::Model for RowModel {
             debug!("RowModel.row_data: row_element.value_i={}",row_element.value_i);
             debug!("RowModel.row_data: row_element.value_f={}",row_element.value_f);
             debug!("RowModel.row_data: row_element.value_s={}",row_element.value_s);
+            debug!("RowModel.row_data: row_element.value_slvi={}",row_element.value_slvi.text);
             let mut stru = slint_interpreter::Struct::default();
             stru.set_field("value_i".into(), Value::Number(row_element.value_i.into()));
             stru.set_field("value_f".into(), Value::Number(row_element.value_f.into()));
             stru.set_field("value_s".into(), Value::String(row_element.value_s.clone().into()));
+            stru.set_field("value_slvi".into(), Value::String(row_element.value_slvi.text.clone().into()));
             stru.into()
         })
     }
