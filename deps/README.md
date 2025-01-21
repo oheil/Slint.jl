@@ -2,23 +2,24 @@
 
 ## Relevant online docs and tools
 
-https://github.com/slint-ui/slint
+[https://github.com/slint-ui/slint]
 
-https://slint.dev/releases/1.9.2/docs/slint/
+[https://slint.dev/releases/1.9.2/docs/slint/]
 
-https://docs.rs/
+[https://docs.rs/]
 
-https://slint.dev/releases/1.9.2/docs/rust/slint/
+[https://slint.dev/releases/1.9.2/docs/rust/slint/]
 
-https://slint.dev/releases/1.9.2/editor/
+[https://slint.dev/releases/1.9.2/editor/]
 
-https://jakegoulding.com/rust-ffi-omnibus/objects/
+[https://jakegoulding.com/rust-ffi-omnibus/objects/]
 
-https://discourse.julialang.org/t/how-to-create-a-cstring-from-a-string/98566
+[https://discourse.julialang.org/t/how-to-create-a-cstring-from-a-string/98566]
 
-https://github.com/felipenoris/JuliaPackageWithRustDep.jl
+[https://github.com/felipenoris/JuliaPackageWithRustDep.jl]
 
 ## General Rust workflows
+
 ```shell
 rustup default stable
 rustup update
@@ -54,7 +55,9 @@ cargo run --release --bin cells
 ```
 
 ## Build
+
 How to build the projekt:
+
 ```julia
 using Pkg; Pkg.activate("."); Pkg.build("Slint"; verbose = true);
 include("contrib\\generator.jl")
@@ -121,7 +124,7 @@ Slint.compile_from_file(file3,"SingleButton")
 Slint.run()
 ```
 
-```
+```julia
 # include("examples\\7guis\\booker.jl")
 using Slint
 file1 = "examples\\7guis\\booker.slint"
@@ -135,11 +138,9 @@ Slint.set_callback("validate-date", on_validate_date)
 Slint.run()
 ```
 
+## Old snippets
 
-
-# Old snippets
-
-```
+```julia
 using Slint
 file1 = "examples\\7guis\\booker.slint"
 file2 = "SingleButton.slint"
@@ -167,9 +168,6 @@ Slint.set_callback("button-clicked", print_callback, :Cint, :(Slint.SharedString
 Slint.run()
 ```
 
-```
+```cmd
 cargo run --release --target-dir "../../deps/" --bin my_cells
 ```
-
-
-

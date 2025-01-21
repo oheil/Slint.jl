@@ -1,15 +1,15 @@
 # Slint.jl
 
-### This package is in a VERY EARLY development state! You need rust installed if you want to try it out.
+## This package is in a VERY EARLY development state! You need rust installed if you want to try it out
 
 Slint GUI for Julia
 
-# prerequisites
+## prerequisites
 
 - Rust
 - Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequsites-in-visual-studio-installer) )
 
-# download/install
+## download/install
 
 ```julia
 using Pkg
@@ -17,7 +17,8 @@ Pkg.add(url="https://github.com/oheil/Slint.jl.git")
 Pkg.develop("Slint")
 ```
 
-# build
+## build
+
 ```julia
 using Pkg
 cd(".julia/dev/Slint")
@@ -26,7 +27,8 @@ Pkg.build("Slint"; verbose = true);
 include("contrib\\generator.jl")
 ```
 
-# working examples
+## working examples
+
 ```julia
 include("examples\\7guis\\booker.jl")
 include("examples\\7guis\\cells.jl")
@@ -34,12 +36,14 @@ include("examples\\7guis\\circledraw.jl")
 include("examples\\7guis\\counter.jl")
 ```
 
-# current example work in progress
+## current example work in progress
+
 ```julia
 include("examples\\7guis\\crud.jl")
 ```
 
-# REPL examples
+## REPL examples
+
 ```julia
 using Slint
 s = "export component MyWin inherits Window {
@@ -73,7 +77,7 @@ Slint.compile_from_file(file3,"SingleButton")
 Slint.run()
 ```
 
-# Install Build prerequsites in Visual Studio Installer:
+## Install Build prerequsites in Visual Studio Installer
 
 ![wi1](https://github.com/user-attachments/assets/fed0a9ed-8c6d-40b5-bd3c-4ef5b8d69351)
 ![wi2](https://github.com/user-attachments/assets/ba48c61c-145a-4310-a96e-b7df646852cd)
