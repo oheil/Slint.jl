@@ -112,6 +112,7 @@ Slint.compile_from_file(file2,"Demo")
 #after last command no callback can be set for file1 anymore!
 function print_callback()
     println("Button clicked, Julia responded")
+    return true
 end
 Slint.set_callback("button-clicked",print_callback)
 
