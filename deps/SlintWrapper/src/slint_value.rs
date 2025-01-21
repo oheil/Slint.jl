@@ -1,4 +1,4 @@
-use slint::StandardListViewItem;
+//use slint::StandardListViewItem;
 use log::*;
 
 //
@@ -11,7 +11,7 @@ pub struct SlintValue {
     pub value_s: String,
     pub value_i: i32,
     pub value_f: f64,
-    pub value_slvi: StandardListViewItem,
+    //pub value_slvi: StandardListViewItem,
 }
 impl Default for SlintValue {
     fn default() -> SlintValue {
@@ -20,10 +20,11 @@ impl Default for SlintValue {
             value_s: String::from(""),
             value_i: 0,
             value_f: 0.0,
-            value_slvi: StandardListViewItem::from(""),
+            //value_slvi: StandardListViewItem::from(""),
         }
     }
 }
+/*
 impl From<SlintValue> for StandardListViewItem {
     fn from(item: SlintValue) -> StandardListViewItem {
         item.value_slvi.clone()
@@ -48,3 +49,4 @@ pub fn convert_vecs<SlintValue, StandardListViewItem>(vector: Vec<SlintValue>) -
         }
     ).collect()
 }
+*/

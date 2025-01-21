@@ -922,12 +922,12 @@ impl slint::Model for RowModel {
             debug!("RowModel.row_data: row_element.value_i={}",row_element.value_i);
             debug!("RowModel.row_data: row_element.value_f={}",row_element.value_f);
             debug!("RowModel.row_data: row_element.value_s={}",row_element.value_s);
-            debug!("RowModel.row_data: row_element.value_slvi={}",row_element.value_slvi.text);
+            //debug!("RowModel.row_data: row_element.value_slvi={}",row_element.value_slvi.text);
             let mut stru = slint_interpreter::Struct::default();
             stru.set_field("value_i".into(), Value::Number(row_element.value_i.into()));
             stru.set_field("value_f".into(), Value::Number(row_element.value_f.into()));
             stru.set_field("value_s".into(), Value::String(row_element.value_s.clone().into()));
-            stru.set_field("value_slvi".into(), Value::String(row_element.value_slvi.text.clone().into()));
+            //stru.set_field("value_slvi".into(), Value::String(row_element.value_slvi.text.clone().into()));
             stru.into()
         })
     }
