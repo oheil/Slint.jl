@@ -95,7 +95,7 @@ s = "export component MyWin inherits Window {
         }
     }
     "
-Slint.compile_from_string(s)
+Slint.compile_from_string(s,"MyWin")
 Slint.run()
 ```
 
