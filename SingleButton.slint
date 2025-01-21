@@ -5,7 +5,7 @@ import { Button, VerticalBox } from "std-widgets.slint";
     // You can collect other global properties here
 //}
 
-export component SingleButton {
+export component SingleButton inherits Window {
     callback button-clicked(string) -> bool;
     b1 := Button {
         text: "OK";

@@ -116,7 +116,7 @@ end
 c_print_callback = @cfunction print_callback Cvoid ()
 Slint.r_set_callback("button-clicked",c_print_callback)
 
-Slint.compile_from_file(file3)
+Slint.compile_from_file(file3,"SingleButton")
 
 Slint.run()
 ```
