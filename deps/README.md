@@ -125,7 +125,7 @@ Slint.run()
 # include("examples\\7guis\\booker.jl")
 using Slint
 file1 = "examples\\7guis\\booker.slint"
-Slint.compile_from_file(file1)
+Slint.compile_from_file(file1,"Booker")
 function on_validate_date(date)
     println(date)
     return Cint(1)
