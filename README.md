@@ -7,7 +7,7 @@ Slint GUI for Julia
 # prerequisites
 
 - Rust
-- Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl/edit/main/README.md#install-build-prerequsites-in-visual-studio-installer) )
+- Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequsites-in-visual-studio-installer) )
 
 # download/install
 
