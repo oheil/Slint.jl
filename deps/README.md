@@ -113,8 +113,7 @@ Slint.compile_from_file(file2,"Demo")
 function print_callback()
     println("Button clicked, Julia responded")
 end
-c_print_callback = @cfunction print_callback Cvoid ()
-Slint.r_set_callback("button-clicked",c_print_callback)
+Slint.set_callback("button-clicked",print_callback)
 
 Slint.compile_from_file(file3,"SingleButton")
 
@@ -128,12 +127,16 @@ file1 = "examples\\7guis\\booker.slint"
 Slint.compile_from_file(file1,"Booker")
 function on_validate_date(date)
     println(date)
-    return Cint(1)
+    return true
 end
-Slint.SetCallback_specific("validate-date", on_validate_date, :Cint, :(Slint.SharedString,) )
+Slint.set_callback("validate-date", on_validate_date)
 
-Slint.Run()
+Slint.run()
 ```
+
+
+
+# Old snippets
 
 ```
 using Slint
@@ -141,7 +144,7 @@ file1 = "examples\\7guis\\booker.slint"
 file2 = "SingleButton.slint"
 
 #setting callbacks needs to be before the next call to CompileFromFile
-Slint.compile_from_file(file1)
+Slint.compile_from_file(file1,"Booker")
 #after last command no callback can be set for file1 anymore!
 function on_validate_date(date)
     println("Validate called")
@@ -162,8 +165,6 @@ Slint.set_callback("button-clicked", print_callback, :Cint, :(Slint.SharedString
 
 Slint.run()
 ```
-
-# Old snippets
 
 ```
 cargo run --release --target-dir "../../deps/" --bin my_cells
