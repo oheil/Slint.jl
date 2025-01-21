@@ -108,7 +108,7 @@ file3 = "SingleButton.slint"
 Slint.compile_from_file(file1,"Booker")
 
 #setting callbacks needs to be before the next call to CompileFromFile
-Slint.compile_from_file(file2)
+Slint.compile_from_file(file2,"Demo")
 #after last command no callback can be set for file1 anymore!
 function print_callback()
     println("Button clicked, Julia responded")
