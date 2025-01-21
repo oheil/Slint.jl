@@ -105,7 +105,7 @@ file1 = "examples\\7guis\\booker.slint"
 file2 = "helloworld.slint"
 file3 = "SingleButton.slint"
 
-Slint.compile_from_file(file1)
+Slint.compile_from_file(file1,"Booker")
 
 #setting callbacks needs to be before the next call to CompileFromFile
 Slint.compile_from_file(file2)
