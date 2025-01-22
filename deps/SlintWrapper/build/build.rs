@@ -8,11 +8,15 @@ fn main() {
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let mut config: cbindgen::Config = Default::default();
     config.language = cbindgen::Language::C;
+
+    let header_filepath = Path::new(&crate_dir).join("include/slintwrapper.h");
+    match fs::remove_file(&header_filepath) {
+        Ok(_) => println!("File {} removed successfully!",&header_filepath.display()),
+        Err(e) => println!("Error removing file: {}", e),
+    }
     cbindgen::generate_with_config(&crate_dir, config)
         .unwrap()
         .write_to_file("include/slintwrapper.h");
-
-    let header_filepath = Path::new(&crate_dir).join("include/slintwrapper.h");
     assert!(header_filepath.exists());
 
     let header_content = fs::read_to_string(&header_filepath).unwrap();

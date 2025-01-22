@@ -70,11 +70,26 @@ function clean()
 
     dylib_file = joinpath(@__DIR__, dylib_filename())
     isfile(dylib_file) && rm(dylib_file)
+
+    # remove deps\SlintWrapper\include\slintwrapper.h in case it can not be removed or
+    # overwritten when it is created anew by deps\SlintWrapper\build\build.rs
+    dylib_header = joinpath(@__DIR__, rustprojname, "include", rustlibname*".h")
+    isfile(dylib_header) && rm(dylib_header, force=true)
+	@assert !isfile(dylib_header) "ERROR: could not remove file $dylib_header"
+
+    # remove Slint\deps\release\build\SlintWrapper-* to force rebuild and 
+    # creation of deps\SlintWrapper\include\slintwrapper.h
+    # this is a workaround against build errors which occur if you do this on Windows:
+    #   pkg> activate --temp
+    #   julia> using Pkg; Pkg.add(url="https://github.com/oheil/Slint.jl.git")
+    # 
+    buildpath = joinpath(@__DIR__, "release", "build")
+    if isdir(buildpath)
+        for folder in filter(x -> contains(x,"SlintWrapper-"), readdir(buildpath))
+            rm(joinpath(buildpath, folder), recursive=true, force=true)
+        end
+    end
+
 end
 
 build_dylib()
-
-
-
-
-

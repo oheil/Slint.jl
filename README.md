@@ -4,29 +4,47 @@
 
 Slint GUI for Julia
 
-## prerequisites
+## Prerequisites
 
 - Rust
 - Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequsites-in-visual-studio-installer) )
 
-## download/install
+## Download/install
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/oheil/Slint.jl.git")  # you can ignore build errors (see below)
-Pkg.develop("Slint")
+Pkg.add(url="https://github.com/oheil/Slint.jl.git")  # build errors (see below) should be resolved now
 ```
 
 ### Remarks to build errors after `Pkg.add(url="https://github.com/oheil/Slint.jl.git")`
 
 On Windows, packages are added to folders like `.julia\packages\Slint\uZ1Dp\`. All folders have full access rights for the current user, but files only have restricted access rights, typically read only. This prevents the build process to succeed because some build artefacts need to be overwritten during build which will fail because of insufficient access rights.
 In this case the problematic file is
-```
+
+```julia
 .julia\packages\Slint\uZ1Dp\deps\SlintWrapper\include\slintwrapper.h
 ```
+
 and a solution will be found at some time.
 
-## build
+## Working examples
+
+```julia
+using Slint
+cd(joinpath(dirname(pathof(Slint)), ".."))
+
+include("examples\\7guis\\booker.jl")
+include("examples\\7guis\\cells.jl")
+include("examples\\7guis\\circledraw.jl")
+include("examples\\7guis\\counter.jl")
+```
+
+## Development and Build
+
+```julia
+using Pkg
+Pkg.develop("Slint")
+```
 
 ```julia
 using Pkg
@@ -36,16 +54,7 @@ Pkg.build("Slint"; verbose = true);
 include("contrib\\generator.jl")
 ```
 
-## working examples
-
-```julia
-include("examples\\7guis\\booker.jl")
-include("examples\\7guis\\cells.jl")
-include("examples\\7guis\\circledraw.jl")
-include("examples\\7guis\\counter.jl")
-```
-
-## current example work in progress
+## Current example work in progress
 
 ```julia
 include("examples\\7guis\\crud.jl")
