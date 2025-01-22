@@ -70,11 +70,10 @@ function clean()
 
     dylib_file = joinpath(@__DIR__, dylib_filename())
     isfile(dylib_file) && rm(dylib_file)
+
+    dylib_header = joinpath(@__DIR__, rustprojname, "include", rustlibname*".h")
+    isfile(dylib_header) && rm(dylib_header, force=true)
+	@assert !isfile(dylib_header) "ERROR: could not remove file $dylib_header"
 end
 
 build_dylib()
-
-
-
-
-
