@@ -4,12 +4,12 @@
 
 Slint GUI for Julia
 
-## prerequisites
+## Prerequisites
 
 - Rust
 - Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequsites-in-visual-studio-installer) )
 
-## download/install
+## Download/install
 
 ```julia
 using Pkg
@@ -25,7 +25,7 @@ In this case the problematic file is
 ```
 and a solution will be found at some time.
 
-## working examples
+## Working examples
 
 ```julia
 using Slint
@@ -52,7 +52,7 @@ Pkg.build("Slint"; verbose = true);
 include("contrib\\generator.jl")
 ```
 
-## current example work in progress
+## Current example work in progress
 
 ```julia
 include("examples\\7guis\\crud.jl")
