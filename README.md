@@ -13,8 +13,7 @@ Slint GUI for Julia
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/oheil/Slint.jl.git")  # you can ignore build errors (see below)
-Pkg.develop("Slint")
+Pkg.add(url="https://github.com/oheil/Slint.jl.git")  # build errors (see below) should be resolved now
 ```
 
 ### Remarks to build errors after `Pkg.add(url="https://github.com/oheil/Slint.jl.git")`
@@ -26,7 +25,24 @@ In this case the problematic file is
 ```
 and a solution will be found at some time.
 
-## build
+## working examples
+
+```julia
+using Slint
+cd(joinpath(dirname(pathof(Slint)), ".."))
+
+include("examples\\7guis\\booker.jl")
+include("examples\\7guis\\cells.jl")
+include("examples\\7guis\\circledraw.jl")
+include("examples\\7guis\\counter.jl")
+```
+
+## Development and Build
+
+```julia
+using Pkg
+Pkg.develop("Slint")
+```
 
 ```julia
 using Pkg
@@ -34,15 +50,6 @@ cd(".julia/dev/Slint")
 Pkg.activate(".")
 Pkg.build("Slint"; verbose = true);
 include("contrib\\generator.jl")
-```
-
-## working examples
-
-```julia
-include("examples\\7guis\\booker.jl")
-include("examples\\7guis\\cells.jl")
-include("examples\\7guis\\circledraw.jl")
-include("examples\\7guis\\counter.jl")
 ```
 
 ## current example work in progress
