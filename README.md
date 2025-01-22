@@ -13,9 +13,18 @@ Slint GUI for Julia
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/oheil/Slint.jl.git")
+Pkg.add(url="https://github.com/oheil/Slint.jl.git")  # you can ignore build errors (see below)
 Pkg.develop("Slint")
 ```
+
+### Remarks to build errors after `Pkg.add(url="https://github.com/oheil/Slint.jl.git")`
+
+On Windows, packages are added to folders like `.julia\packages\Slint\uZ1Dp\`. All folders have full access rights for the current user, but files only have restricted access rights, typically read only. This prevents the build process to succeed because some build artefacts need to be overwritten during build which will fail because of insufficient access rights.
+In this case the problematic file is
+```
+.julia\packages\Slint\uZ1Dp\deps\SlintWrapper\include\slintwrapper.h
+```
+and a solution will be found at some time.
 
 ## build
 
