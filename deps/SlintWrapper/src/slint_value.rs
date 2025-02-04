@@ -1,4 +1,4 @@
-//use slint::StandardListViewItem;
+use slint::StandardListViewItem;
 use log::*;
 
 //
@@ -11,7 +11,7 @@ pub struct SlintValue {
     pub value_s: String,
     pub value_i: i32,
     pub value_f: f64,
-    //pub value_slvi: StandardListViewItem,
+    pub value_slvi: StandardListViewItem,
 }
 impl Default for SlintValue {
     fn default() -> SlintValue {
@@ -20,17 +20,30 @@ impl Default for SlintValue {
             value_s: String::from(""),
             value_i: 0,
             value_f: 0.0,
-            //value_slvi: StandardListViewItem::from(""),
+            value_slvi: StandardListViewItem::from(""),
         }
     }
 }
-/*
+
 impl From<SlintValue> for StandardListViewItem {
-    fn from(item: SlintValue) -> StandardListViewItem {
+    fn from(item: SlintValue) -> Self {
         item.value_slvi.clone()
     }
 }
-pub fn convert_vecs<SlintValue, StandardListViewItem>(vector: Vec<SlintValue>) -> Vec<StandardListViewItem>
+pub trait VecInto<StandardListViewItem> {
+    fn vec_into(self) -> Vec<StandardListViewItem>;
+}
+impl<SlintValue, StandardListViewItem> VecInto<StandardListViewItem> for Vec<SlintValue>
+where
+StandardListViewItem: From<SlintValue>,
+{
+  fn vec_into(self) -> Vec<StandardListViewItem> {
+    self.into_iter().map(std::convert::Into::into).collect()
+  }
+}
+
+/*
+pub fn convert<SlintValue, StandardListViewItem>(vector: Vec<SlintValue>) -> Vec<StandardListViewItem>
   where
     SlintValue: TryInto<StandardListViewItem>,
     <SlintValue as std::convert::TryInto<StandardListViewItem>>::Error: std::fmt::Display
@@ -49,4 +62,4 @@ pub fn convert_vecs<SlintValue, StandardListViewItem>(vector: Vec<SlintValue>) -
         }
     ).collect()
 }
-*/
+ */

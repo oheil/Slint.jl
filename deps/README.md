@@ -49,6 +49,11 @@ set RUST_LOG=debug
 set RUST_LOG=
 ```
 
+```powershell
+[Environment]::SetEnvironmentVariable("RUST_LOG", "debug")
+[Environment]::SetEnvironmentVariable("RUST_LOG", "")
+```
+
 ```shell
 cd examples\7guis
 cargo run --release --bin cells
