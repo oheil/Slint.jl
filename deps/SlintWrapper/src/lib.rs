@@ -212,7 +212,7 @@ impl From<JRvalue> for Value {
 //   func is a C-callable function pointer
 //
 #[no_mangle]
-pub unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern fn(par_ptr: *const c_void, len: i32) -> JRvalue ) {
+pub unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue ) {
     debug!("r_set_callback");
     let funcid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     if ! INSTANCES.lock().unwrap().is_empty() {
@@ -662,7 +662,7 @@ pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut c
 //   and register the callback for "update_cell", which is called when a cell value has changed
 //
 #[no_mangle]
-pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols: i32, func: extern fn(par_ptr: *const c_void, len: i32) -> JRvalue ) {
+pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols: i32, func: extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue ) {
     debug!("r_set_property_model");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     if ! INSTANCES.lock().unwrap().is_empty() {
@@ -729,7 +729,7 @@ impl Model for CellsModel {
     }
 }
 impl CellsModel {
-    fn new(nrows: usize, ncols: usize, func: extern fn(par_ptr: *const c_void, len: i32) -> JRvalue) -> Rc<Self> {
+    fn new(nrows: usize, ncols: usize, func: extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue) -> Rc<Self> {
         debug!("CellsModel.new");
         Rc::new_cyclic(|w| Self {
             rows: RefCell::new((0..nrows)
@@ -904,7 +904,7 @@ struct RowModel {
     row_elements: RefCell<Vec<SlintValue>>,
     base_model: std::rc::Weak<CellsModel>,
     notify: ModelNotify,
-    func: extern fn(par_ptr: *const c_void, len: i32) -> JRvalue,
+    func: extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue,
 }
 impl slint::Model for RowModel {
     type Data = Value; // again, Data must be Value
