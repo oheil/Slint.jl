@@ -88,6 +88,10 @@ Slint.__init__()  # load slintwrapper.dll again
 ## Julia Examples
 
 ```julia
+include("examples/7guis/crud.jl")
+```
+
+```julia
 include("examples/7guis/circledraw.jl")
 ```
 
