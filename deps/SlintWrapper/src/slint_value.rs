@@ -1,4 +1,5 @@
 use slint::StandardListViewItem;
+use slint_interpreter::SharedString;
 use log::*;
 
 //
@@ -11,23 +12,26 @@ pub struct SlintValue {
     pub value_s: String,
     pub value_i: i32,
     pub value_f: f64,
-    pub value_slvi: StandardListViewItem,
+    //pub value_slvi: StandardListViewItem,
 }
+
 impl Default for SlintValue {
     fn default() -> SlintValue {
-        debug!("SlintValue default");
+        debug!("SlintValue: default");
         SlintValue{
             value_s: String::from(""),
             value_i: 0,
             value_f: 0.0,
-            value_slvi: StandardListViewItem::from(""),
+            //value_slvi: StandardListViewItem::from(""),
         }
     }
 }
 
 impl From<SlintValue> for StandardListViewItem {
     fn from(item: SlintValue) -> Self {
-        item.value_slvi.clone()
+        debug!("SlintValue: from -> StandardListViewItem");
+        let ss = SharedString::from(item.value_s);
+        StandardListViewItem::from(ss)
     }
 }
 pub trait VecInto<StandardListViewItem> {
@@ -38,8 +42,20 @@ where
 StandardListViewItem: From<SlintValue>,
 {
   fn vec_into(self) -> Vec<StandardListViewItem> {
+    debug!("SlintValue: Vec<SlintValue> -> Vec<StandardListViewItem>");
     self.into_iter().map(std::convert::Into::into).collect()
   }
+}
+
+fn slint_value_list_2_standard_list_view_item_list( sv: &Vec<Vec<SlintValue>>, slvi: &mut Vec<StandardListViewItem> ) {
+    debug!("slint_value_list_2_standard_list_view_item_list");
+    // convert [[SlintValue]] to [StandardListViewItem]
+    slvi.clear();
+    for i in 0..sv[0].len() {
+        let item = &sv[0][i];
+        let slvi_item = StandardListViewItem::from(item.clone());
+        slvi.push(slvi_item);
+    }
 }
 
 /*

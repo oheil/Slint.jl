@@ -3,16 +3,23 @@
 
 import { LineEdit, Button, Slider, StandardListView, GridBox, HorizontalBox } from "std-widgets.slint";
 
-struct SlintValue  { value_s: string, value_i: int, value_f: float, value_slvi: StandardListViewItem }
+struct SlintValue  { value_s: string, value_i: int, value_f: float }
 
 export component MainWindow inherits Window {
     //in property <[StandardListViewItem]> names-list;
-    in property <[[SlintValue]]> names-list;
+    private property <[StandardListViewItem]> names-list;    
+
+    in property <[[SlintValue]]> names-list-bridge;
+
+    callback slint-value-list-2-standard-list-view-item-list( [[SlintValue]], [StandardListViewItem] );
+    changed names-list-bridge => {
+        slint-value-list-2-standard-list-view-item-list(names-list-bridge,names-list);
+    }
+
     out property <int> current-item: list.current-item;
     out property <string> name;
     out property <string> surname;
     out property <string> prefix;
-    private property <[StandardListViewItem]> names-list-slint;
     callback prefixEdited();
     callback createClicked();
     callback updateClicked();
@@ -30,16 +37,11 @@ export component MainWindow inherits Window {
             edited => { root.prefixEdited() }
         }
 
-        //for item[idx] in root.names-list[0] : root.names-list-slint {
-        //    root.names-list-slint[idx] = item;
-        //}
-
         list := StandardListView {
             row: 1;
             rowspan: 3;
             colspan: 2;
-            //model: root.names-list;
-            model: root.names-list-slint;
+            model: root.names-list;
 
         }
 
@@ -78,16 +80,13 @@ export component MainWindow inherits Window {
                 clicked => { root.updateClicked() }
 
                 text: "Update";
-                //enabled: list.current-item != -1 && list.current-item < root.names-list.length;
-                enabled: list.current-item != -1 && list.current-item < root.names-list-slint.length;
-
+                enabled: list.current-item != -1 && list.current-item < root.names-list.length;
             }
             Button {
                 clicked => { root.deleteClicked() }
 
                 text: "Delete";
-                //enabled: list.current-item != -1 && list.current-item < root.names-list.length;
-                enabled: list.current-item != -1 && list.current-item < root.names-list-slint.length;
+                enabled: list.current-item != -1 && list.current-item < root.names-list.length;
             }
         }
     }
