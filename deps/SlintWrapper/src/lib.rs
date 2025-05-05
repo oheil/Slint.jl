@@ -73,11 +73,43 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
 
 
 
+            let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
+                debug!("bridge2StandardListViewItem");
 
+                //method1
+                let rowmodel2: ModelRc<Value> = ModelRc::try_from(args[0].clone()).unwrap();
+                debug!("bridge2StandardListViewItem:rowmodel2.row_count(): {}",rowmodel2.row_count());
 
+                //method2
+                if let slint_interpreter::Value::Model(rowmodel) = &args[0] {
+                    debug!("bridge2StandardListViewItem:rowmodel.row_count(): {}",rowmodel.row_count());
+                    print_type_of(rowmodel);
 
+                    let row1 = rowmodel.row_data(1).unwrap();
+                    print_type_of(&row1);
+                    
+                    if let slint_interpreter::Value::Model(cellmodel) = row1 {
+                        debug!("bridge2StandardListViewItem:cellmodel.row_count(): {}",cellmodel.row_count());
 
+                        let el1 = cellmodel.row_data(0).unwrap();
+                        print_type_of(&el1);
 
+                        let stru = slint_interpreter::Struct::try_from(el1).unwrap();
+                        let val = stru.get_field("value_s".into()).unwrap().clone();
+                        let shstr = slint_interpreter::SharedString::try_from(val).unwrap();
+
+                        debug!("bridge2StandardListViewItem: el1 {:#?}",shstr);
+                    }
+
+                    //let some_elem = row1.get(0);
+                    //debug!("bridge2StandardListViewItem: some_row {:#?}",some_elem.unwrap().value_s);
+                }
+               
+
+                return Value::from(Value::Void);
+            } );
+
+            /*
             let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
                 debug!("bridge2StandardListViewItem");
                 // debug list of arguments
@@ -103,13 +135,26 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
                     debug!("bridge2StandardListViewItem:value type is: {:#?}", vt);
                 }
 
-                //let sv: &Vec<Vec<SlintValue>> = std::slice::from_raw_parts(args_ptr as *const &Vec<Vec<SlintValue>>, len as usize)[0];
+                let sv = &args2[0];
                 
-                
+                //let model: Rc<CellsModel> = sv.clone().try_into().unwrap();
+                let propertyid: String = String::from("names-list-bridge");
+                let model: Rc<CellsModel> = model_get(&propertyid);
+                let some_row = model.rows.borrow()[1].clone();
+                let binding = some_row.row_elements.borrow();
+                let some_elem = binding.get(0);
+                debug!("bridge2StandardListViewItem: some_row {:#?}",some_elem.unwrap().value_s);
+                let some_elem2 = binding.get(1);
+                debug!("bridge2StandardListViewItem: some_row {:#?}",some_elem2.unwrap().value_s);
+                let some_row2 = model.rows.borrow()[2].clone();
+                let binding2 = some_row2.row_elements.borrow();
+                let some_elem3 = binding2.get(0);
+                debug!("bridge2StandardListViewItem: some_row {:#?}",some_elem3.unwrap().value_s);
+
 
                 return Value::from(Value::Void);
             } );
-
+            */
 
 
 
