@@ -65,9 +65,59 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
                 INSTANCES.lock().unwrap().pop();
             }
             INSTANCES.lock().unwrap().push(instance.as_weak());
+
             // shows the window on the screen and maintains an extra strong reference.
             // if not called, the instance is dropped and lost.
             let _ = instance.show();
+
+
+
+
+
+
+
+
+
+            let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
+                debug!("bridge2StandardListViewItem");
+                // debug list of arguments
+                debug!("bridge2StandardListViewItem:slint calls bridge2StandardListViewItem with {} arguments", args.len());
+                for arg in args {
+                    print_type_of(arg);
+                    let vt = arg.value_type();
+                    debug!("bridge2StandardListViewItem:value type is: {:#?}", vt);
+                }
+                // debug end
+
+                // create a void ptr to list of arguments which is send to Julias callback.
+                let args_ptr: *const c_void = args as *const [Value] as *const c_void;
+                // get number of arguments. This is send to Julia callback, too.
+                let len: i32 = args.len().try_into().unwrap();
+
+                // debug void ptr
+                debug!("bridge2StandardListViewItem:void ptr adress is: {:p}", args_ptr);
+                let args2: &[Value] = std::slice::from_raw_parts(args_ptr as *const Value, args.len());
+                for arg in args2 {
+                    print_type_of(arg);
+                    let vt = arg.value_type();
+                    debug!("bridge2StandardListViewItem:value type is: {:#?}", vt);
+                }
+
+                //let sv: &Vec<Vec<SlintValue>> = std::slice::from_raw_parts(args_ptr as *const &Vec<Vec<SlintValue>>, len as usize)[0];
+                
+                
+
+                return Value::from(Value::Void);
+            } );
+
+
+
+
+
+
+            
+
+
         }
     } else {
         //slint_interpreter::print_diagnostics(&compiler.diagnostics());

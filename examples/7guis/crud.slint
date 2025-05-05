@@ -11,9 +11,9 @@ export component MainWindow inherits Window {
 
     in property <[[SlintValue]]> names-list-bridge;
 
-    callback slint-value-list-2-standard-list-view-item-list( [[SlintValue]], [StandardListViewItem] );
+    callback bridge2StandardListViewItem( [[SlintValue]], [StandardListViewItem] );
     changed names-list-bridge => {
-        slint-value-list-2-standard-list-view-item-list(names-list-bridge,names-list);
+        bridge2StandardListViewItem(names-list-bridge,names-list);
     }
 
     out property <int> current-item: list.current-item;
