@@ -8,6 +8,8 @@ use env_logger::Env;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
 use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, SharedString };
+use slint::StandardListViewItem;
+use slint::VecModel;
 
 mod slint_value;
 pub use crate::slint_value::*;
@@ -70,14 +72,42 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
             // if not called, the instance is dropped and lost.
             let _ = instance.show();
 
+            let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
+                debug!("bridge2StandardListViewItem");
+                let ss = SharedString::try_from(args[0].clone()).unwrap();
+                let propertyid: String = ss.as_str().to_string();
+                
+                let model: Rc<CellsModel> = model_get(&propertyid);
+                debug!("bridge2StandardListViewItem:model.row_count(): {}",model.row_count());
+                print_type_of(&model);
+
+                let ss2 = SharedString::try_from(args[1].clone()).unwrap();
+                let propertyid2: String = ss2.as_str().to_string();
+                
+
+                let instance2 = (&(INSTANCES.lock().unwrap())[0]).upgrade();
+                let ss: SharedString = SharedString::try_from("Hello").unwrap();
+                let v: StandardListViewItem = StandardListViewItem::from(ss);
+                let model2 = Rc::new(VecModel::from(vec![ss.clone(),ss.clone()]));
+                let model3 = Rc::new(
+                    model2
+                        .clone()
+                        .map(|n| StandardListViewItem::from(slint::format!("{}", n)))
+                );
+                        
+                //let r = instance2.unwrap().set_property(&propertyid2,Value::Model(model2.clone().into()));
+    
 
 
+                return Value::from(Value::Void);
+            } );
 
+            /*
             let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
                 debug!("bridge2StandardListViewItem");
 
                 //method1
-                let rowmodel2: ModelRc<Value> = ModelRc::try_from(args[0].clone()).unwrap();
+                let mut rowmodel2: ModelRc<Value> = ModelRc::try_from(args[1].clone()).unwrap();
                 debug!("bridge2StandardListViewItem:rowmodel2.row_count(): {}",rowmodel2.row_count());
 
                 //method2
@@ -99,6 +129,23 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
                         let shstr = slint_interpreter::SharedString::try_from(val).unwrap();
 
                         debug!("bridge2StandardListViewItem: el1 {:#?}",shstr);
+
+                        let slsvi: StandardListViewItem = StandardListViewItem::try_from(shstr).unwrap();
+                        
+                        print_type_of(&rowmodel2);
+
+                        let ss: SharedString = SharedString::try_from("Hello").unwrap();
+                        let v: Value = Value::from(ss);
+
+                        let new_rowmodel = Rc::new(VecModel::from(vec![v.clone(),v.clone()]));
+                        let the_model_rc = ModelRc::from(new_rowmodel.clone());
+
+                        rowmodel2 = the_model_rc;
+                        print_type_of(&rowmodel2);
+
+                        
+
+
                     }
 
                     //let some_elem = row1.get(0);
@@ -108,6 +155,7 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
 
                 return Value::from(Value::Void);
             } );
+            */
 
             /*
             let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
