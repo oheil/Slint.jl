@@ -7,16 +7,16 @@ struct SlintValue  { value_s: string, value_i: int, value_f: float }
 
 export component MainWindow inherits Window {
     //in property <[StandardListViewItem]> names-list;
-    private property <[StandardListViewItem]> names-list;
+    in-out property <[[StandardListViewItem]]> names-list;
 
-    in property <[[SlintValue]]> names-list-bridge;
+    //in-out property <[[SlintValue]]> names-list-bridge;
 
-    callback bridge2StandardListViewItem( string,string );
+    //callback bridge2StandardListViewItem( string,string );
     //callback bridge2StandardListViewItem( [[SlintValue]], [StandardListViewItem] );
-    changed names-list-bridge => {
+    //changed names-list-bridge => {
         //bridge2StandardListViewItem(names-list-bridge,names-list);
-        bridge2StandardListViewItem("names-list-bridge","names-list");
-    }
+        //bridge2StandardListViewItem("names-list-bridge","names-list");
+    //}
 
     out property <int> current-item: list.current-item;
     out property <string> name;
@@ -43,7 +43,7 @@ export component MainWindow inherits Window {
             row: 1;
             rowspan: 3;
             colspan: 2;
-            model: root.names-list;
+            model: root.names-list[0];
 
         }
 
@@ -82,13 +82,13 @@ export component MainWindow inherits Window {
                 clicked => { root.updateClicked() }
 
                 text: "Update";
-                enabled: list.current-item != -1 && list.current-item < root.names-list.length;
+                enabled: list.current-item != -1 && list.current-item < root.names-list[0].length;
             }
             Button {
                 clicked => { root.deleteClicked() }
 
                 text: "Delete";
-                enabled: list.current-item != -1 && list.current-item < root.names-list.length;
+                enabled: list.current-item != -1 && list.current-item < root.names-list[0].length;
             }
         }
     }

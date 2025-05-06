@@ -7,9 +7,11 @@ use log::*;
 use env_logger::Env;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
-use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, SharedString };
-use slint::StandardListViewItem;
-use slint::VecModel;
+use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle };
+use slint::{Model, ModelRc, ModelTracker, ModelNotify, SharedString};
+
+use std::cell::RefCell;
+use std::rc::Rc;
 
 mod slint_value;
 pub use crate::slint_value::*;
@@ -72,6 +74,16 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
             // if not called, the instance is dropped and lost.
             let _ = instance.show();
 
+
+
+
+            let model = CellsModel::new(10,1,None);
+            //model.push_row("names-list",[entry3])
+            
+            let _ = instance.set_property("names-list", Value::Model(model.clone().into()));
+
+
+            /*
             let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
                 debug!("bridge2StandardListViewItem");
                 let ss = SharedString::try_from(args[0].clone()).unwrap();
@@ -85,22 +97,24 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
                 let propertyid2: String = ss2.as_str().to_string();
                 
 
-                let instance2 = (&(INSTANCES.lock().unwrap())[0]).upgrade();
                 let ss: SharedString = SharedString::try_from("Hello").unwrap();
-                let v: StandardListViewItem = StandardListViewItem::from(ss);
+                //let v: StandardListViewItem = StandardListViewItem::from(ss);
                 let model2 = Rc::new(VecModel::from(vec![ss.clone(),ss.clone()]));
                 let model3 = Rc::new(
                     model2
                         .clone()
-                        .map(|n| StandardListViewItem::from(slint::format!("{}", n)))
+                        .map(|n| Value::from(slint::format!("{}", n)))
                 );
                         
-                //let r = instance2.unwrap().set_property(&propertyid2,Value::Model(model2.clone().into()));
+                let instance2 = (&(INSTANCES.lock().unwrap())[0]).upgrade();
+                let r = instance2.unwrap().set_property(&propertyid2,Value::Model(model3.clone().into()));
+
     
 
 
                 return Value::from(Value::Void);
             } );
+             */
 
             /*
             let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
@@ -549,9 +563,7 @@ pub unsafe extern "C" fn r_get_value_number(args_ptr: *const c_void, len: i32, i
 // an element of such an array is often called "cell"
 //
 
-use slint::{Model, ModelRc, ModelTracker, ModelNotify};
-use std::cell::RefCell;
-use std::rc::Rc;
+
 use std::collections::HashMap;
 use std::ptr;
 
@@ -805,7 +817,9 @@ pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut c
 //   and register the callback for "update_cell", which is called when a cell value has changed
 //
 #[no_mangle]
-pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols: i32, func: extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue ) {
+pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols: i32, 
+    func: Option<extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue> 
+) {
     debug!("r_set_property_model");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     if ! INSTANCES.lock().unwrap().is_empty() {
@@ -871,8 +885,13 @@ impl Model for CellsModel {
         &self.notify
     }
 }
+extern "C" fn def_cb(_par_ptr: *const c_void, _len: i32) -> JRvalue {
+    debug!("CellsModel.def_cb");
+    JRvalue::new_undefined()
+}
 impl CellsModel {
-    fn new(nrows: usize, ncols: usize, func: extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue) -> Rc<Self> {
+
+    fn new( nrows: usize, ncols: usize, func: Option<extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue> ) -> Rc<Self> {
         debug!("CellsModel.new");
         Rc::new_cyclic(|w| Self {
             rows: RefCell::new((0..nrows)
@@ -977,7 +996,8 @@ impl CellsModel {
             
                     // call Julia callback and receive a JRvalue struct as return value
                     if ! get_skip_callback() {
-                        rv = (r_model.func)(args_ptr,len);
+                        let f = r_model.func.unwrap_or(def_cb);
+                        rv = (f)(args_ptr,len);
                     }
                 }
         
@@ -1047,7 +1067,7 @@ struct RowModel {
     row_elements: RefCell<Vec<SlintValue>>,
     base_model: std::rc::Weak<CellsModel>,
     notify: ModelNotify,
-    func: extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue,
+    func: Option<extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue>,
 }
 impl slint::Model for RowModel {
     type Data = Value; // again, Data must be Value

@@ -47,6 +47,7 @@ StandardListViewItem: From<SlintValue>,
   }
 }
 
+/*
 fn slint_value_list_2_standard_list_view_item_list( sv: &Vec<Vec<SlintValue>>, slvi: &mut Vec<StandardListViewItem> ) {
     debug!("slint_value_list_2_standard_list_view_item_list");
     // convert [[SlintValue]] to [StandardListViewItem]
@@ -57,6 +58,7 @@ fn slint_value_list_2_standard_list_view_item_list( sv: &Vec<Vec<SlintValue>>, s
         slvi.push(slvi_item);
     }
 }
+ */
 
 /*
 pub fn convert<SlintValue, StandardListViewItem>(vector: Vec<SlintValue>) -> Vec<StandardListViewItem>
