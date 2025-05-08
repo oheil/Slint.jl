@@ -3,11 +3,11 @@
 
 import { LineEdit, Button, Slider, StandardListView, GridBox, HorizontalBox } from "std-widgets.slint";
 
-struct SlintValue  { value_s: string, value_i: int, value_f: float }
+struct SlintValue  { value_s: string, value_i: int, value_f: float, value_slvi: StandardListViewItem }
 
 export component MainWindow inherits Window {
     //in property <[StandardListViewItem]> names-list;
-    in-out property <[[StandardListViewItem]]> names-list;
+    in property <[[SlintValue]]> names-list;
 
     //in-out property <[[SlintValue]]> names-list-bridge;
 

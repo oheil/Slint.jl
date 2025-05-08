@@ -9,6 +9,7 @@ use env_logger::Env;
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
 use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle };
 use slint::{Model, ModelRc, ModelTracker, ModelNotify, SharedString};
+use slint::StandardListViewItem;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -63,6 +64,7 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
     //    compiler.build_from_source(code.into(), Default::default()));
     let diagnostics : Vec<_> = result.diagnostics().collect();
     if diagnostics.is_empty() {
+        debug!("r_compile_from_file: diagnostics is empty");
         if let Some(definition) = result.component(start_component) {
             let instance = definition.create().unwrap();
             if ! INSTANCES.lock().unwrap().is_empty() {
@@ -75,9 +77,35 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
             let _ = instance.show();
 
 
+            let model = CellsModel::new(1,1,None);
+            let row_count = model.row_count()+1;
+            let some_row = model.rows.borrow()[0].clone();
+            let mut values: Vec<StandardListViewItem> = Vec::new();
+            let mut sv = StandardListViewItem::default();
+            sv.text = SharedString::from("TEST1");
+            values.push(sv.clone());
+            sv.text = SharedString::from("TEST2");
+            values.push(sv.clone());
 
+            let values2: Vec<SlintValue> = values.vec_into();
+            debug!("{}",values2[0].value_slvi.text);
+            debug!("{}",values2[1].value_slvi.text);
 
-            let model = CellsModel::new(10,1,None);
+            let values3: Vec<StandardListViewItem> = values2.vec_into();
+            debug!("{}",values3[0].text);
+            debug!("{}",values3[1].text);
+
+            let _new_row = Rc::new(RowModel {
+                row: row_count,
+                row_elements: values3.vec_into().into(),
+                base_model: some_row.base_model.clone(),
+                notify: Default::default(),
+                func: some_row.func,
+            });
+
+            model.push_row(_new_row);
+            //model.remove_row(0);
+
             //model.push_row("names-list",[entry3])
             
             let _ = instance.set_property("names-list", Value::Model(model.clone().into()));
@@ -227,6 +255,7 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
 
         }
     } else {
+        debug!("r_compile_from_file: diagnostics is not empty");
         //slint_interpreter::print_diagnostics(&compiler.diagnostics());
         result.print_diagnostics();
     }

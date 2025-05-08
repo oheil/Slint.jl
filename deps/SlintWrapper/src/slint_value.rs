@@ -1,5 +1,5 @@
 use slint::StandardListViewItem;
-use slint_interpreter::SharedString;
+//use slint::SharedString;
 use log::*;
 
 //
@@ -12,7 +12,7 @@ pub struct SlintValue {
     pub value_s: String,
     pub value_i: i32,
     pub value_f: f64,
-    //pub value_slvi: StandardListViewItem,
+    pub value_slvi: StandardListViewItem,
 }
 
 impl Default for SlintValue {
@@ -22,18 +22,40 @@ impl Default for SlintValue {
             value_s: String::from(""),
             value_i: 0,
             value_f: 0.0,
-            //value_slvi: StandardListViewItem::from(""),
+            value_slvi: StandardListViewItem::from(""),
         }
     }
 }
 
+/*
+impl From<SharedString> for SlintValue {
+    fn from(item: SharedString) -> Self {
+        debug!("SlintValue: from -> SharedString");
+        let s = item.to_string();
+        let mut sv = SlintValue::default();
+        sv.value_slvi = s;
+        sv
+    }
+}
+*/
+
 impl From<SlintValue> for StandardListViewItem {
     fn from(item: SlintValue) -> Self {
         debug!("SlintValue: from -> StandardListViewItem");
-        let ss = SharedString::from(item.value_s);
-        StandardListViewItem::from(ss)
+        item.value_slvi
     }
 }
+
+impl From<StandardListViewItem> for SlintValue {
+    fn from(item: StandardListViewItem) -> Self {
+        debug!("StandardListViewItem: from -> SlintValue");
+        let mut sv = SlintValue::default();
+        sv.value_slvi = item;
+        sv
+    }
+}
+
+/*
 pub trait VecInto<StandardListViewItem> {
     fn vec_into(self) -> Vec<StandardListViewItem>;
 }
@@ -46,6 +68,23 @@ StandardListViewItem: From<SlintValue>,
     self.into_iter().map(std::convert::Into::into).collect()
   }
 }
+ */
+
+pub trait VecInto<SlintValue> {
+    fn vec_into(self) -> Vec<SlintValue>;
+}
+impl<StandardListViewItem, SlintValue> VecInto<SlintValue> for Vec<StandardListViewItem>
+where
+StandardListViewItem: Into<SlintValue>,
+{
+  fn vec_into(self) -> Vec<SlintValue> {
+    debug!("StandardListViewItem: Vec<StandardListViewItem> -> Vec<SlintValue>");
+    self.into_iter().map(std::convert::Into::into).collect()
+  }
+}
+
+
+
 
 /*
 fn slint_value_list_2_standard_list_view_item_list( sv: &Vec<Vec<SlintValue>>, slvi: &mut Vec<StandardListViewItem> ) {
