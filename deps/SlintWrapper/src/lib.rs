@@ -10,6 +10,7 @@ use env_logger::Env;
 use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle };
 use slint::{Model, ModelRc, ModelTracker, ModelNotify, SharedString};
 use slint::StandardListViewItem;
+use slint::VecModel;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -107,42 +108,59 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
             //model.remove_row(0);
 
             //model.push_row("names-list",[entry3])
+
+            //let slvi_list = ModelRc::new(VecModel::from(vec![sv.clone(),sv.clone()]));
             
-            let _ = instance.set_property("names-list", Value::Model(model.clone().into()));
+            //let _ = instance.set_property("names-list", slvi_list.into());
 
 
-            /*
+            
             let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
                 debug!("bridge2StandardListViewItem");
                 let ss = SharedString::try_from(args[0].clone()).unwrap();
                 let propertyid: String = ss.as_str().to_string();
                 
-                let model: Rc<CellsModel> = model_get(&propertyid);
-                debug!("bridge2StandardListViewItem:model.row_count(): {}",model.row_count());
-                print_type_of(&model);
+                let source_model: Rc<CellsModel> = model_get(&propertyid);
+                debug!("bridge2StandardListViewItem:source_model.row_count(): {}",source_model.row_count());
+                print_type_of(&source_model);
 
                 let ss2 = SharedString::try_from(args[1].clone()).unwrap();
                 let propertyid2: String = ss2.as_str().to_string();
-                
 
-                let ss: SharedString = SharedString::try_from("Hello").unwrap();
+        
+                //let ss: SharedString = SharedString::try_from("Hello").unwrap();
                 //let v: StandardListViewItem = StandardListViewItem::from(ss);
-                let model2 = Rc::new(VecModel::from(vec![ss.clone(),ss.clone()]));
-                let model3 = Rc::new(
-                    model2
-                        .clone()
-                        .map(|n| Value::from(slint::format!("{}", n)))
-                );
-                        
-                let instance2 = (&(INSTANCES.lock().unwrap())[0]).upgrade();
-                let r = instance2.unwrap().set_property(&propertyid2,Value::Model(model3.clone().into()));
+                //let model2 = ModelRc::new(VecModel::from(vec![ss.clone(),ss.clone()]));
 
+                //let sv: StandardListViewItem = StandardListViewItem::try_from(ss).unwrap();
+                //let slvi_list: Vec<StandardListViewItem> = vec![sv.clone(),sv.clone()];
+
+                let mut slvi_list: Vec<StandardListViewItem> = vec![];
+                for rows in source_model.rows.borrow().iter() {
+                    for cell in rows.row_elements.borrow().iter() {
+                        let ss = SharedString::try_from(cell.value_s.clone()).unwrap();
+                        let sv: StandardListViewItem = StandardListViewItem::try_from(ss).unwrap();
+                        slvi_list.push(sv);
+                    }
+                }
+
+                let new_model = ModelRc::new(VecModel::from(slvi_list));
+                let instance2 = (&(INSTANCES.lock().unwrap())[0]).upgrade();
+
+                //let slvi_list = ModelRc::new(VecModel::from(vec![sv.clone(),sv.clone()]));
+                //let _ = instance2.unwrap().set_property("names-list", slvi_list.into());
+
+                let r = instance2.unwrap().set_property(&propertyid2, new_model.into());
+                match r {
+                    Ok(_) => (),
+                    Err(error) => warn!("bridge2StandardListViewItem:setting model for property <{}> failed: {:?}", propertyid2, error),
+                };
     
 
 
                 return Value::from(Value::Void);
             } );
-             */
+            
 
             /*
             let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
