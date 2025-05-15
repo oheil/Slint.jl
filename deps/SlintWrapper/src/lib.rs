@@ -136,11 +136,13 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
                 //let slvi_list: Vec<StandardListViewItem> = vec![sv.clone(),sv.clone()];
 
                 let mut slvi_list: Vec<StandardListViewItem> = vec![];
-                for rows in source_model.rows.borrow().iter() {
-                    for cell in rows.row_elements.borrow().iter() {
-                        let ss = SharedString::try_from(cell.value_s.clone()).unwrap();
-                        let sv: StandardListViewItem = StandardListViewItem::try_from(ss).unwrap();
-                        slvi_list.push(sv);
+                for (rowindex, row) in source_model.rows.borrow().iter().enumerate() {
+                    if rowindex > 0 {
+                        for (_cellindex, cell) in row.row_elements.borrow().iter().enumerate() {
+                            let ss = SharedString::try_from(cell.value_s.clone()).unwrap();
+                            let sv: StandardListViewItem = StandardListViewItem::try_from(ss).unwrap();
+                            slvi_list.push(sv);
+                        }
                     }
                 }
 
