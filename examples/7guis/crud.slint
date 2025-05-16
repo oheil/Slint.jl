@@ -3,7 +3,7 @@
 
 import { LineEdit, Button, Slider, StandardListView, GridBox, HorizontalBox } from "std-widgets.slint";
 
-struct SlintValue  { value_s: string, value_i: int, value_f: float, value_slvi: StandardListViewItem }
+struct SlintValue  { value_s: string, value_i: int, value_f: float }
 
 export component MainWindow inherits Window {
     in property <[StandardListViewItem]> names-list;

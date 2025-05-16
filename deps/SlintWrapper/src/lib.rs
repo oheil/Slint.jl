@@ -78,6 +78,7 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
             let _ = instance.show();
 
 
+            /*
             let model = CellsModel::new(1,1,None);
             let row_count = model.row_count()+1;
             let some_row = model.rows.borrow()[0].clone();
@@ -112,7 +113,8 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
             //let slvi_list = ModelRc::new(VecModel::from(vec![sv.clone(),sv.clone()]));
             
             //let _ = instance.set_property("names-list", slvi_list.into());
-
+            
+            */
 
             
             let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
