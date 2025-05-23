@@ -29,7 +29,7 @@ fn print_type_of<T>(_: &T) {
 }
 
 // do anything needed at startup
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn r_init() {
     debug!("r_init");
     let env = Env::default()
@@ -41,8 +41,8 @@ pub extern "C" fn r_init() {
 // compile a .slint file, create the single instance
 // but do not run it yet, to be able to set callbacks
 //
-#[no_mangle]
-pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: *const c_char) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: *const c_char) { unsafe {
     debug!("r_compile_from_file");
     let cstr = CStr::from_ptr(slint_file);
     let filename: String = cstr.to_string_lossy().into_owned();
@@ -281,14 +281,14 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
         //slint_interpreter::print_diagnostics(&compiler.diagnostics());
         result.print_diagnostics();
     }
-}
+}}
 
 //
 // compile from string with slint code, create the single instance
 // but do not run it yet, to be able to set callbacks
 //
-#[no_mangle]
-pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_comp: *const c_char) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_comp: *const c_char) { unsafe {
     debug!("r_compile_from_string");
     let cstr = CStr::from_ptr(slint_string);
     let slint_code: String = cstr.to_string_lossy().into_owned();
@@ -316,14 +316,14 @@ pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slin
         //slint_interpreter::print_diagnostics(&compiler.diagnostics());
         result.print_diagnostics();
     }
-}
+}}
 
 //
 // JRvalue is used to receive return value from Julia callbacks
 //   and as a return value to calls from Julia (e.g. r_get_cell_value) if helpfull
 //
 const JRMAGIC: i32 = 123456;
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn r_get_magic() -> i32 {
     debug!("r_get_magic");
     JRMAGIC
@@ -419,8 +419,8 @@ impl From<JRvalue> for Value {
 //   id is "validate-date" in this case
 //   func is a C-callable function pointer
 //
-#[no_mangle]
-pub unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue ) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue ) { unsafe {
     debug!("r_set_callback");
     let funcid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     if ! INSTANCES.lock().unwrap().is_empty() {
@@ -493,9 +493,9 @@ pub unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(p
     } else {
         warn!("r_set_callback:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
     }
-}
+}}
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn r_run() {
     debug!("r_run");
     if ! INSTANCES.lock().unwrap().is_empty() {
@@ -518,8 +518,8 @@ pub extern "C" fn r_run() {
 // len is the count of arguments in the list, this is needed to reconstruct the list from the ptr
 // return the type as a string of the argument at index
 //
-#[no_mangle]
-pub unsafe extern "C" fn r_get_value_type(args_ptr: *const c_void, len: i32, index: i32) -> *mut c_char {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_get_value_type(args_ptr: *const c_void, len: i32, index: i32) -> *mut c_char { unsafe {
     debug!("r_get_value_type");
     debug!("r_get_value_type:void ptr adress to the list of arguments is: {:p}",args_ptr);
     debug!("r_get_value_type:number of arguments in this list: {}",len);
@@ -545,15 +545,15 @@ pub unsafe extern "C" fn r_get_value_type(args_ptr: *const c_void, len: i32, ind
     // return an empty value type
     let cstring = CString::new("").unwrap();
     return cstring.into_raw();
-}
+}}
 
 //
 // args_ptr must be the ptr to the list of arguments, &[Value], sent to the Julia callback from r_set_callback (see above)
 // len is the count of arguments in the list, this is needed to reconstruct the list from the ptr
 // return the value of the argument at index as a string
 //
-#[no_mangle]
-pub unsafe extern "C" fn r_get_value_string(args_ptr: *const c_void, len: i32, index: i32) -> *mut c_char  {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_get_value_string(args_ptr: *const c_void, len: i32, index: i32) -> *mut c_char  { unsafe {
     debug!("r_get_value_string");
     debug!("r_get_value_string:void ptr adress to the list of arguments is: {:p}",args_ptr);
     debug!("r_get_value_string:number of arguments in this list: {}",len);
@@ -576,15 +576,15 @@ pub unsafe extern "C" fn r_get_value_string(args_ptr: *const c_void, len: i32, i
     // return an empty value
     let cstring = CString::new("").unwrap();
     return cstring.into_raw();
-}
+}}
 
 //
 // args_ptr must be the ptr to the list of arguments, &[Value], sent to the Julia callback from r_set_callback (see above)
 // len is the count of arguments in the list, this is needed to reconstruct the list from the ptr
 // return the value of the argument at index as a string
 //
-#[no_mangle]
-pub unsafe extern "C" fn r_get_value_number(args_ptr: *const c_void, len: i32, index: i32, nan: f64) -> f64  {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_get_value_number(args_ptr: *const c_void, len: i32, index: i32, nan: f64) -> f64  { unsafe {
     debug!("r_get_value_number");
     debug!("r_get_value_number:void ptr adress to the list of arguments is: {:p}",args_ptr);
     debug!("r_get_value_number:number of arguments in this list: {}",len);
@@ -603,7 +603,7 @@ pub unsafe extern "C" fn r_get_value_number(args_ptr: *const c_void, len: i32, i
     }
     // return NaN provided from caller
     return nan;
-}
+}}
 
 //
 // API to models for arrays/matrices starts here
@@ -622,20 +622,20 @@ use std::ptr;
 static mut MODELS: Lazy<Mutex<HashMap<String,Rc<CellsModel>>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
 });
-unsafe fn model_contains(propertyid: &String) -> bool {
+unsafe fn model_contains(propertyid: &String) -> bool { unsafe {
     //let model = MODELS.lock().unwrap();
     //return (*model).contains_key(&propertyid);
     let mod_ptr = ptr::addr_of_mut!(MODELS);
     return (*mod_ptr).lock().unwrap().contains_key(propertyid);
-}
-unsafe fn model_get(propertyid: &String) -> Rc<CellsModel> {
+}}
+unsafe fn model_get(propertyid: &String) -> Rc<CellsModel> { unsafe {
     let mod_ptr = ptr::addr_of_mut!(MODELS);
     return (*mod_ptr).lock().unwrap().get(propertyid).unwrap().clone();
-}
-unsafe fn model_insert(propertyid: String, model: Rc<CellsModel>) {
+}}
+unsafe fn model_insert(propertyid: String, model: Rc<CellsModel>) { unsafe {
     let mod_ptr = ptr::addr_of_mut!(MODELS);
     (*mod_ptr).lock().unwrap().insert(propertyid,model);
-}
+}}
 
 // sometimes the update_cell callback should not be called, e.g. if changing a cell during update_cell
 static SKIP_CALLBACK: Lazy<Mutex<bool>> = Lazy::new(|| {
@@ -653,8 +653,8 @@ unsafe fn get_skip_callback() -> bool {
 //
 //
 //
-#[no_mangle]
-pub unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) { unsafe {
     debug!("r_pop_row");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
@@ -666,13 +666,13 @@ pub unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) {
         let model: Rc<CellsModel> = model_get(&propertyid);
         model.remove_row(index);
     }
-}
+}}
 
 //
 //
 //
-#[no_mangle]
-pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalue, len: usize) {
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalue, len: usize) { unsafe {
     debug!("r_push_row");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
@@ -750,14 +750,14 @@ pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalu
 
         //debug!("{}",model.row_count());
     }
-}
+}}
 
 //
 // set the value of a property
 //   the call_back is not called during this explicit update, as the caller already should know, that he updates the property
 // 
-#[no_mangle]
-pub unsafe extern "C" fn r_set_value(id: *const c_char, new_value: JRvalue) {    
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_set_value(id: *const c_char, new_value: JRvalue) { unsafe {    
     debug!("r_set_value");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
 
@@ -774,15 +774,15 @@ pub unsafe extern "C" fn r_set_value(id: *const c_char, new_value: JRvalue) {
     } else {
         warn!("r_set_value:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
     }
-}
+}}
 
 //
 // set the string value of a cell
 //   the call_back is not called during this explicit update, as the caller already should know, that he updates the cell
 // 
-#[no_mangle]
+#[unsafe(no_mangle)]
 //pub unsafe extern "C" fn r_set_cell_value(id: *const c_char, mut row: i32, mut col: i32, new_value: *const c_char) {
-pub unsafe extern "C" fn r_set_cell_value(id: *const c_char, mut row: i32, mut col: i32, new_value: JRvalue) {    
+pub unsafe extern "C" fn r_set_cell_value(id: *const c_char, mut row: i32, mut col: i32, new_value: JRvalue) { unsafe {    
     debug!("r_set_cell_value");
     if row == 0 {
         warn!("r_set_cell_value: row index is <{}>, please provide 1-based indices as in Julia",row);
@@ -808,14 +808,14 @@ pub unsafe extern "C" fn r_set_cell_value(id: *const c_char, mut row: i32, mut c
         model.update_cell(row as usize, col as usize, Some(new_value));
         set_skip_callback(false);
     }
-}
+}}
 
 //
 // get the value of a cell as a string wrapped in a JRvalue struct
 //
-#[no_mangle]
+#[unsafe(no_mangle)]
 //pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, row: i32, col: i32) -> *mut c_char  {
-pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut col: i32) -> JRvalue {
+pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut col: i32) -> JRvalue { unsafe {
     debug!("r_get_cell_value");
     if row == 0 {
         warn!("r_get_cell_value: row index is <{}>, please provide 1-based indices as in Julia",row);
@@ -861,16 +861,16 @@ pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut c
     debug!("r_get_cell_value:return value string: {}",cs);
 
     return rv;
-}
+}}
 
 //
 // set the model for a slint vector property (id is the slint property id as string)
 //   and register the callback for "update_cell", which is called when a cell value has changed
 //
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols: i32, 
     func: Option<extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue> 
-) {
+) { unsafe {
     debug!("r_set_property_model");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     if ! INSTANCES.lock().unwrap().is_empty() {
@@ -905,7 +905,7 @@ pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols
     } else {
         warn!("r_set_property_model:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
     }
-}
+}}
 
 //
 // below the generic model for every slint 2-dimensional vector property
