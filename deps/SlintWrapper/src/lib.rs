@@ -77,204 +77,7 @@ pub unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_co
             // if not called, the instance is dropped and lost.
             let _ = instance.show();
 
-
-            /*
-            let model = CellsModel::new(1,1,None);
-            let row_count = model.row_count()+1;
-            let some_row = model.rows.borrow()[0].clone();
-            let mut values: Vec<StandardListViewItem> = Vec::new();
-            let mut sv = StandardListViewItem::default();
-            sv.text = SharedString::from("TEST1");
-            values.push(sv.clone());
-            sv.text = SharedString::from("TEST2");
-            values.push(sv.clone());
-
-            let values2: Vec<SlintValue> = values.vec_into();
-            debug!("{}",values2[0].value_slvi.text);
-            debug!("{}",values2[1].value_slvi.text);
-
-            let values3: Vec<StandardListViewItem> = values2.vec_into();
-            debug!("{}",values3[0].text);
-            debug!("{}",values3[1].text);
-
-            let _new_row = Rc::new(RowModel {
-                row: row_count,
-                row_elements: values3.vec_into().into(),
-                base_model: some_row.base_model.clone(),
-                notify: Default::default(),
-                func: some_row.func,
-            });
-
-            model.push_row(_new_row);
-            //model.remove_row(0);
-
-            //model.push_row("names-list",[entry3])
-
-            //let slvi_list = ModelRc::new(VecModel::from(vec![sv.clone(),sv.clone()]));
-            
-            //let _ = instance.set_property("names-list", slvi_list.into());
-            
-            */
-
-            
-            let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
-                debug!("bridge2StandardListViewItem");
-                let ss = SharedString::try_from(args[0].clone()).unwrap();
-                let propertyid: String = ss.as_str().to_string();
-                
-                let source_model: Rc<CellsModel> = model_get(&propertyid);
-                debug!("bridge2StandardListViewItem:source_model.row_count(): {}",source_model.row_count());
-                print_type_of(&source_model);
-
-                let ss2 = SharedString::try_from(args[1].clone()).unwrap();
-                let propertyid2: String = ss2.as_str().to_string();
-
-        
-                //let ss: SharedString = SharedString::try_from("Hello").unwrap();
-                //let v: StandardListViewItem = StandardListViewItem::from(ss);
-                //let model2 = ModelRc::new(VecModel::from(vec![ss.clone(),ss.clone()]));
-
-                //let sv: StandardListViewItem = StandardListViewItem::try_from(ss).unwrap();
-                //let slvi_list: Vec<StandardListViewItem> = vec![sv.clone(),sv.clone()];
-
-                let mut slvi_list: Vec<StandardListViewItem> = vec![];
-                for (rowindex, row) in source_model.rows.borrow().iter().enumerate() {
-                    if rowindex > 0 {
-                        for (_cellindex, cell) in row.row_elements.borrow().iter().enumerate() {
-                            let ss = SharedString::try_from(cell.value_s.clone()).unwrap();
-                            let sv: StandardListViewItem = StandardListViewItem::try_from(ss).unwrap();
-                            slvi_list.push(sv);
-                        }
-                    }
-                }
-
-                let new_model = ModelRc::new(VecModel::from(slvi_list));
-                let instance2 = (&(INSTANCES.lock().unwrap())[0]).upgrade();
-
-                //let slvi_list = ModelRc::new(VecModel::from(vec![sv.clone(),sv.clone()]));
-                //let _ = instance2.unwrap().set_property("names-list", slvi_list.into());
-
-                let r = instance2.unwrap().set_property(&propertyid2, new_model.into());
-                match r {
-                    Ok(_) => (),
-                    Err(error) => warn!("bridge2StandardListViewItem:setting model for property <{}> failed: {:?}", propertyid2, error),
-                };
-    
-
-
-                return Value::from(Value::Void);
-            } );
-            
-
-            /*
-            let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
-                debug!("bridge2StandardListViewItem");
-
-                //method1
-                let mut rowmodel2: ModelRc<Value> = ModelRc::try_from(args[1].clone()).unwrap();
-                debug!("bridge2StandardListViewItem:rowmodel2.row_count(): {}",rowmodel2.row_count());
-
-                //method2
-                if let slint_interpreter::Value::Model(rowmodel) = &args[0] {
-                    debug!("bridge2StandardListViewItem:rowmodel.row_count(): {}",rowmodel.row_count());
-                    print_type_of(rowmodel);
-
-                    let row1 = rowmodel.row_data(1).unwrap();
-                    print_type_of(&row1);
-                    
-                    if let slint_interpreter::Value::Model(cellmodel) = row1 {
-                        debug!("bridge2StandardListViewItem:cellmodel.row_count(): {}",cellmodel.row_count());
-
-                        let el1 = cellmodel.row_data(0).unwrap();
-                        print_type_of(&el1);
-
-                        let stru = slint_interpreter::Struct::try_from(el1).unwrap();
-                        let val = stru.get_field("value_s".into()).unwrap().clone();
-                        let shstr = slint_interpreter::SharedString::try_from(val).unwrap();
-
-                        debug!("bridge2StandardListViewItem: el1 {:#?}",shstr);
-
-                        let slsvi: StandardListViewItem = StandardListViewItem::try_from(shstr).unwrap();
-                        
-                        print_type_of(&rowmodel2);
-
-                        let ss: SharedString = SharedString::try_from("Hello").unwrap();
-                        let v: Value = Value::from(ss);
-
-                        let new_rowmodel = Rc::new(VecModel::from(vec![v.clone(),v.clone()]));
-                        let the_model_rc = ModelRc::from(new_rowmodel.clone());
-
-                        rowmodel2 = the_model_rc;
-                        print_type_of(&rowmodel2);
-
-                        
-
-
-                    }
-
-                    //let some_elem = row1.get(0);
-                    //debug!("bridge2StandardListViewItem: some_row {:#?}",some_elem.unwrap().value_s);
-                }
-               
-
-                return Value::from(Value::Void);
-            } );
-            */
-
-            /*
-            let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
-                debug!("bridge2StandardListViewItem");
-                // debug list of arguments
-                debug!("bridge2StandardListViewItem:slint calls bridge2StandardListViewItem with {} arguments", args.len());
-                for arg in args {
-                    print_type_of(arg);
-                    let vt = arg.value_type();
-                    debug!("bridge2StandardListViewItem:value type is: {:#?}", vt);
-                }
-                // debug end
-
-                // create a void ptr to list of arguments which is send to Julias callback.
-                let args_ptr: *const c_void = args as *const [Value] as *const c_void;
-                // get number of arguments. This is send to Julia callback, too.
-                let len: i32 = args.len().try_into().unwrap();
-
-                // debug void ptr
-                debug!("bridge2StandardListViewItem:void ptr adress is: {:p}", args_ptr);
-                let args2: &[Value] = std::slice::from_raw_parts(args_ptr as *const Value, args.len());
-                for arg in args2 {
-                    print_type_of(arg);
-                    let vt = arg.value_type();
-                    debug!("bridge2StandardListViewItem:value type is: {:#?}", vt);
-                }
-
-                let sv = &args2[0];
-                
-                //let model: Rc<CellsModel> = sv.clone().try_into().unwrap();
-                let propertyid: String = String::from("names-list-bridge");
-                let model: Rc<CellsModel> = model_get(&propertyid);
-                let some_row = model.rows.borrow()[1].clone();
-                let binding = some_row.row_elements.borrow();
-                let some_elem = binding.get(0);
-                debug!("bridge2StandardListViewItem: some_row {:#?}",some_elem.unwrap().value_s);
-                let some_elem2 = binding.get(1);
-                debug!("bridge2StandardListViewItem: some_row {:#?}",some_elem2.unwrap().value_s);
-                let some_row2 = model.rows.borrow()[2].clone();
-                let binding2 = some_row2.row_elements.borrow();
-                let some_elem3 = binding2.get(0);
-                debug!("bridge2StandardListViewItem: some_row {:#?}",some_elem3.unwrap().value_s);
-
-
-                return Value::from(Value::Void);
-            } );
-            */
-
-
-
-
-
-            
-
-
+            register_bridge_2_standard_list_view_item(&instance);
         }
     } else {
         debug!("r_compile_from_file: diagnostics is not empty");
@@ -311,12 +114,72 @@ pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slin
             // shows the window on the screen and maintains an extra strong reference
             // if not called, the instance is dropped and lost
             let _ = instance.show();
+
+            register_bridge_2_standard_list_view_item(&instance);
         }
     } else {
         //slint_interpreter::print_diagnostics(&compiler.diagnostics());
         result.print_diagnostics();
     }
 }}
+
+// register the callback for slint components which use StandardListViewItem
+#[unsafe(no_mangle)]
+pub unsafe fn register_bridge_2_standard_list_view_item(instance: &ComponentInstance) {
+    debug!("register_bridge_2_standard_list_view_item");
+    // register the callback for slint components which use StandardListViewItem
+    // example:
+    //   Original slint code:
+    //      ...
+    //      in property <[StandardListViewItem]> names-list;
+    //      ...
+    //   New slint code:
+    //      ...
+    //      in property <[StandardListViewItem]> names-list;
+    //
+    //      in property <[[SlintValue]]> names-list-bridge;
+    //      callback bridge2StandardListViewItem( string, string );
+    //      changed names-list-bridge => {
+    //          bridge2StandardListViewItem("names-list-bridge","names-list");
+    //      }
+    //      ...
+    // If you now fill the property "names-list-bridge", all items are converted to
+    // StandardListViewItem and set to the property "names-list".
+    let _ = instance.set_callback("bridge2StandardListViewItem", move |args: &[Value]| -> Value {
+        debug!("bridge2StandardListViewItem");
+        let ss = SharedString::try_from(args[0].clone()).unwrap();
+        let propertyid: String = ss.as_str().to_string();
+        
+        let source_model: Rc<CellsModel> = model_get(&propertyid);
+        debug!("bridge2StandardListViewItem:source_model.row_count(): {}",source_model.row_count());
+        print_type_of(&source_model);
+
+        let ss2 = SharedString::try_from(args[1].clone()).unwrap();
+        let propertyid2: String = ss2.as_str().to_string();
+
+        let mut slvi_list: Vec<StandardListViewItem> = vec![];
+        for (rowindex, row) in source_model.rows.borrow().iter().enumerate() {
+            if rowindex > 0 {
+                for (_cellindex, cell) in row.row_elements.borrow().iter().enumerate() {
+                    let ss = SharedString::try_from(cell.value_s.clone()).unwrap();
+                    let sv: StandardListViewItem = StandardListViewItem::try_from(ss).unwrap();
+                    slvi_list.push(sv);
+                }
+            }
+        }
+
+        let new_model = ModelRc::new(VecModel::from(slvi_list));
+        let instance2 = (&(INSTANCES.lock().unwrap())[0]).upgrade();
+
+        let r = instance2.unwrap().set_property(&propertyid2, new_model.into());
+        match r {
+            Ok(_) => (),
+            Err(error) => warn!("bridge2StandardListViewItem:setting model for property <{}> failed: {:?}", propertyid2, error),
+        };
+
+        return Value::from(Value::Void);
+    } );
+}
 
 //
 // JRvalue is used to receive return value from Julia callbacks
