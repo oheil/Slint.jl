@@ -157,6 +157,15 @@ function compile_from_string(slint_string::AbstractString, start_comp::AbstractS
 end
 
 #
+# clear/remove all rows from model
+#  
+function clear_rows(id)
+    check_init()
+    r_clear_rows(id)
+    nothing
+end
+
+#
 # remove a row at index from model
 #  
 function remove_row(id, index)

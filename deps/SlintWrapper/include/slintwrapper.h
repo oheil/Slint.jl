@@ -31,6 +31,8 @@ char *r_get_value_string(const void *args_ptr, int32_t len, int32_t index);
 
 double r_get_value_number(const void *args_ptr, int32_t len, int32_t index, double nan);
 
+void r_clear_rows(const char *id);
+
 void r_remove_row(const char *id, uintptr_t index);
 
 void r_push_row(const char *id, const struct JRvalue *new_values, uintptr_t len);

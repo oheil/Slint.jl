@@ -2,6 +2,7 @@ use std::sync::Mutex;
 use once_cell::sync::Lazy;
 use std::ffi::{CStr, CString, c_void, c_char};
 use std::convert::From;
+use std::collections::HashMap;
 
 use log::*;
 use env_logger::Env;
@@ -22,6 +23,74 @@ pub use crate::slint_value::*;
 static INSTANCES: Lazy<Mutex<Vec<Weak<ComponentInstance>>>> = Lazy::new(|| {
     Mutex::new(Vec::new())
 });
+
+// all bridges are stored here
+static mut BRIDGES: Lazy<Mutex<HashMap<String,Vec<String>>>> = Lazy::new(|| {
+    Mutex::new(HashMap::new())
+});
+unsafe fn bridges_contains(propertyid: &String) -> bool { unsafe {
+    let bridge_ptr = ptr::addr_of_mut!(BRIDGES);
+    return (*bridge_ptr).lock().unwrap().contains_key(propertyid);
+}}
+unsafe fn bridges_get(propertyid: &String) -> Vec<String> { unsafe {
+    let bridge_ptr = ptr::addr_of_mut!(BRIDGES);
+    return (*bridge_ptr).lock().unwrap().get(propertyid).unwrap().clone();
+}}
+unsafe fn bridges_insert(propertyid: String, target: String) { unsafe {
+    let bridge_ptr = ptr::addr_of_mut!(BRIDGES);
+    if bridges_contains(&propertyid) {
+        if ! (*bridge_ptr).lock().unwrap().get_mut(&propertyid).unwrap().contains(&target) {
+            (*bridge_ptr).lock().unwrap().get_mut(&propertyid).unwrap().push(target);
+        }
+    } else {
+        (*bridge_ptr).lock().unwrap().insert(propertyid, vec![target]);
+    }
+}}
+unsafe fn bridges_move_values(propertyid: String, propertyid2: String) {
+    unsafe {
+        debug!("bridges_move_values: moving values from {} to {}", propertyid, propertyid2);
+
+        let source_model: Rc<CellsModel> = model_get(&propertyid);
+        debug!("bridge2StandardListViewItem:source_model.row_count(): {}",source_model.row_count());
+        print_type_of(&source_model);
+
+        let mut slvi_list: Vec<StandardListViewItem> = vec![];
+        for (rowindex, row) in source_model.rows.borrow().iter().enumerate() {
+            if rowindex > 0 {
+                for (_cellindex, cell) in row.row_elements.borrow().iter().enumerate() {
+                    let ss = SharedString::try_from(cell.value_s.clone()).unwrap();
+                    let sv: StandardListViewItem = StandardListViewItem::try_from(ss).unwrap();
+                    slvi_list.push(sv);
+                }
+            }
+        }
+
+        let new_model = ModelRc::new(VecModel::from(slvi_list));
+        let instance2 = (&(INSTANCES.lock().unwrap())[0]).upgrade();
+
+        let r = instance2.unwrap().set_property(&propertyid2, new_model.into());
+        match r {
+            Ok(_) => {
+                debug!("bridge2StandardListViewItem:remember bridge from <{}> to <{}>", propertyid, propertyid2);
+                bridges_insert(propertyid.clone(), propertyid2.clone());
+            },
+            Err(error) => warn!("bridge2StandardListViewItem:setting model for property <{}> failed: {:?}", propertyid2, error),
+        };
+    }
+}
+unsafe fn bridges_changed(propertyid: String) {
+    unsafe {
+        debug!("bridges_changed: propertyid: {}", propertyid);
+        if bridges_contains(&propertyid) {
+            let targets = bridges_get(&propertyid);
+            debug!("bridges_changed: targets: {:?}", targets);
+            for target in targets {
+                debug!("bridges_changed: moving values to target: {}", target);
+                bridges_move_values(propertyid.clone(), target.clone());
+            }
+        }
+    }
+}
 
 // debug output
 fn print_type_of<T>(_: &T) {
@@ -124,7 +193,6 @@ pub unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slin
 }}
 
 // register the callback for slint components which use StandardListViewItem
-#[unsafe(no_mangle)]
 pub unsafe fn register_bridge_2_standard_list_view_item(instance: &ComponentInstance) {
     debug!("register_bridge_2_standard_list_view_item");
     // register the callback for slint components which use StandardListViewItem
@@ -150,32 +218,10 @@ pub unsafe fn register_bridge_2_standard_list_view_item(instance: &ComponentInst
         let ss = SharedString::try_from(args[0].clone()).unwrap();
         let propertyid: String = ss.as_str().to_string();
         
-        let source_model: Rc<CellsModel> = model_get(&propertyid);
-        debug!("bridge2StandardListViewItem:source_model.row_count(): {}",source_model.row_count());
-        print_type_of(&source_model);
-
         let ss2 = SharedString::try_from(args[1].clone()).unwrap();
         let propertyid2: String = ss2.as_str().to_string();
 
-        let mut slvi_list: Vec<StandardListViewItem> = vec![];
-        for (rowindex, row) in source_model.rows.borrow().iter().enumerate() {
-            if rowindex > 0 {
-                for (_cellindex, cell) in row.row_elements.borrow().iter().enumerate() {
-                    let ss = SharedString::try_from(cell.value_s.clone()).unwrap();
-                    let sv: StandardListViewItem = StandardListViewItem::try_from(ss).unwrap();
-                    slvi_list.push(sv);
-                }
-            }
-        }
-
-        let new_model = ModelRc::new(VecModel::from(slvi_list));
-        let instance2 = (&(INSTANCES.lock().unwrap())[0]).upgrade();
-
-        let r = instance2.unwrap().set_property(&propertyid2, new_model.into());
-        match r {
-            Ok(_) => (),
-            Err(error) => warn!("bridge2StandardListViewItem:setting model for property <{}> failed: {:?}", propertyid2, error),
-        };
+        bridges_move_values(propertyid, propertyid2);
 
         return Value::from(Value::Void);
     } );
@@ -494,8 +540,6 @@ pub unsafe extern "C" fn r_get_value_number(args_ptr: *const c_void, len: i32, i
 // an element of such an array is often called "cell"
 //
 
-
-use std::collections::HashMap;
 use std::ptr;
 
 // all models are stored here
@@ -522,13 +566,36 @@ static SKIP_CALLBACK: Lazy<Mutex<bool>> = Lazy::new(|| {
     Mutex::new(false)
 });
 unsafe fn set_skip_callback(b: bool) {
+    debug!("set_skip_callback: {}", b);
     let mut skip = SKIP_CALLBACK.lock().unwrap();
     *skip = b;
 }
 unsafe fn get_skip_callback() -> bool {
+    debug!("get_skip_callback");
     let skip = SKIP_CALLBACK.lock().unwrap();
     *skip
 }
+
+//
+//
+//
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_clear_rows(id: *const c_char) { unsafe {
+    debug!("r_clear_rows");
+    let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
+
+    if ! model_contains(&propertyid) {
+        warn!("r_clear_rows:no model available for property id <{}>",propertyid);
+    } else {
+        let model: Rc<CellsModel> = model_get(&propertyid);
+        debug!("r_clear_rows: removing from index {} to {}",1,model.row_count());
+        for _ in 1..model.row_count() {
+            // clear all rows, but keep the first row as a template
+            model.remove_row(1);
+        }   
+        bridges_changed(propertyid);
+    }
+}}
 
 //
 //
@@ -545,6 +612,7 @@ pub unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) { unsafe 
         //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
         let model: Rc<CellsModel> = model_get(&propertyid);
         model.remove_row(index);
+        bridges_changed(propertyid);
     }
 }}
 
@@ -552,85 +620,80 @@ pub unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) { unsafe 
 //
 //
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalue, len: usize) { unsafe {
-    debug!("r_push_row");
-    let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
-    //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
-    if ! model_contains(&propertyid) {
-        warn!("r_push_row:no model available for property id <{}>",propertyid);
-    } else {
-        debug!("r_push_row: new_values size: {}",len);
-        //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
-        let model: Rc<CellsModel> = model_get(&propertyid);
-        let row_count = model.row_count() + 1;
-        let some_row = model.rows.borrow()[0].clone();
+pub unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalue, len: usize) {
+    unsafe {
+        debug!("r_push_row");
+        let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
+        //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+        if ! model_contains(&propertyid) {
+            warn!("r_push_row:no model available for property id <{}>",propertyid);
+        } else {
+            debug!("r_push_row: new_values size: {}",len);
+            //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+            let model: Rc<CellsModel> = model_get(&propertyid);
+            let row_count = model.row_count() + 1;
+            let some_row = model.rows.borrow()[0].clone();
 
-        let mut values: Vec<SlintValue> = Vec::new();
-        let new_values_vec = std::slice::from_raw_parts(new_values as *const JRvalue, len);
+            let mut values: Vec<SlintValue> = Vec::new();
+            let new_values_vec = std::slice::from_raw_parts(new_values as *const JRvalue, len);
 
-        for index in 0..len {
-            let value: JRvalue = new_values_vec[index];
-            debug!("r_push_row: value.magic is {}",value.magic);
-            if value.magic == JRMAGIC {
-                let rv_cstr = CStr::from_ptr(value.rtype);
-                let rv_type: String = rv_cstr.to_string_lossy().into_owned();
-                debug!("r_push_row: rv_type is {}",rv_type);
-                if rv_type == "Bool" {
-                    let mut sv = SlintValue::default();
-                    sv.value_i = value.int_value;
-                    debug!("r_push_row: sv.value_i is {}",sv.value_i);
-                    values.push(sv);
-                }        
-                if rv_type == "Integer" {
-                    let mut sv = SlintValue::default();
-                    sv.value_i = value.int_value;
-                    debug!("r_push_row: sv.value_i is {}",sv.value_i);
-                    values.push(sv);
-                }        
-                if rv_type == "Float" {
-                    let mut sv = SlintValue::default();
-                    sv.value_f = value.float_value;
-                    debug!("r_push_row: sv.value_f is {}",sv.value_f);
-                    values.push(sv);
-                }        
-                if rv_type == "String" {
-                    let mut sv = SlintValue::default();
-                    sv.value_s = CStr::from_ptr(value.string_value).to_string_lossy().into_owned().into();
-                    debug!("r_push_row: sv.value_s is {}",sv.value_s);
-                    values.push(sv);
-                }        
-                if rv_type == "Unknown" {
-                    let mut sv = SlintValue::default();
-                    sv.value_i = value.int_value;
-                    sv.value_f = value.float_value;
-                    sv.value_s = CStr::from_ptr(value.string_value).to_string_lossy().into_owned().into();
-                    debug!("r_push_row: sv.value_i is {}",sv.value_i);
-                    debug!("r_push_row: sv.value_f is {}",sv.value_f);
-                    debug!("r_push_row: sv.value_s is {}",sv.value_s);
-                    values.push(sv);
+            for index in 0..len {
+                let value: JRvalue = new_values_vec[index];
+                debug!("r_push_row: value.magic is {}",value.magic);
+                if value.magic == JRMAGIC {
+                    let rv_cstr = CStr::from_ptr(value.rtype);
+                    let rv_type: String = rv_cstr.to_string_lossy().into_owned();
+                    debug!("r_push_row: rv_type is {}",rv_type);
+                    if rv_type == "Bool" {
+                        let mut sv = SlintValue::default();
+                        sv.value_i = value.int_value;
+                        debug!("r_push_row: sv.value_i is {}",sv.value_i);
+                        values.push(sv);
+                    }        
+                    if rv_type == "Integer" {
+                        let mut sv = SlintValue::default();
+                        sv.value_i = value.int_value;
+                        debug!("r_push_row: sv.value_i is {}",sv.value_i);
+                        values.push(sv);
+                    }        
+                    if rv_type == "Float" {
+                        let mut sv = SlintValue::default();
+                        sv.value_f = value.float_value;
+                        debug!("r_push_row: sv.value_f is {}",sv.value_f);
+                        values.push(sv);
+                    }        
+                    if rv_type == "String" {
+                        let mut sv = SlintValue::default();
+                        sv.value_s = CStr::from_ptr(value.string_value).to_string_lossy().into_owned().into();
+                        debug!("r_push_row: sv.value_s is {}",sv.value_s);
+                        values.push(sv);
+                    }        
+                    if rv_type == "Unknown" {
+                        let mut sv = SlintValue::default();
+                        sv.value_i = value.int_value;
+                        sv.value_f = value.float_value;
+                        sv.value_s = CStr::from_ptr(value.string_value).to_string_lossy().into_owned().into();
+                        debug!("r_push_row: sv.value_i is {}",sv.value_i);
+                        debug!("r_push_row: sv.value_f is {}",sv.value_f);
+                        debug!("r_push_row: sv.value_s is {}",sv.value_s);
+                        values.push(sv);
+                    }
                 }
             }
+
+            let _new_row = Rc::new(RowModel {
+                    row: row_count,
+                    row_elements: values.into(),
+                    base_model: some_row.base_model.clone(),
+                    notify: Default::default(),
+                    func: some_row.func,
+                });
+            
+            model.push_row(_new_row);
+            bridges_changed(propertyid);
         }
-
-        let _new_row = Rc::new(RowModel {
-                row: row_count,
-                row_elements: values.into(),
-                base_model: some_row.base_model.clone(),
-                notify: Default::default(),
-                func: some_row.func,
-            });
-        
-        model.push_row(_new_row);
-        //set_skip_callback(true);
-        //model.rows.borrow_mut().push(_new_row);
-        //set_skip_callback(false);
-
-        //model.rows.borrow()[0].notify.row_changed(0);
-        //model.rows.notify.row_changed(row_count);
-
-        //debug!("{}",model.row_count());
     }
-}}
+}
 
 //
 // set the value of a property
@@ -648,6 +711,7 @@ pub unsafe extern "C" fn r_set_value(id: *const c_char, new_value: JRvalue) { un
             debug!("r_set_value: new_value.float_value={}",new_value.float_value);
             debug!("r_set_value: new_value.string_value={:p}",new_value.string_value);
             let _ = instance.unwrap().set_property(&propertyid, Value::from(new_value));
+            bridges_changed(propertyid);
         } else {
             warn!("r_set_value:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again");
         }
@@ -722,6 +786,7 @@ pub unsafe extern "C" fn r_set_cell_value(id: *const c_char, mut row: i32, mut c
         set_skip_callback(true);
         model.update_cell(row as usize, col as usize, Some(new_value));
         set_skip_callback(false);
+        bridges_changed(propertyid);
     }
 }}
 
@@ -787,42 +852,46 @@ pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut c
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols: i32, 
     func: Option<extern "C" fn(par_ptr: *const c_void, len: i32) -> JRvalue> 
-) { unsafe {
-    debug!("r_set_property_model");
-    let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
-    if ! INSTANCES.lock().unwrap().is_empty() {
-        //let ref i_ref = &(INSTANCES.lock().unwrap())[0];
-        //let instance = i_ref.upgrade();
-        let instance = (&(INSTANCES.lock().unwrap())[0]).upgrade();
-        if instance.is_some() {
+) { 
+    unsafe {
+        debug!("r_set_property_model");
+        let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
+        if ! INSTANCES.lock().unwrap().is_empty() {
+            //let ref i_ref = &(INSTANCES.lock().unwrap())[0];
+            //let instance = i_ref.upgrade();
+            let instance = (&(INSTANCES.lock().unwrap())[0]).upgrade();
+            if instance.is_some() {
 
-            //test code start
-            let v = instance.as_ref().unwrap().get_property(&propertyid);
-            match v {
-                Ok(value) => {
-                    debug!("r_set_property_model:property <{}> has value: {:?}", propertyid, value);
-                    print_type_of(&value);
-                },
-                Err(error) => warn!("r_set_property_model:getting property <{}> failed: {:?}", propertyid, error),
-            };
+                //test code start
+                let v = instance.as_ref().unwrap().get_property(&propertyid);
+                match v {
+                    Ok(value) => {
+                        debug!("r_set_property_model:property <{}> has value: {:?}", propertyid, value);
+                        print_type_of(&value);
+                    },
+                    Err(error) => warn!("r_set_property_model:getting property <{}> failed: {:?}", propertyid, error),
+                };
 
-            //test code end
+                //test code end
 
-            let model = CellsModel::new(rows as usize,cols as usize, func);
-            //MODELS.lock().unwrap().insert(propertyid.clone(),model.clone());
-            model_insert(propertyid.clone(),model.clone());
-            let r = instance.unwrap().set_property(&propertyid,Value::Model(model.clone().into()));
-            match r {
-                Ok(_) => (),
-                Err(error) => warn!("r_set_property_model:setting model for property <{}> failed: {:?}", propertyid, error),
-            };
+                let model = CellsModel::new(rows as usize,cols as usize, func);
+
+                let r = instance.unwrap().set_property(&propertyid,Value::Model(model.clone().into()));
+                match r {
+                    Ok(_) => {
+                        model_insert(propertyid.clone(),model.clone());
+                        bridges_changed(propertyid);                        
+                    },
+                    Err(error) => warn!("r_set_property_model:setting model for property <{}> failed: {:?}", propertyid, error),
+                };
+            } else {
+                warn!("r_set_property_model:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again");
+            }
         } else {
-            warn!("r_set_property_model:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again");
+            warn!("r_set_property_model:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
         }
-    } else {
-        warn!("r_set_property_model:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
     }
-}}
+}
 
 //
 // below the generic model for every slint 2-dimensional vector property

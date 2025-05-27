@@ -16,15 +16,11 @@ entries = [entry1,entry2,entry3]
 Slint.push_row("names-list-bridge",entries)
 
 function on_prefix_edited(params...)
-    println("on_prefix_edited")
     prefix = Slint.get_value("prefix")
-    global entries
+
     filtered_entries = filter(e -> startswith(e, prefix), entries)
-    #Slint.remove_row("names-list-bridge", 1)
-    
+    Slint.clear_rows("names-list-bridge")
     Slint.push_row("names-list-bridge",filtered_entries)
-
-
 
     return true
 end

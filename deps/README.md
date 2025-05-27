@@ -4,7 +4,7 @@
 
 [https://github.com/slint-ui/slint]
 
-[https://slint.dev/releases/1.9.2/docs/slint/]
+[https://docs.slint.dev/latest/docs/slint/]
 
 [https://docs.rs/]
 
