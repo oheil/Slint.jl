@@ -37,6 +37,8 @@ void r_push_row(const char *id, const struct JRvalue *new_values, uintptr_t len)
 
 void r_set_value(const char *id, struct JRvalue new_value);
 
+struct JRvalue r_get_value(const char *id);
+
 void r_set_cell_value(const char *id, int32_t row, int32_t col, struct JRvalue new_value);
 
 struct JRvalue r_get_cell_value(const char *id, int32_t row, int32_t col);

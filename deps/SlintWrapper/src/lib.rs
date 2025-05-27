@@ -234,6 +234,21 @@ impl JRvalue {
     */
 }
 
+impl From<Value> for JRvalue {
+    fn from(v: Value) -> Self {
+        debug!("JRvalue::From<Value>");
+        let cs: SharedString = v.try_into().unwrap();
+        let c_ptr: *const c_char = cs.as_ptr() as *const i8;
+        JRvalue {
+            magic: JRMAGIC,
+            rtype: CString::new("String").unwrap().into_raw(),
+            int_value: 0,
+            float_value: 0.0,
+            string_value: c_ptr,
+        }
+    }
+}
+
 impl From<JRvalue> for Value {
     fn from(rv: JRvalue) -> Self {
         if rv.magic == JRMAGIC {
@@ -416,30 +431,32 @@ pub unsafe extern "C" fn r_get_value_type(args_ptr: *const c_void, len: i32, ind
 // return the value of the argument at index as a string
 //
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn r_get_value_string(args_ptr: *const c_void, len: i32, index: i32) -> *mut c_char  { unsafe {
-    debug!("r_get_value_string");
-    debug!("r_get_value_string:void ptr adress to the list of arguments is: {:p}",args_ptr);
-    debug!("r_get_value_string:number of arguments in this list: {}",len);
+pub unsafe extern "C" fn r_get_value_string(args_ptr: *const c_void, len: i32, index: i32) -> *mut c_char  { 
+    unsafe {
+        debug!("r_get_value_string");
+        debug!("r_get_value_string:void ptr adress to the list of arguments is: {:p}",args_ptr);
+        debug!("r_get_value_string:number of arguments in this list: {}",len);
 
-    // reconstruct the list of arguments from the void ptr
-    let args: &[Value] = std::slice::from_raw_parts(args_ptr as *const Value, len as usize);
-    // check if argument is a string
-    let vt = args[index as usize].value_type();
-    if vt == ValueType::String {
-        // get the arguments value
-        let arg: SharedString = args[index as usize].clone().try_into().unwrap();
-        // convert it to a Julia usable string type:
-        let s: &str = arg.as_str();
-        debug!("r_get_value_string:arguments value is: {}",s);
-        let cstring = CString::new(s).unwrap();
+        // reconstruct the list of arguments from the void ptr
+        let args: &[Value] = std::slice::from_raw_parts(args_ptr as *const Value, len as usize);
+        // check if argument is a string
+        let vt = args[index as usize].value_type();
+        if vt == ValueType::String {
+            // get the arguments value
+            let arg: SharedString = args[index as usize].clone().try_into().unwrap();
+            // convert it to a Julia usable string type:
+            let s: &str = arg.as_str();
+            debug!("r_get_value_string:arguments value is: {}",s);
+            let cstring = CString::new(s).unwrap();
+            return cstring.into_raw();
+        } else {
+            warn!("r_get_value_string:argument type at index {} is not a string", index);
+        }
+        // return an empty value
+        let cstring = CString::new("").unwrap();
         return cstring.into_raw();
-    } else {
-        warn!("r_get_value_string:argument type at index {} is not a string", index);
     }
-    // return an empty value
-    let cstring = CString::new("").unwrap();
-    return cstring.into_raw();
-}}
+}
 
 //
 // args_ptr must be the ptr to the list of arguments, &[Value], sent to the Julia callback from r_set_callback (see above)
@@ -640,6 +657,41 @@ pub unsafe extern "C" fn r_set_value(id: *const c_char, new_value: JRvalue) { un
 }}
 
 //
+// get the value of a property
+// 
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn r_get_value(id: *const c_char) -> JRvalue { 
+    unsafe {
+        debug!("r_get_value");
+        let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
+
+        let mut rv = JRvalue::new_undefined();
+
+        if ! INSTANCES.lock().unwrap().is_empty() {
+            let instance = (&(INSTANCES.lock().unwrap())[0]).upgrade();
+            if instance.is_some() {
+                let value = instance.unwrap().get_property(&propertyid);
+                if value.is_ok() {
+                    let value = value.unwrap();
+                    debug!("r_get_value: value is: {:?}", value);
+                    rv = JRvalue::from(value);
+                    return rv;                    
+                } else {
+                    warn!("r_get_value:property <{}> not found",propertyid);
+                }
+            }
+            else {
+                warn!("r_get_value:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again");
+            }
+        } else {
+            warn!("r_get_value:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
+        }
+        return rv;
+    }
+}
+
+
+//
 // set the string value of a cell
 //   the call_back is not called during this explicit update, as the caller already should know, that he updates the cell
 // 
@@ -678,53 +730,55 @@ pub unsafe extern "C" fn r_set_cell_value(id: *const c_char, mut row: i32, mut c
 //
 #[unsafe(no_mangle)]
 //pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, row: i32, col: i32) -> *mut c_char  {
-pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut col: i32) -> JRvalue { unsafe {
-    debug!("r_get_cell_value");
-    if row == 0 {
-        warn!("r_get_cell_value: row index is <{}>, please provide 1-based indices as in Julia",row);
-    }
-    if col == 0 {
-        warn!("r_get_cell_value: column index is <{}>, please provide 1-based indices as in Julia",col);
-    }
-    row -= 1;
-    col -= 1;
-    let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
-
-    let mut rv = JRvalue::new_undefined();
-
-    //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
-    if ! model_contains(&propertyid) {
-        warn!("r_get_cell_value:no model available for property id <{}>",propertyid);
-    } else {
-        //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
-        let model: Rc<CellsModel> = model_get(&propertyid);
-        //let v: Option<String> = model.get_cell_value(row as usize, col as usize);
-        let rv_tmp: Option<JRvalue> = model.get_cell_value(row as usize, col as usize);
-        //match v {
-        match rv_tmp {
-            Some(x) => {
-                debug!("r_get_cell_value:cell value: {:p}",x.string_value);
-                rv.rtype = x.rtype;
-                rv.string_value = x.string_value;
-                rv.int_value = x.int_value;
-                rv.float_value = x.float_value;
-            },
-            None => debug!("r_get_cell_value:no cell value"),
+pub unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut col: i32) -> JRvalue {
+    unsafe {
+        debug!("r_get_cell_value");
+        if row == 0 {
+            warn!("r_get_cell_value: row index is <{}>, please provide 1-based indices as in Julia",row);
         }
+        if col == 0 {
+            warn!("r_get_cell_value: column index is <{}>, please provide 1-based indices as in Julia",col);
+        }
+        row -= 1;
+        col -= 1;
+        let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
+
+        let mut rv = JRvalue::new_undefined();
+
+        //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
+        if ! model_contains(&propertyid) {
+            warn!("r_get_cell_value:no model available for property id <{}>",propertyid);
+        } else {
+            //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
+            let model: Rc<CellsModel> = model_get(&propertyid);
+            //let v: Option<String> = model.get_cell_value(row as usize, col as usize);
+            let rv_tmp: Option<JRvalue> = model.get_cell_value(row as usize, col as usize);
+            //match v {
+            match rv_tmp {
+                Some(x) => {
+                    debug!("r_get_cell_value:cell value: {:p}",x.string_value);
+                    rv.rtype = x.rtype;
+                    rv.string_value = x.string_value;
+                    rv.int_value = x.int_value;
+                    rv.float_value = x.float_value;
+                },
+                None => debug!("r_get_cell_value:no cell value"),
+            }
+        }
+
+        debug!("r_get_cell_value:return value: {}",rv.magic);
+        let rv_cstr = CStr::from_ptr(rv.rtype);
+        let rv_type: String = rv_cstr.to_string_lossy().into_owned();
+        debug!("r_get_cell_value:return value type: {}",rv_type);
+        debug!("r_get_cell_value:return value int: {}",rv.int_value);
+        debug!("r_get_cell_value:return value float: {}",rv.float_value);
+        debug!("r_get_cell_value:return value string_p: {:p}",rv.string_value);
+        let cs: SharedString = CStr::from_ptr(rv.string_value).to_string_lossy().into_owned().into();
+        debug!("r_get_cell_value:return value string: {}",cs);
+
+        return rv;
     }
-
-    debug!("r_get_cell_value:return value: {}",rv.magic);
-    let rv_cstr = CStr::from_ptr(rv.rtype);
-    let rv_type: String = rv_cstr.to_string_lossy().into_owned();
-    debug!("r_get_cell_value:return value type: {}",rv_type);
-    debug!("r_get_cell_value:return value int: {}",rv.int_value);
-    debug!("r_get_cell_value:return value float: {}",rv.float_value);
-    debug!("r_get_cell_value:return value string_p: {:p}",rv.string_value);
-    let cs: SharedString = CStr::from_ptr(rv.string_value).to_string_lossy().into_owned().into();
-    debug!("r_get_cell_value:return value string: {}",cs);
-
-    return rv;
-}}
+}
 
 //
 // set the model for a slint vector property (id is the slint property id as string)

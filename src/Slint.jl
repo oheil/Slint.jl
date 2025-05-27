@@ -190,6 +190,18 @@ function set_value(id, new_value)
 end
 
 #
+# get the value of a property 
+#  
+function get_value(id)
+    check_init()
+    rv = r_get_value(id)
+    if rv.magic == Cint(rMagic)
+        return unsafe_string(rv.string_value)
+    end
+    return raw""
+end
+
+#
 # get the value of a element/cell as string
 #  
 function get_cell_value(id, row, col)
