@@ -1,0 +1,9 @@
+C:\Z-Temp\Temp\Slint.jl\deps\SlintWrapper\target\debug\deps\libi_slint_renderer_femtovg-014f967958c41490.rmeta: C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\lib.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\fonts.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\images.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\itemrenderer.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\README.md
+
+C:\Z-Temp\Temp\Slint.jl\deps\SlintWrapper\target\debug\deps\i_slint_renderer_femtovg-014f967958c41490.d: C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\lib.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\fonts.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\images.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\itemrenderer.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\README.md
+
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\lib.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\fonts.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\images.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\itemrenderer.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-renderer-femtovg-1.11.0\README.md:

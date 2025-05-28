@@ -4,7 +4,7 @@
 
 [https://github.com/slint-ui/slint]
 
-[https://slint.dev/releases/1.9.2/docs/slint/]
+[https://docs.slint.dev/latest/docs/slint/]
 
 [https://docs.rs/]
 
@@ -49,6 +49,11 @@ set RUST_LOG=debug
 set RUST_LOG=
 ```
 
+```powershell
+[Environment]::SetEnvironmentVariable("RUST_LOG", "debug")
+[Environment]::SetEnvironmentVariable("RUST_LOG", "")
+```
+
 ```shell
 cd examples\7guis
 cargo run --release --bin cells
@@ -81,6 +86,10 @@ Slint.__init__()  # load slintwrapper.dll again
 ```
 
 ## Julia Examples
+
+```julia
+include("examples/7guis/crud.jl")
+```
 
 ```julia
 include("examples/7guis/circledraw.jl")

@@ -2,9 +2,6 @@ using Slint
 
 slintFile = "examples\\7guis\\crud.slint"
 
-function on_entry(params...)
-end
-
 Slint.compile_from_file(slintFile,"MainWindow")
 
 # only use the bridge on the Julia side

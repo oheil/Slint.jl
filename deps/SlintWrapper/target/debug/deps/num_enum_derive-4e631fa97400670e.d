@@ -1,0 +1,9 @@
+C:\Z-Temp\Temp\Slint.jl\deps\SlintWrapper\target\debug\deps\num_enum_derive-4e631fa97400670e.dll: C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\lib.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\enum_attributes.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\parsing.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\utils.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\variant_attributes.rs
+
+C:\Z-Temp\Temp\Slint.jl\deps\SlintWrapper\target\debug\deps\num_enum_derive-4e631fa97400670e.d: C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\lib.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\enum_attributes.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\parsing.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\utils.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\variant_attributes.rs
+
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\lib.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\enum_attributes.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\parsing.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\utils.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\num_enum_derive-0.7.3\src\variant_attributes.rs:

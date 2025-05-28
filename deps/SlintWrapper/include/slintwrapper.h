@@ -31,11 +31,15 @@ char *r_get_value_string(const void *args_ptr, int32_t len, int32_t index);
 
 double r_get_value_number(const void *args_ptr, int32_t len, int32_t index, double nan);
 
+void r_clear_rows(const char *id);
+
 void r_remove_row(const char *id, uintptr_t index);
 
 void r_push_row(const char *id, const struct JRvalue *new_values, uintptr_t len);
 
 void r_set_value(const char *id, struct JRvalue new_value);
+
+struct JRvalue r_get_value(const char *id);
 
 void r_set_cell_value(const char *id, int32_t row, int32_t col, struct JRvalue new_value);
 

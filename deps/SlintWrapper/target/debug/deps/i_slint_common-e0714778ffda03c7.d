@@ -1,0 +1,11 @@
+C:\Z-Temp\Temp\Slint.jl\deps\SlintWrapper\target\debug\deps\libi_slint_common-e0714778ffda03c7.rmeta: C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\lib.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\builtin_structs.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\enums.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\key_codes.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\README.md
+
+C:\Z-Temp\Temp\Slint.jl\deps\SlintWrapper\target\debug\deps\libi_slint_common-e0714778ffda03c7.rlib: C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\lib.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\builtin_structs.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\enums.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\key_codes.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\README.md
+
+C:\Z-Temp\Temp\Slint.jl\deps\SlintWrapper\target\debug\deps\i_slint_common-e0714778ffda03c7.d: C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\lib.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\builtin_structs.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\enums.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\key_codes.rs C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\README.md
+
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\lib.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\builtin_structs.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\enums.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\key_codes.rs:
+C:\Users\oheil\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\i-slint-common-1.11.0\README.md:

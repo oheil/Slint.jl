@@ -44,6 +44,10 @@ function r_get_value_number(args_ptr, len, index, nan)
     ccall((:r_get_value_number, slintwrapper), Cdouble, (Ptr{Cvoid}, Int32, Int32, Cdouble), args_ptr, len, index, nan)
 end
 
+function r_clear_rows(id)
+    ccall((:r_clear_rows, slintwrapper), Cvoid, (Ptr{Cchar},), id)
+end
+
 function r_remove_row(id, index)
     ccall((:r_remove_row, slintwrapper), Cvoid, (Ptr{Cchar}, Csize_t), id, index)
 end
@@ -54,6 +58,10 @@ end
 
 function r_set_value(id, new_value)
     ccall((:r_set_value, slintwrapper), Cvoid, (Ptr{Cchar}, JRvalue), id, new_value)
+end
+
+function r_get_value(id)
+    ccall((:r_get_value, slintwrapper), JRvalue, (Ptr{Cchar},), id)
 end
 
 function r_set_cell_value(id, row, col, new_value)
