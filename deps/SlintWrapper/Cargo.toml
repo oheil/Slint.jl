@@ -18,5 +18,5 @@ name = "slintwrapper"
 crate-type = ["staticlib", "cdylib"]
 
 [build-dependencies]
-cbindgen = "0.28"
+cbindgen = "0.29"
 regex = "1.10"
