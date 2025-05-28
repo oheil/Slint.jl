@@ -8,9 +8,9 @@
 
 [https://docs.rs/]
 
-[https://slint.dev/releases/1.9.2/docs/rust/slint/]
+[https://docs.slint.dev/latest/docs/rust/slint/]
 
-[https://slint.dev/releases/1.9.2/editor/]
+[https://docs.slint.dev/latest/editor/]
 
 [https://jakegoulding.com/rust-ffi-omnibus/objects/]
 
