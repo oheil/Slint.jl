@@ -92,11 +92,19 @@ include("examples/7guis/crud.jl")
 ```
 
 ```julia
+include("examples\\7guis\\counter.jl")
+```
+
+```julia
 include("examples/7guis/circledraw.jl")
 ```
 
 ```julia
 include("examples/7guis/cells.jl")
+```
+
+```julia
+include("examples\\7guis\\booker.jl")
 ```
 
 ```julia
