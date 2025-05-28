@@ -199,26 +199,76 @@ function set_value(id, new_value)
 end
 
 #
-# get the value of a property 
+# get the value of a property as String
 #  
 function get_value(id)
     check_init()
     rv = r_get_value(id)
+    rtype=unsafe_string(rv.rtype)
     if rv.magic == Cint(rMagic)
+        if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rString)] )
+            return unsafe_string(rv.string_value)
+        end
+        error(raw"Slint.get_value: return value is not a String as expected")
         return unsafe_string(rv.string_value)
     end
+    error(raw"Slint.get_value: wrong magic number")
     return raw""
 end
 
 #
-# get the value of a element/cell as string
+# get the value of a property as Float64
+#  
+function get_value(::Type{T}, id) where T<:Float64
+    check_init()
+    rv = r_get_value(id)
+    rtype=unsafe_string(rv.rtype)
+    if rv.magic == Cint(rMagic)
+        if( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rFloat)] )
+            return rv.float_value
+        end
+        error(raw"Slint.get_value as Float64: return value is not a Float as expected")
+        return 0.0
+    end
+    error(raw"Slint.get_value as Float64: wrong magic number")
+    return 0.0
+end
+
+#
+# get the value of property as Int
+#  
+function get_value(::Type{T}, id) where T<:Int
+    check_init()
+    rv = r_get_value(id)
+    rtype=unsafe_string(rv.rtype)
+    if rv.magic == Cint(rMagic)
+        if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rInteger)] || rtype == rtypes[Int(rBool)] )
+            return rv.int_value
+        end
+        if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rFloat)] )
+            return Int(floor(rv.float_value))
+        end
+        error(raw"Slint.get_value as Int: return value is not a Number as expected")
+        return 0
+    end
+    error(raw"Slint.get_value as Int: wrong magic number")
+    return 0
+end
+
+#
+# get the value of a element/cell as String
 #  
 function get_cell_value(id, row, col)
     check_init()
     rv = r_get_cell_value(id,row,col)
     if rv.magic == Cint(rMagic)
+        if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rString)] )
+            return unsafe_string(rv.string_value)
+        end
+        error(raw"Slint.get_cell_value: return value is not a String as expected")
         return unsafe_string(rv.string_value)
     end
+    error(raw"Slint.get_cell_value: wrong magic number")
     return ""
 end
 
@@ -229,11 +279,14 @@ function get_cell_value(::Type{T}, id, row, col) where T<:Float64
     check_init()
     rv = r_get_cell_value(id,row,col)
     rtype=unsafe_string(rv.rtype)
-    if rv.magic == Cint(rMagic) && 
-        ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rFloat)] )
-        return rv.float_value
+    if rv.magic == Cint(rMagic)
+        if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rFloat)] )
+            return rv.float_value
+        end
+        error(raw"Slint.get_cell_value as Float64: return value is not a Float as expected")
+        return 0.0
     end
-    error(raw"Slint.get_cell_value: return value is not a Float as expected")
+    error(raw"Slint.get_cell_value as Float64: wrong magic number")
     return 0.0
 end
 
@@ -244,26 +297,35 @@ function get_cell_value(::Type{T}, id, row, col) where T<:Int
     check_init()
     rv = r_get_cell_value(id,row,col)
     rtype=unsafe_string(rv.rtype)
-    if rv.magic == Cint(rMagic) && 
-        ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rInteger)] )
-        return rv.int_value
+    if rv.magic == Cint(rMagic)
+        if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rInteger)] || rtype == rtypes[Int(rBool)] )
+            return rv.int_value
+        end
+        if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rFloat)] )
+            return Int(floor(rv.float_value))
+        end
+        error(raw"Slint.get_cell_value as Int: return value is not a Number as expected")
+        return 0
     end
-    error(raw"Slint.get_cell_value: return value is not an Int as expected")
+    error(raw"Slint.get_cell_value as Float64: wrong magic number")
     return 0
 end
 
 #
-# get the value of a element/cell as Float64
+# get the value of a element/cell as String
 #  
 function get_cell_value(::Type{T}, id, row, col) where T<:String
     check_init()
     rv = r_get_cell_value(id,row,col)
     rtype=unsafe_string(rv.rtype)
-    if rv.magic == Cint(rMagic) && 
-        ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rString)] )
-        return unsafe_string(rv.string_value)
+    if rv.magic == Cint(rMagic)
+        if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rString)] )
+            return unsafe_string(rv.string_value)
+        end
+        error(raw"Slint.get_cell_value as String: return value is not a String as expected")
+        return ""
     end
-    error(raw"Slint.get_cell_value: return value is not a String as expected")
+    error(raw"Slint.get_cell_value as String: wrong magic number")
     return ""
 end
 
@@ -295,6 +357,12 @@ function set_property_model(id, rows, cols, user_callback)
     # register the complete callback_wrapper for the callback id. This calls into rust (lib.rs:r_set_property_model)
     r_set_property_model(id,rows,cols,c_callback_wrapper)
 end
+function set_property_model(id, rows, cols)
+    check_init()
+    # register the complete callback_wrapper for the callback id. This calls into rust (lib.rs:r_set_property_model)
+    r_set_property_model(id,rows,cols,C_NULL)
+end
+
 
 #
 # set the wrapped users callback function

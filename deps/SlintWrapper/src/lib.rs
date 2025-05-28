@@ -283,14 +283,36 @@ impl JRvalue {
 impl From<Value> for JRvalue {
     fn from(v: Value) -> Self {
         debug!("JRvalue::From<Value>");
-        let cs: SharedString = v.try_into().unwrap();
-        let c_ptr: *const c_char = cs.as_ptr() as *const i8;
-        JRvalue {
-            magic: JRMAGIC,
-            rtype: CString::new("String").unwrap().into_raw(),
-            int_value: 0,
-            float_value: 0.0,
-            string_value: c_ptr,
+        let vt = v.value_type();
+        match vt {
+            ValueType::String => {
+                let cs: SharedString = v.try_into().unwrap();
+                let c_ptr: *const c_char = cs.as_ptr() as *const i8;
+                return JRvalue {
+                    magic: JRMAGIC,
+                    rtype: CString::new("String").unwrap().into_raw(),
+                    int_value: 0,
+                    float_value: 0.0,
+                    string_value: c_ptr,
+                };
+            }
+            ValueType::Bool => {
+                let b: bool = v.try_into().unwrap();
+                return JRvalue::new_bool(b);
+            }
+            ValueType::Number => {
+                let n: f64 = v.try_into().unwrap();
+                return JRvalue {
+                    magic: JRMAGIC,
+                    rtype: CString::new("Float").unwrap().into_raw(),
+                    int_value: 0,
+                    float_value: n,
+                    string_value: CString::new("").unwrap().into_raw(),
+                };
+            }
+            _ => {
+                return JRvalue::new_undefined();
+            }
         }
     }
 }
@@ -924,7 +946,7 @@ impl Model for CellsModel {
 }
 extern "C" fn def_cb(_par_ptr: *const c_void, _len: i32) -> JRvalue {
     debug!("CellsModel.def_cb");
-    JRvalue::new_undefined()
+    JRvalue::new_bool(false)
 }
 impl CellsModel {
 
