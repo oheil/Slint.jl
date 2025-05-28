@@ -44,6 +44,10 @@ function r_get_value_number(args_ptr, len, index, nan)
     ccall((:r_get_value_number, slintwrapper), Cdouble, (Ptr{Cvoid}, Int32, Int32, Cdouble), args_ptr, len, index, nan)
 end
 
+function r_clear_rows(id)
+    ccall((:r_clear_rows, slintwrapper), Cvoid, (Ptr{Cchar},), id)
+end
+
 function r_remove_row(id, index)
     ccall((:r_remove_row, slintwrapper), Cvoid, (Ptr{Cchar}, Csize_t), id, index)
 end
