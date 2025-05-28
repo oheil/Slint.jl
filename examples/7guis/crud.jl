@@ -4,6 +4,7 @@ slintFile = "examples\\7guis\\crud.slint"
 
 Slint.compile_from_file(slintFile,"MainWindow")
 
+# only use the bridge on the Julia side
 Slint.set_property_model("names-list-bridge",1,1)
 entries = ["Emil, Hans","Mustermann, Max","Tisch, Roman"]
 filtered_indices = getindex.(collect(enumerate(entries)),1)
