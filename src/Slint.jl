@@ -4,7 +4,7 @@ using CEnum
 
 const deps_file = joinpath(dirname(@__FILE__), "..", "deps", "deps.jl")
 if !isfile(deps_file)
-    error(raw"Slint.jl is not installed properly, run Pkg.build(\"Slint\") and restart Julia.")
+    error("Slint: Slint.jl is not installed properly, run Pkg.build(\"Slint\") and restart Julia.")
 end
 include(deps_file)
 
@@ -23,7 +23,7 @@ function check_init()
         __init__()
     end
     if handle == C_NULL
-        error("can't load $slintwrapper, Please re-run Pkg.build(\"Slint\"), and restart Julia.")
+        error("Slint.check_init: can't load $slintwrapper, Please re-run Pkg.build(\"Slint\"), and restart Julia.")
     end
     return
 end
@@ -50,6 +50,7 @@ rstring_value = [""]
 #   magic::Int32
 #   rtype::Ptr{Cchar}
 #   int_value::Int32
+#   float_value::Cdouble
 #   string_value::Ptr{Cchar}
 #end
 function JRvalue(v::Int)
@@ -209,11 +210,11 @@ function get_value(id)
         if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rString)] )
             return unsafe_string(rv.string_value)
         end
-        error(raw"Slint.get_value: return value is not a String as expected")
+        error("Slint.get_value: return value is not a String as expected")
         return unsafe_string(rv.string_value)
     end
-    error(raw"Slint.get_value: wrong magic number")
-    return raw""
+    error("Slint.get_value: wrong magic number")
+    return ""
 end
 
 #
@@ -227,10 +228,10 @@ function get_value(::Type{T}, id) where T<:Float64
         if( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rFloat)] )
             return rv.float_value
         end
-        error(raw"Slint.get_value as Float64: return value is not a Float as expected")
+        error("Slint.get_value as Float64: return value is not a Float as expected")
         return 0.0
     end
-    error(raw"Slint.get_value as Float64: wrong magic number")
+    error("Slint.get_value as Float64: wrong magic number")
     return 0.0
 end
 
@@ -246,12 +247,13 @@ function get_value(::Type{T}, id) where T<:Int
             return rv.int_value
         end
         if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rFloat)] )
+            @warn "Slint.get_value as Int: return value is Float, converting to Int"
             return Int(floor(rv.float_value))
         end
-        error(raw"Slint.get_value as Int: return value is not a Number as expected")
+        error("Slint.get_value as Int: return value is not a Number as expected")
         return 0
     end
-    error(raw"Slint.get_value as Int: wrong magic number")
+    error("Slint.get_value as Int: wrong magic number")
     return 0
 end
 
@@ -265,10 +267,10 @@ function get_cell_value(id, row, col)
         if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rString)] )
             return unsafe_string(rv.string_value)
         end
-        error(raw"Slint.get_cell_value: return value is not a String as expected")
+        error("Slint.get_cell_value: return value is not a String as expected")
         return unsafe_string(rv.string_value)
     end
-    error(raw"Slint.get_cell_value: wrong magic number")
+    error("Slint.get_cell_value: wrong magic number")
     return ""
 end
 
@@ -283,10 +285,10 @@ function get_cell_value(::Type{T}, id, row, col) where T<:Float64
         if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rFloat)] )
             return rv.float_value
         end
-        error(raw"Slint.get_cell_value as Float64: return value is not a Float as expected")
+        error("Slint.get_cell_value as Float64: return value is not a Float as expected")
         return 0.0
     end
-    error(raw"Slint.get_cell_value as Float64: wrong magic number")
+    error("Slint.get_cell_value as Float64: wrong magic number")
     return 0.0
 end
 
@@ -302,12 +304,13 @@ function get_cell_value(::Type{T}, id, row, col) where T<:Int
             return rv.int_value
         end
         if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rFloat)] )
+            @warn "Slint.get_cell_value as Int: return value is Float, converting to Int"
             return Int(floor(rv.float_value))
         end
-        error(raw"Slint.get_cell_value as Int: return value is not a Number as expected")
+        error("Slint.get_cell_value as Int: return value is not a Number as expected")
         return 0
     end
-    error(raw"Slint.get_cell_value as Float64: wrong magic number")
+    error("Slint.get_cell_value as Int: wrong magic number")
     return 0
 end
 
@@ -322,10 +325,10 @@ function get_cell_value(::Type{T}, id, row, col) where T<:String
         if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rString)] )
             return unsafe_string(rv.string_value)
         end
-        error(raw"Slint.get_cell_value as String: return value is not a String as expected")
+        error("Slint.get_cell_value as String: return value is not a String as expected")
         return ""
     end
-    error(raw"Slint.get_cell_value as String: wrong magic number")
+    error("Slint.get_cell_value as String: wrong magic number")
     return ""
 end
 
@@ -335,7 +338,6 @@ end
 function set_cell_value(id, row, col, new_value)
     check_init()
     rv = JRvalue(new_value)
-    #r_set_cell_value(id, row, col, new_value)
     r_set_cell_value(id, row, col, rv)
 end
 
@@ -404,19 +406,12 @@ function create_callback_wrapper(user_callback)
     #     from this information the Julia parameter tuple is constructed
     exprfunc = :( func = ( ptr, len ) -> 
         begin
-
-            #println("callback_wrapper")
-            #println(ptr)
-            #println(len)
-            
             # construct the tuple of parameters to call the users callback with:
             params = let t = ()
                 for i in 0:(len-1)
                     type = unsafe_string(Slint.r_get_value_type(ptr,len,i))
-                    #println(type)
                     if type == "String"
                         p = unsafe_string(Slint.r_get_value_string(ptr,len,i))
-                        #println(p)
                         t = (t..., p)
                     elseif type == "Number"
                         p = Slint.r_get_value_number(ptr,len,i,NaN)
@@ -428,9 +423,6 @@ function create_callback_wrapper(user_callback)
                 t
             end
 
-            #println("params:")
-            #println(params)
-
             # call the users callback and retrieve the result r:
             r = $user_callback(params...)
 
@@ -440,8 +432,6 @@ function create_callback_wrapper(user_callback)
             if typeof(r) == Bool
                 rstring_value[1] = ""
                 rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rBool)]),Cint(r),Cdouble(0.0),Base.unsafe_convert(Cstring,rstring_value[1]))
-                #rptr = Ptr{Cvoid}(pointer_from_objref(Ref(test_rv)))
-                #return rptr
             elseif typeof(r) == Int
                 rstring_value[1] = ""
                 rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rInteger)]),Cint(r),Cdouble(0.0),Base.unsafe_convert(Cstring,rstring_value[1]))

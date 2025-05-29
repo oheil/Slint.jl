@@ -23,7 +23,7 @@ end
 Slint.set_callback("prefixEdited", on_prefix_edited)
 
 function on_update_clicked(params...)
-    current_item = Slint.get_value(Int,"current-item") + 1
+    current_item = Int(floor(Slint.get_value(Float64,"current-item"))) + 1
     entry_index = filtered_indices[current_item]
 
     name = Slint.get_value("name")
@@ -43,7 +43,7 @@ end
 Slint.set_callback("updateClicked", on_update_clicked)
 
 function on_delete_clicked(params...)
-    current_item = Slint.get_value(Int,"current-item") + 1
+    current_item = Int(floor(Slint.get_value(Float64,"current-item"))) + 1
     entry_index = filtered_indices[current_item]
 
     deleteat!(entries, entry_index)
