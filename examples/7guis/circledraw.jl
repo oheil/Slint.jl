@@ -1,9 +1,11 @@
 using Slint
 
 slintFile = "examples\\7guis\\circledraw.slint"
+startComponent = "MainWindow"
 
-Slint.compile_from_file(slintFile,"MainWindow")
+Slint.compile_from_file(slintFile, startComponent)
 
+# some circle management functions
 @enum Action draw=1 resize=2
 let CIRCLE_COUNT = Ref{Int}(0)
     global get_circle_count
@@ -35,11 +37,9 @@ end
 UndoStack = Undo[]
 RedoStack = Undo[]
 
+# implementation of callback:
+#       callback undo_clicked();
 function on_undo_clicked(params...)
-    #println("on_undo_clicked")
-    #for p in params
-    #    println(p," ",typeof(p))
-    #end
     if get_circle_count() > 0 
         u=pop!(UndoStack)
         Slint.set_value("redoable",true)
@@ -61,13 +61,13 @@ function on_undo_clicked(params...)
     end
     return true
 end
+# register callback for:
+#       callback undo_clicked();
 Slint.set_callback("undo_clicked", on_undo_clicked)
 
+# implementation of callback:
+#       callback redo_clicked();
 function on_redo_clicked(params...)
-    #println("on_redo_clicked")
-    #for p in params
-    #    println(p," ",typeof(p))
-    #end
     i = length(RedoStack)
     if i > 0 
         u=pop!(RedoStack)
@@ -91,30 +91,30 @@ function on_redo_clicked(params...)
     end
     return true
 end
+# register callback for:
+#       callback redo_clicked();
 Slint.set_callback("redo_clicked", on_redo_clicked)
 
+# implementation of callback:
+#       callback background_clicked(length,length);
 function on_background_clicked(params...)
-    #println("on_background_clicked")
-    #for p in params
-    #    println(p," ",typeof(p))
-    #end
     x=Int(params[1])
     y=Int(params[2])
-    w=30
+    w=30 # default diameter
     Slint.push_row("model",[x,y,w])
     Slint.set_value("undoable",true)
     inc_circle_count()
     push!(UndoStack,Undo(draw,get_circle_count(),w,x,y))
     return true
 end
+# register callback for:
+#       callback background_clicked(length,length);
 Slint.set_callback("background_clicked", on_background_clicked)
 
+# implementation of callback:
+#       callback circle_resized(int, length);
 function on_circle_resized(params...)
-    #println("on_circle_resized")
-    #for p in params
-    #    println(p," ",typeof(p))
-    #end
-    row=Int(params[1]) + 1
+    row=Int(params[1]) + 1 # 0-based to 1-based
     col=3 
     value=Int(floor(params[2]))
     old_value=Slint.get_cell_value(Int,"model",row,col)
@@ -122,22 +122,14 @@ function on_circle_resized(params...)
     push!(UndoStack,Undo(resize,row,old_value,0,0))
     return true
 end
+# register callback for:
+#       callback circle_resized(int, length);
 Slint.set_callback("circle_resized", on_circle_resized)
 
-function on_circle(params...)
-    #println("on_draw_circle")
-    #for p in params
-    #    println(p," ",typeof(p))
-    #end
-
-    row = Int(params[1])  # 0-based
-    col = Int(params[2])  # 0-based
-    new_value = params[3]
-    old_value = params[4]
-
-    return true
-end
-Slint.set_property_model("model",1,3,on_circle) # id,rows,cols,callback
-
+rows = 1  # always at least one row
+columns = 3 # x, y, width
+Slint.set_property_model("model", rows, columns)
 
 Slint.run()
+# unload library
+Slint.close()

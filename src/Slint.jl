@@ -263,6 +263,7 @@ end
 function get_cell_value(id, row, col)
     check_init()
     rv = r_get_cell_value(id,row,col)
+    rtype=unsafe_string(rv.rtype)
     if rv.magic == Cint(rMagic)
         if ( rtype == rtypes[Int(rUnknown)] || rtype == rtypes[Int(rString)] )
             return unsafe_string(rv.string_value)
@@ -356,13 +357,24 @@ function set_property_model(id, rows, cols, user_callback)
     # create the wrapper callback
     c_callback_wrapper = create_callback_wrapper(user_callback)
 
+    if rows <= 0
+        @warn raw"set_property_model: rows="*string(rows)*", initializing a model needs at least 1 row, setting rows to 1"
+        rows = 1
+    end
+    if cols <= 0
+        @warn raw"set_property_model: cols="*string(cols)*", initializing a model needs at least 1 column, setting cols to 1.
+         If cols=1 doesn't match your data model, you should provide proper rows and columns."
+        cols = 1
+    end
+
     # register the complete callback_wrapper for the callback id. This calls into rust (lib.rs:r_set_property_model)
-    r_set_property_model(id,rows,cols,c_callback_wrapper)
+    r_set_property_model(id, rows, cols, c_callback_wrapper)
 end
 function set_property_model(id, rows, cols)
     check_init()
-    # register the complete callback_wrapper for the callback id. This calls into rust (lib.rs:r_set_property_model)
-    r_set_property_model(id,rows,cols,C_NULL)
+
+    # no callback provided
+    set_property_model(id, rows, cols, C_NULL)
 end
 
 

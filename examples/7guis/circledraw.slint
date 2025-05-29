@@ -4,12 +4,11 @@
 import { LineEdit, Button, Slider, StandardListView, VerticalBox } from "std-widgets.slint";
 
 //struct Circle  { x: length, y: length, d: length }
-//struct SlintValue  { value_s: string, value_i: int, value_f: float, value_slvi: StandardListViewItem }
 struct SlintValue  { value_s: string, value_i: int, value_f: float }
 
 export component MainWindow inherits Window {
     //in property <[Circle]> model;
-    //Circle.x,.y,.d => [SlintValue][0],[1],[2]
+    // instead of a 1d array of Circle, we use a 2d array of SlintValue: [ [x1,y1,d1], [x2,y2,d2], ... ]
     in property <[[SlintValue]]> model;
     in property <bool> undoable: false;
     in property <bool> redoable: false;
