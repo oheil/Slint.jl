@@ -33,6 +33,8 @@ cargo add slint-interpreter
 cd ..\..
 
 cd c:\Users\oheil\.julia\dev\Slint\rust
+cargo update
+
 cargo run --release --bin my_cells
 cargo run --release --bin my_cells_listview
 cargo run --release --bin circledraw
