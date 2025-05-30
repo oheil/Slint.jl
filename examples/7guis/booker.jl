@@ -1,9 +1,10 @@
 using Slint, Dates
 
 slintFile = "examples\\7guis\\booker.slint"
+startComponent = "Booker"
 
 # Main/Start component is "Booker"
-Slint.compile_from_file(slintFile,"Booker")
+Slint.compile_from_file(slintFile,startComponent)
 
 # implementation of callback:
 #       pure callback validate-date(string) -> bool;

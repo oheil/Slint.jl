@@ -8,6 +8,8 @@ struct SlintValue  { value_s: string, value_i: int, value_f: float }
 export component MainWindow inherits Window {
     in property <[StandardListViewItem]> names-list;
 
+    // Above [StandardListViewItem] property needs to be bridged with a SlintValue property.
+    // This is the generic way. Use names-list-bridge from Julia:
     in property <[[SlintValue]]> names-list-bridge;
     callback bridge2StandardListViewItem( string, string );
     changed names-list-bridge => {

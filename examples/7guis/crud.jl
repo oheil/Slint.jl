@@ -1,15 +1,21 @@
 using Slint
 
 slintFile = "examples\\7guis\\crud.slint"
+startComponent = "MainWindow"
 
-Slint.compile_from_file(slintFile,"MainWindow")
+Slint.compile_from_file(slintFile,startComponent)
 
-# only use the bridge on the Julia side
+# only use the bridge on the Julia side. When filled or changed, it will be used to populate
+#   in property <[StandardListViewItem]> names-list;
 Slint.set_property_model("names-list-bridge",1,1)
+
 entries = ["Emil, Hans","Mustermann, Max","Tisch, Roman"]
-filtered_indices = getindex.(collect(enumerate(entries)),1)
 Slint.push_row("names-list-bridge",entries)
 
+filtered_indices = getindex.(collect(enumerate(entries)),1)
+
+# implementation of callback:
+#       callback prefixEdited();
 function on_prefix_edited(params...)
     prefix = Slint.get_value("prefix")
 
@@ -20,8 +26,12 @@ function on_prefix_edited(params...)
 
     return true
 end
+# register callback for:
+#       callback prefixEdited();
 Slint.set_callback("prefixEdited", on_prefix_edited)
 
+# implementation of callback:
+#       callback updateClicked();
 function on_update_clicked(params...)
     current_item = Int(floor(Slint.get_value(Float64,"current-item"))) + 1
     entry_index = filtered_indices[current_item]
@@ -40,8 +50,12 @@ function on_update_clicked(params...)
 
     return true
 end
+# register callback for:
+#       callback updateClicked();
 Slint.set_callback("updateClicked", on_update_clicked)
 
+# implementation of callback:
+#       callback deleteClicked();
 function on_delete_clicked(params...)
     current_item = Int(floor(Slint.get_value(Float64,"current-item"))) + 1
     entry_index = filtered_indices[current_item]
@@ -54,8 +68,12 @@ function on_delete_clicked(params...)
 
     return true
 end
+# register callback for:
+#       callback deleteClicked();
 Slint.set_callback("deleteClicked", on_delete_clicked)
 
+# implementation of callback:
+#       callback createClicked();
 function on_create_clicked(params...)
     name = Slint.get_value("name")
     surname = Slint.get_value("surname")
@@ -71,7 +89,10 @@ function on_create_clicked(params...)
 
     return true
 end
+# register callback for:
+#       callback createClicked();
 Slint.set_callback("createClicked", on_create_clicked)
 
 Slint.run()
-
+# unload library
+Slint.close()
