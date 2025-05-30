@@ -13,23 +13,28 @@ spin_on = "0.1.1"
 once_cell = "1.19.0"
 log = "0.4.20"
 env_logger = "0.11.1"
+plotters = "0.3.7"
 
 [[bin]]
-path = "src/my_cells.rs"
+path = "src/plotter/main.rs"
+name = "plotter"
+
+[[bin]]
+path = "src/7guis/my_cells.rs"
 name = "my_cells"
 
 [[bin]]
-path = "src/my_cells_listview.rs"
+path = "src/7guis/my_cells_listview.rs"
 name = "my_cells_listview"
 
 [[bin]]
-path = "src/circledraw.rs"
+path = "src/7guis/circledraw.rs"
 name = "circledraw"
 
 [[bin]]
-path = "src/circledraw_2dim_array.rs"
+path = "src/7guis/circledraw_2dim_array.rs"
 name = "circledraw_2dim_array"
 
 [[bin]]
-path = "src/crud.rs"
+path = "src/7guis/crud.rs"
 name = "crud"

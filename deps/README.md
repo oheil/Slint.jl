@@ -38,6 +38,10 @@ cargo run --release --bin my_cells_listview
 cargo run --release --bin circledraw
 cargo run --release --bin circledraw_2dim_array
 cargo run --release --bin crud
+cargo run --release --bin cells
+
+cargo add plotters
+cargo run --release --bin plotters
 ```
 
 ```shell
@@ -52,11 +56,6 @@ set RUST_LOG=
 ```powershell
 [Environment]::SetEnvironmentVariable("RUST_LOG", "debug")
 [Environment]::SetEnvironmentVariable("RUST_LOG", "")
-```
-
-```shell
-cd examples\7guis
-cargo run --release --bin cells
 ```
 
 ## Build
@@ -88,22 +87,12 @@ Slint.__init__()  # load slintwrapper.dll again
 ## Julia Examples
 
 ```julia
+include("examples/7guis/timer.jl")
+include("examples/7guis/tempconv.jl")
 include("examples/7guis/crud.jl")
-```
-
-```julia
 include("examples\\7guis\\counter.jl")
-```
-
-```julia
 include("examples/7guis/circledraw.jl")
-```
-
-```julia
 include("examples/7guis/cells.jl")
-```
-
-```julia
 include("examples\\7guis\\booker.jl")
 ```
 
