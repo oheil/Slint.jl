@@ -9,7 +9,7 @@ export component MainWindow inherits Window {
     in property <[StandardListViewItem]> names-list;
 
     // Above [StandardListViewItem] property needs to be bridged with a SlintValue property.
-    // This is the generic way. Use names-list-bridge from Julia:
+    // This is the generic way. In your Julia code use names-list-bridge:
     in property <[[SlintValue]]> names-list-bridge;
     callback bridge2StandardListViewItem( string, string );
     changed names-list-bridge => {
@@ -42,7 +42,6 @@ export component MainWindow inherits Window {
             rowspan: 3;
             colspan: 2;
             model: root.names-list;
-
         }
 
         Text {
