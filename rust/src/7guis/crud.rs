@@ -4,7 +4,7 @@ use slint::{Model, ModelExt, SharedString, StandardListViewItem, VecModel};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-slint::slint!(export { MainWindow } from "src/crud.slint";);
+slint::slint!(export { MainWindow } from "src/7guis/crud.slint";);
 
 #[derive(Clone)]
 struct Name {
