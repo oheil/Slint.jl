@@ -8,7 +8,7 @@ use log::*;
 use env_logger::Env;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
-use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle };
+use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, Image, Rgba8Pixel };
 use slint::{Model, ModelRc, ModelTracker, ModelNotify, SharedString};
 use slint::StandardListViewItem;
 use slint::VecModel;
@@ -458,7 +458,9 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
                         debug!("r_set_callback:callback return value is Image at {:p}", rv.image_value);
                         //let pixel_buffer: SharedPixelBuffer = SharedPixelBuffer::from_raw(rv.image_value as *mut u8, 0, 0);
                         //return Value::from(pixel_buffer);
-                        return Value::from(Value::Void);
+                        let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::new(800, 600);
+                        let image = Image::from_rgba8(pixel_buffer);
+                        return Value::from(image);
                     }
                     else {
                         error!("r_set_callback:callback return value of type {} is not implemented",rv_type);

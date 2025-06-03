@@ -1,9 +1,13 @@
 using Slint
 
+using Colors
+
 slintFile = "examples\\plotter\\plotter.slint"
 startComponent = "MainWindow"
 
 Slint.compile_from_file(slintFile,startComponent)
+
+buffer=zeros(ARGB32, 800, 600)
 
 # implementation of callback:
 #       pure callback render_plot(/* pitch */ float, /* yaw */ float, /* amplitude */ float) -> image;
@@ -36,9 +40,12 @@ function on_render_plot(params...)
     #   
     #   image(myfig[1,1],img,axis = (title = "Default",))  ???
 
+    # Ptr{UInt8}, Ptr{Nothing} ???
+    # buffer=zeros(ARGB32, WIDTH, HEIGHT)
+    
+    #return C_NULL
 
-    return C_NULL
-
+    return buffer
     
 end
 # register callback for:

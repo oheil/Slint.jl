@@ -103,6 +103,16 @@ function JRvalue(v::Float64)
         C_NULL,
     )
 end
+function JRvalue(v::AbstractMatrix)
+    JRvalue(
+        Cint(rMagic),
+        Base.unsafe_convert(Cstring,rtypes[Int(rImage)]),
+        Cint(-1),
+        Cdouble(0.0),
+        Base.unsafe_convert(Cstring,""),
+        pointer(v),
+    )
+end
 
 
 function run()
@@ -463,6 +473,8 @@ function create_callback_wrapper(user_callback)
                 rv = JRvalue(Float64(r))
             elseif typeof(r) == String
                 rv = JRvalue(String(r))
+            elseif typeof(r) <: AbstractMatrix
+                rv = JRvalue(r)
             else
                 @warn "Slint.create_callback_wrapper: Julia callback returned a value of type "*string(typeof(r))*
                     ", which is not supported, returning empty value."
