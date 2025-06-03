@@ -30,6 +30,10 @@ function on_render_plot(params...)
     #       figure = (; size = (1200, 800), fontsize = 22));
     #   myfig=Figure()  ???
     #   img = colorbuffer(fig.scene);   ???
+    #   
+    #   using ImageView
+    #   imshow(img)
+    #   
     #   image(myfig[1,1],img,axis = (title = "Default",))  ???
 
 
