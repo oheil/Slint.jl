@@ -12,6 +12,7 @@ use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, Com
 use slint::{Model, ModelRc, ModelTracker, ModelNotify, SharedString};
 use slint::StandardListViewItem;
 use slint::VecModel;
+use slint::SharedPixelBuffer;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -253,6 +254,7 @@ struct JRvalue {
     int_value: i32,
     float_value: f64,
     string_value: *const c_char,
+    image_value: *const c_void,
 }
 impl JRvalue {
     fn new_bool(b: bool) -> Self {
@@ -263,6 +265,7 @@ impl JRvalue {
             int_value: b.into(),
             float_value: 0.0,
             string_value: CString::new("").unwrap().into_raw(),
+            image_value: std::ptr::null(),
         }
     }
     fn new_undefined() -> Self {
@@ -273,6 +276,7 @@ impl JRvalue {
             int_value: 0,
             float_value: 0.0,
             string_value: CString::new("").unwrap().into_raw(),
+            image_value: std::ptr::null(),
         }
     }
     /*
@@ -283,6 +287,7 @@ impl JRvalue {
             rtype: (*rv_ref).rtype,
             int_value: (*rv_ref).int_value,
             string_value: (*rv_ref).string_value,
+            image_value: std::ptr::null(),
         }
     }
     */
@@ -302,6 +307,7 @@ impl From<Value> for JRvalue {
                     int_value: 0,
                     float_value: 0.0,
                     string_value: c_ptr,
+                    image_value: std::ptr::null(),
                 };
             }
             ValueType::Bool => {
@@ -316,6 +322,7 @@ impl From<Value> for JRvalue {
                     int_value: 0,
                     float_value: n,
                     string_value: CString::new("").unwrap().into_raw(),
+                    image_value: std::ptr::null(),
                 };
             }
             _ => {
@@ -415,6 +422,7 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
                 debug!("r_set_callback:return value type is: {:p}", rv.rtype);
                 debug!("r_set_callback:return value int_value is: {}", rv.int_value);
                 debug!("r_set_callback:return value string_value is: {:p}", rv.string_value);
+                debug!("r_set_callback:return value image_value is: {:p}", rv.image_value);
                 // debug end
 
                 // valid JRvalue only if magic == 123456
@@ -432,10 +440,31 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
                         } else {
                             return Value::from(false);                        
                         }
-                    } else {
+                    } 
+                    else if rv_type == "String" {
+                        let cs: SharedString = CStr::from_ptr(rv.string_value).to_string_lossy().into_owned().into();
+                        debug!("r_set_callback:callback return value is String {}",cs);
+                        return Value::from(cs);
+                    } 
+                    else if rv_type == "Integer" {
+                        debug!("r_set_callback:callback return value is Integer {}",rv.int_value);
+                        return Value::from(rv.int_value);
+                    } 
+                    else if rv_type == "Float" {
+                        debug!("r_set_callback:callback return value is Float {}",rv.float_value);
+                        return Value::from(rv.float_value);
+                    }
+                    else if rv_type == "Image" {
+                        debug!("r_set_callback:callback return value is Image at {:p}", rv.image_value);
+                        //let pixel_buffer: SharedPixelBuffer = SharedPixelBuffer::from_raw(rv.image_value as *mut u8, 0, 0);
+                        //return Value::from(pixel_buffer);
+                        return Value::from(Value::Void);
+                    }
+                    else {
                         error!("r_set_callback:callback return value of type {} is not implemented",rv_type);
                     }
-                } else {
+                } 
+                else {
                     error!("r_set_callback:callback must return a valid JRvalue, JRvalue.magic must equal {}",JRMAGIC);
                 }
                 // Unvalid or not implemented JRvalue type, return an empty/void

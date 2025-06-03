@@ -43,8 +43,8 @@ include("api.jl")
 const rMagic = r_get_magic()
 
 # globals for persistance of string return values of callbacks
-@enum Rtype rUnknown=1 rBool rString rInteger rFloat
-rtypes = ["Unknown","Bool","String","Integer","Float"]
+@enum Rtype rUnknown=1 rBool rString rInteger rFloat rImage
+rtypes = ["Unknown","Bool","String","Integer","Float","Image"]
 rstring_value = [""]
 #struct JRvalue
 #   magic::Int32
@@ -53,13 +53,24 @@ rstring_value = [""]
 #   float_value::Cdouble
 #   string_value::Ptr{Cchar}
 #end
+function JRvalue()
+    JRvalue(
+        Cint(rMagic),
+        Base.unsafe_convert(Cstring,rtypes[Int(rUnknown)]),
+        Cint(0),
+        Cdouble(0.0),
+        Base.unsafe_convert(Cstring,""),
+        C_NULL,
+    )
+end
 function JRvalue(v::Int)
     JRvalue(
         Cint(rMagic),
         Base.unsafe_convert(Cstring,rtypes[Int(rInteger)]),
         Cint(v),
         Cdouble(0.0),
-        Base.unsafe_convert(Cstring,"")
+        Base.unsafe_convert(Cstring,""),
+        C_NULL,
     )
 end
 function JRvalue(v::Bool)
@@ -68,7 +79,8 @@ function JRvalue(v::Bool)
         Base.unsafe_convert(Cstring,rtypes[Int(rBool)]),
         Cint(v),
         Cdouble(0.0),
-        Base.unsafe_convert(Cstring,"")
+        Base.unsafe_convert(Cstring,""),
+        C_NULL,
     )
 end
 function JRvalue(v::String)
@@ -77,7 +89,8 @@ function JRvalue(v::String)
         Base.unsafe_convert(Cstring,rtypes[Int(rString)]),
         Cint(-1),
         Cdouble(0.0),
-        Base.unsafe_convert(Cstring,v)
+        Base.unsafe_convert(Cstring,v),
+        C_NULL,
     )
 end
 function JRvalue(v::Float64)
@@ -86,7 +99,8 @@ function JRvalue(v::Float64)
         Base.unsafe_convert(Cstring,rtypes[Int(rFloat)]),
         Cint(-1),
         Cdouble(v),
-        Base.unsafe_convert(Cstring,"")
+        Base.unsafe_convert(Cstring,""),
+        C_NULL,
     )
 end
 
@@ -442,18 +456,18 @@ function create_callback_wrapper(user_callback)
             #   all strings need to be global to outlive any garbage collection
             #   (unsure if this is really needed, it works with local strings too)
             if typeof(r) == Bool
-                rstring_value[1] = ""
-                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rBool)]),Cint(r),Cdouble(0.0),Base.unsafe_convert(Cstring,rstring_value[1]))
+                rv = JRvalue(Bool(r))
             elseif typeof(r) == Int
-                rstring_value[1] = ""
-                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rInteger)]),Cint(r),Cdouble(0.0),Base.unsafe_convert(Cstring,rstring_value[1]))
+                rv = JRvalue(Int(r))
             elseif typeof(r) == Float64
-                rstring_value[1] = ""
-                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rFloat)]),Cint(-1),Cdouble(r),Base.unsafe_convert(Cstring,rstring_value[1]))
+                rv = JRvalue(Float64(r))
+            elseif typeof(r) == String
+                rv = JRvalue(String(r))
             else
+                @warn "Slint.create_callback_wrapper: Julia callback returned a value of type "*string(typeof(r))*
+                    ", which is not supported, returning empty value."
                 # The users return value is not implemented to be passed back to rust, return something empty:
-                rstring_value[1] = ""
-                rv = JRvalue(Cint(rMagic),Base.unsafe_convert(Cstring,rtypes[Int(rUnknown)]),Cint(-1),Cdouble(0.0),Base.unsafe_convert(Cstring,rstring_value[1]))
+                rv = JRvalue()
             end
 
             # return to rust

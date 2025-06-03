@@ -6,6 +6,7 @@ struct JRvalue
     int_value::Int32
     float_value::Cdouble
     string_value::Ptr{Cchar}
+    image_value::Ptr{Cvoid}
 end
 
 function r_init()

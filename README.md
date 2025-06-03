@@ -58,7 +58,7 @@ include("contrib\\generator.jl")
 ## Current example work in progress
 
 ```julia
-
+include("examples/plotter/main.jl")
 ```
 
 ## REPL examples
