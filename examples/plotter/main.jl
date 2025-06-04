@@ -7,7 +7,7 @@ startComponent = "MainWindow"
 
 Slint.compile_from_file(slintFile,startComponent)
 
-buffer=zeros(ARGB32, 800, 600)
+buffer=zeros(RGB24, 800, 600)
 
 # implementation of callback:
 #       pure callback render_plot(/* pitch */ float, /* yaw */ float, /* amplitude */ float) -> image;

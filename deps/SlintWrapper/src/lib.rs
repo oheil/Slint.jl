@@ -8,7 +8,7 @@ use log::*;
 use env_logger::Env;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
-use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, Image, Rgba8Pixel };
+use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, Image, Rgba8Pixel, Rgb8Pixel };
 use slint::{Model, ModelRc, ModelTracker, ModelNotify, SharedString};
 use slint::StandardListViewItem;
 use slint::VecModel;
@@ -19,6 +19,8 @@ use std::rc::Rc;
 
 mod slint_value;
 use crate::slint_value::*;
+
+use plotters::prelude::*;  //REMOVE THIS LATER
 
 // only hold a single instance at index 0
 static INSTANCES: Lazy<Mutex<Vec<Weak<ComponentInstance>>>> = Lazy::new(|| {
@@ -373,6 +375,17 @@ impl From<JRvalue> for Value {
     }
 }
 
+// REEMOVE THIS LATER
+                        fn pdf(x: f64, y: f64, a: f64) -> f64 {
+                            const SDX: f64 = 0.1;
+                            const SDY: f64 = 0.1;
+                            let x = x as f64 / 10.0;
+                            let y = y as f64 / 10.0;
+                            a * (-x * x / 2.0 / SDX / SDX - y * y / 2.0 / SDY / SDY).exp()
+                        }
+
+
+
 //
 // register a callback defined in .slint file
 //   example line in .slint file:
@@ -458,8 +471,56 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
                         debug!("r_set_callback:callback return value is Image at {:p}", rv.image_value);
                         //let pixel_buffer: SharedPixelBuffer = SharedPixelBuffer::from_raw(rv.image_value as *mut u8, 0, 0);
                         //return Value::from(pixel_buffer);
-                        let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::new(800, 600);
-                        let image = Image::from_rgba8(pixel_buffer);
+                        
+                        let slice = std::slice::from_raw_parts(rv.image_value as *const u8, 800 * 600 * 3);
+                        let mut pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::clone_from_slice(slice, 800, 600);
+                        
+                        /*
+                        //let pixel_buffer2 = rv.image_value as *const SharedPixelBuffer<Rgb8Pixel>;
+                        //let pixel_buffer3: &SharedPixelBuffer<Rgb8Pixel> = &*pixel_buffer2;
+                        //let mut pixel_buffer: SharedPixelBuffer<Rgb8Pixel> = pixel_buffer3.clone();
+                        //let mut pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::new(800, 600);
+                        
+                        let pitch: f32 = args2[0].clone().try_into().unwrap();
+                        let yaw: f32 = args2[1].clone().try_into().unwrap();
+                        let amplitude: f32 = args2[2].clone().try_into().unwrap();
+
+                        //let mut pixel_buffer = SharedPixelBuffer::new(640, 480);
+                        let size = (pixel_buffer.width(), pixel_buffer.height());
+                        let backend = BitMapBackend::with_buffer(pixel_buffer.make_mut_bytes(), size);
+                        let root = backend.into_drawing_area();
+                        root.fill(&GREEN).expect("error filling drawing area");
+                        let mut chart = ChartBuilder::on(&root)
+                            .build_cartesian_3d(-3.0..3.0, 0.0..6.0, -3.0..3.0)
+                            .expect("error building coordinate system");
+                        chart.with_projection(|mut p| {
+                            p.pitch = pitch as f64;
+                            p.yaw = yaw as f64;
+                            p.scale = 0.7;
+                            p.into_matrix() // build the projection matrix
+                        });
+
+                        chart.configure_axes().draw().expect("error drawing");
+                        chart
+                            .draw_series(
+                                SurfaceSeries::xoz(
+                                    (-15..=15).map(|x| x as f64 / 5.0),
+                                    (-15..=15).map(|x| x as f64 / 5.0),
+                                    |x, y| pdf(x, y, amplitude as f64),
+                                )
+                                .style_func(&|&v| {
+                                    (&HSLColor(240.0 / 360.0 - 240.0 / 360.0 * v / 5.0, 1.0, 0.7)).into()
+                                }),
+                            )
+                            .expect("error drawing series");
+
+                        root.present().expect("error presenting");
+                        drop(chart);
+                        drop(root);
+
+                        */
+                        
+                        let image = Image::from_rgb8(pixel_buffer);
                         return Value::from(image);
                     }
                     else {
