@@ -1,13 +1,15 @@
 using Slint
 
-using Colors
+using CairoMakie
+using CairoMakie.Colors
 
 slintFile = "examples\\plotter\\plotter.slint"
 startComponent = "MainWindow"
 
 Slint.compile_from_file(slintFile,startComponent)
 
-buffer=zeros(RGB24, 800, 600)
+buffer = zeros(RGB24, 800, 600)
+
 
 # implementation of callback:
 #       pure callback render_plot(/* pitch */ float, /* yaw */ float, /* amplitude */ float) -> image;
@@ -44,6 +46,26 @@ function on_render_plot(params...)
     # buffer=zeros(ARGB32, WIDTH, HEIGHT)
     
     #return C_NULL
+    sz = (800, 600)
+    px_per_unit = 1
+    surf = CairoMakie.Cairo.CairoImageSurface(collect(buffer'))
+    conf = Makie.merge_screen_config(CairoMakie.ScreenConfig, Dict(:px_per_unit => px_per_unit))
+
+    x = -2:0.005:2
+    y = -2:0.005:2
+    f(z) = (z^2 + 1) / (z^2 - 1)
+    fvals = [f(u + 1im * v) for u in x, v in y]
+    fvalues = abs.(fvals)
+    fargs = angle.(fvals)
+    indxCut = fvalues .> 3
+    fvalues[indxCut] .= 3.01
+    fig, ax, pltobj = surface(x, y, fvalues, color = fargs,
+        colormap = :roma, colorrange = (-π, π),
+        backlight = 1.0f0, highclip = :black,
+        figure = (; size = sz, fontsize = 22));
+
+    scr = CairoMakie.Screen(fig.scene, conf, surf)
+    CairoMakie.cairo_draw(scr, fig.scene)
 
     return buffer
     
