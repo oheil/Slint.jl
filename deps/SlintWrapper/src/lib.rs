@@ -472,8 +472,9 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
                         //let pixel_buffer: SharedPixelBuffer = SharedPixelBuffer::from_raw(rv.image_value as *mut u8, 0, 0);
                         //return Value::from(pixel_buffer);
                         
-                        let slice = std::slice::from_raw_parts(rv.image_value as *const u8, 800 * 600 * 3);
-                        let mut pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::clone_from_slice(slice, 800, 600);
+                        // all Julia image buffers (e.g. Matrix{RGB24,ARGB32,UInt32}) are of element size 4 bytes
+                        let slice = std::slice::from_raw_parts(rv.image_value as *const u8, 800 * 600 * 4);
+                        let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(slice, 800, 600);
                         
                         /*
                         //let pixel_buffer2 = rv.image_value as *const SharedPixelBuffer<Rgb8Pixel>;
@@ -519,8 +520,8 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
                         drop(root);
 
                         */
-                        
-                        let image = Image::from_rgb8(pixel_buffer);
+
+                        let image = Image::from_rgba8(pixel_buffer);
                         return Value::from(image);
                     }
                     else {

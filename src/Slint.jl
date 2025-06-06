@@ -103,7 +103,11 @@ function JRvalue(v::Float64)
         C_NULL,
     )
 end
-function JRvalue(v::AbstractMatrix)
+function JRvalue(v::Matrix{T}) where T
+    if sizeof(T) != 4
+        @warn "Slint.JRvalue: only matrices of element size 4 (e.g. UInt32) are supported, returning empty JRvalue"
+        return JRvalue()
+    end 
     JRvalue(
         Cint(rMagic),
         Base.unsafe_convert(Cstring,rtypes[Int(rImage)]),
@@ -113,7 +117,10 @@ function JRvalue(v::AbstractMatrix)
         pointer(v),
     )
 end
-
+function JRvalue(v::AbstractArray)
+    @warn "Slint.JRvalue: only arrays of element size 4 bytes (e.g. RGB24,ARGB32,UInt32) are supported, returning empty JRvalue"
+    JRvalue()
+end
 
 function run()
     check_init()
@@ -473,7 +480,7 @@ function create_callback_wrapper(user_callback)
                 rv = JRvalue(Float64(r))
             elseif typeof(r) == String
                 rv = JRvalue(String(r))
-            elseif typeof(r) <: AbstractMatrix
+            elseif typeof(r) <: AbstractArray
                 rv = JRvalue(r)
             else
                 @warn "Slint.create_callback_wrapper: Julia callback returned a value of type "*string(typeof(r))*
