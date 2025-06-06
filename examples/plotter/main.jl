@@ -96,6 +96,8 @@ function on_render_plot(params...)
 	resize_to_layout!(fig)
 	buffer .= colorbuffer(fig.scene)
 
+    #using ImageView
+    #imshow(buffer)
 
 
     return buffer
