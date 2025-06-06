@@ -1,18 +1,18 @@
-using GLMakie
-using GLMakie.Colors
-
 using Slint
+
+#using WGLMakie
+#using WGLMakie.Colors
 
 slintFile = "examples\\plotter\\plotter.slint"
 startComponent = "MainWindow"
 
 Slint.compile_from_file(slintFile,startComponent)
 
-buffer = zeros(RGB24, 600, 800)   # 4 x w=800 x h=600 Bytes, sizeof(buffer)
+#buffer = zeros(RGB24, 600, 800)   # 4 x w=800 x h=600 Bytes, sizeof(buffer)
 #buffer = zeros(ARGB32, 800, 600)  # 4 x 800 x 600 Bytes
-#buffer = zeros(UInt32, 800, 600)   # 4 x 800 x 600 Bytes
+buffer = zeros(UInt32, 800, 600)   # 4 x 800 x 600 Bytes
 
-GLMakie.activate!(; visible = false)
+#GLMakie.activate!(; visible = false)
 
 # implementation of callback:
 #       pure callback render_plot(/* pitch */ float, /* yaw */ float, /* amplitude */ float) -> image;
@@ -22,6 +22,8 @@ function on_render_plot(params...)
     end
 
     amplitude = params[3]
+
+    # Makie NOT WORKGING, CairoMakie, GLMakie, WGLMakie all not working!
 
     # https://beautiful.makie.org/dev/examples/3d/surfaces/complex_function
     #   using CairoMakie
@@ -78,6 +80,7 @@ function on_render_plot(params...)
 
     =#
 
+    #=
 	sz = (800, 600)
 
 	x = -2:0.005:2
@@ -94,11 +97,14 @@ function on_render_plot(params...)
 		figure = (; size = sz, fontsize = 22));
 
 	resize_to_layout!(fig)
-	buffer .= colorbuffer(fig.scene)
+	
+    #scr = WGLMakie.Screen(fig.scene)
+    #colorbuffer(fig.scene)
+    #buffer .= colorbuffer(fig.scene)
 
     #using ImageView
     #imshow(buffer)
-
+    =#
 
     return buffer
     

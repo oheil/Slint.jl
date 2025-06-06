@@ -9,6 +9,7 @@ use env_logger::Env;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
 use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, Image, Rgba8Pixel, Rgb8Pixel };
+use slint_interpreter::BackendSelector;
 use slint::{Model, ModelRc, ModelTracker, ModelNotify, SharedString};
 use slint::StandardListViewItem;
 use slint::VecModel;
@@ -167,6 +168,11 @@ unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: 
     //let mut compiler = ComponentCompiler::default();
     let compiler = Compiler::default();
     //compilers.push(&compiler);
+
+    //let selector = BackendSelector::new().backend_name(String::from("winit-skia-software"));
+    //if let Err(err) = selector.select() {
+    //    debug!("r_compile_from_file: error selecting backend: {err}");
+    //}
 
     let result = spin_on::spin_on(
         compiler.build_from_path(filename)
