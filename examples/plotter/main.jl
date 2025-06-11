@@ -10,8 +10,8 @@ startComponent = "MainWindow"
 Slint.compile_from_file(slintFile,startComponent)
 
 #buffer = zeros(RGB24, 600, 800)   # 4 x w=800 x h=600 Bytes, sizeof(buffer)
-buffer = zeros(ARGB32, 800, 600)  # 4 x 800 x 600 Bytes
 #buffer = zeros(UInt32, 800, 600)   # 4 x 800 x 600 Bytes
+buffer = zeros(ARGB32, 800, 600)  # 4 x 800 x 600 Bytes
 buffer4io = zeros(UInt8, 800*600*4);
 buffer_rot = zeros(ARGB32, 600, 800)
 
@@ -52,11 +52,13 @@ end
 # implementation of callback:
 #       pure callback render_plot(/* pitch */ float, /* yaw */ float, /* amplitude */ float) -> image;
 function on_render_plot(params...)
-    for p in params
-        println(p," ",typeof(p))
-    end
+    #for p in params
+    #    println(p," ",typeof(p))
+    #end
 
     amplitude = params[3] / 5.0
+    elevation = 10.0 * params[1] # * 2.0 * π / 360.0
+    azimuthal = 10.0 * params[2] #  * 2.0 * π / 360.0
 
     # Makie NOT WORKGING, CairoMakie, GLMakie, WGLMakie all not working!
 
@@ -173,6 +175,7 @@ function on_render_plot(params...)
         nx=50, ny=50, display_option=Plots.GR.OPTION_SHADED_MESH,
         size=(800,600),
         zlims=(-0.5,3.0),
+        camera=(azimuthal, elevation),
     );
     io_buf = IOBuffer(buffer4io, read=true, write=true, maxsize=sizeof(buffer4io))
     show(io_buf, MIME("image/png"), p)
