@@ -57,8 +57,8 @@ function on_render_plot(params...)
     #end
 
     amplitude = params[3] / 5.0
-    elevation = 10.0 * params[1] # * 2.0 * π / 360.0
-    azimuthal = 10.0 * params[2] #  * 2.0 * π / 360.0
+    elevation = 30.0 + 10.0 * params[1] # * 2.0 * π / 360.0
+    azimuthal = 30.0 + 10.0 * params[2] #  * 2.0 * π / 360.0
 
     # Makie NOT WORKGING, CairoMakie, GLMakie, WGLMakie all not working!
 
