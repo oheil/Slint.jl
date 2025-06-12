@@ -179,7 +179,8 @@ function on_render_plot(params...)
     );
     io_buf = IOBuffer(buffer4io, read=true, write=true, maxsize=sizeof(buffer4io))
     show(io_buf, MIME("image/png"), p)
-    buffer_rot .= ARGB32.(load(io_buf))
+    #buffer_rot .= ARGB32.(load(io_buf))
+    buffer_rot .= load(io_buf)
     #buffer .= PermutedDimsArray(view(buffer_rot, :, size(buffer_rot, 2):-1:1), (2, 1))
     buffer .= PermutedDimsArray(view(buffer_rot, :, 1:1:size(buffer_rot, 2)), (2, 1))
 

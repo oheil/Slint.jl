@@ -7,6 +7,9 @@ struct JRvalue
     float_value::Cdouble
     string_value::Ptr{Cchar}
     image_value::Ptr{Cvoid}
+    width::Int32
+    height::Int32
+    elsize::Int32
 end
 
 function r_init()

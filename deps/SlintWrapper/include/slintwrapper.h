@@ -12,6 +12,9 @@ typedef struct JRvalue {
   double float_value;
   const char *string_value;
   const void *image_value;
+  int32_t width;
+  int32_t height;
+  int32_t elsize;
 } JRvalue;
 
 void r_init(void);

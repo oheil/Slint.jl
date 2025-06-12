@@ -52,6 +52,10 @@ rstring_value = [""]
 #   int_value::Int32
 #   float_value::Cdouble
 #   string_value::Ptr{Cchar}
+#   image_value::Ptr{Cvoid}
+#   width::Int32
+#   height::Int32
+#   elsize::Int32
 #end
 function JRvalue()
     JRvalue(
@@ -61,6 +65,9 @@ function JRvalue()
         Cdouble(0.0),
         Base.unsafe_convert(Cstring,""),
         C_NULL,
+        Cint(0),
+        Cint(0),
+        Cint(0),
     )
 end
 function JRvalue(v::Int)
@@ -71,6 +78,9 @@ function JRvalue(v::Int)
         Cdouble(0.0),
         Base.unsafe_convert(Cstring,""),
         C_NULL,
+        Cint(0),
+        Cint(0),
+        Cint(0),
     )
 end
 function JRvalue(v::Bool)
@@ -81,6 +91,9 @@ function JRvalue(v::Bool)
         Cdouble(0.0),
         Base.unsafe_convert(Cstring,""),
         C_NULL,
+        Cint(0),
+        Cint(0),
+        Cint(0),
     )
 end
 function JRvalue(v::String)
@@ -91,6 +104,9 @@ function JRvalue(v::String)
         Cdouble(0.0),
         Base.unsafe_convert(Cstring,v),
         C_NULL,
+        Cint(0),
+        Cint(0),
+        Cint(0),
     )
 end
 function JRvalue(v::Float64)
@@ -101,13 +117,16 @@ function JRvalue(v::Float64)
         Cdouble(v),
         Base.unsafe_convert(Cstring,""),
         C_NULL,
+        Cint(0),
+        Cint(0),
+        Cint(0),
     )
 end
 function JRvalue(v::Matrix{T}) where T
-    if sizeof(T) != 4
-        @warn "Slint.JRvalue: only matrices of element size 4 (e.g. UInt32) are supported, returning empty JRvalue"
-        return JRvalue()
-    end 
+    #if sizeof(T) != 4
+    #    @warn "Slint.JRvalue: only matrices of element size 4 (e.g. UInt32) are currently supported, returning empty JRvalue"
+    #    return JRvalue()
+    #end 
     JRvalue(
         Cint(rMagic),
         Base.unsafe_convert(Cstring,rtypes[Int(rImage)]),
@@ -115,6 +134,9 @@ function JRvalue(v::Matrix{T}) where T
         Cdouble(0.0),
         Base.unsafe_convert(Cstring,""),
         pointer(v),
+        Cint(size(v,1)),
+        Cint(size(v,2)),
+        Cint(sizeof(eltype(v))),
     )
 end
 function JRvalue(v::AbstractArray)

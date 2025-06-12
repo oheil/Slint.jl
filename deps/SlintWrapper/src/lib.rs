@@ -263,6 +263,9 @@ struct JRvalue {
     float_value: f64,
     string_value: *const c_char,
     image_value: *const c_void,
+    width: i32, // optional, for images
+    height: i32, // optional, for images
+    elsize: i32, // optional, for images
 }
 impl JRvalue {
     fn new_bool(b: bool) -> Self {
@@ -274,6 +277,9 @@ impl JRvalue {
             float_value: 0.0,
             string_value: CString::new("").unwrap().into_raw(),
             image_value: std::ptr::null(),
+            width: 0,
+            height: 0,
+            elsize: 0,
         }
     }
     fn new_undefined() -> Self {
@@ -285,6 +291,9 @@ impl JRvalue {
             float_value: 0.0,
             string_value: CString::new("").unwrap().into_raw(),
             image_value: std::ptr::null(),
+            width: 0,
+            height: 0,
+            elsize: 0,
         }
     }
     /*
@@ -316,6 +325,9 @@ impl From<Value> for JRvalue {
                     float_value: 0.0,
                     string_value: c_ptr,
                     image_value: std::ptr::null(),
+                    width: 0,
+                    height: 0,
+                    elsize: 0,
                 };
             }
             ValueType::Bool => {
@@ -331,6 +343,9 @@ impl From<Value> for JRvalue {
                     float_value: n,
                     string_value: CString::new("").unwrap().into_raw(),
                     image_value: std::ptr::null(),
+                    width: 0,
+                    height: 0,
+                    elsize: 0,
                 };
             }
             _ => {
@@ -380,17 +395,6 @@ impl From<JRvalue> for Value {
         return Value::Void;
     }
 }
-
-// REEMOVE THIS LATER
-                        fn pdf(x: f64, y: f64, a: f64) -> f64 {
-                            const SDX: f64 = 0.1;
-                            const SDY: f64 = 0.1;
-                            let x = x as f64 / 10.0;
-                            let y = y as f64 / 10.0;
-                            a * (-x * x / 2.0 / SDX / SDX - y * y / 2.0 / SDY / SDY).exp()
-                        }
-
-
 
 //
 // register a callback defined in .slint file
@@ -475,60 +479,25 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
                     }
                     else if rv_type == "Image" {
                         debug!("r_set_callback:callback return value is Image at {:p}", rv.image_value);
-                        //let pixel_buffer: SharedPixelBuffer = SharedPixelBuffer::from_raw(rv.image_value as *mut u8, 0, 0);
-                        //return Value::from(pixel_buffer);
+                        let width = rv.width as usize;
+                        let height = rv.height as usize;
+                        let elsize = rv.elsize as usize;
+
+                        let slice = std::slice::from_raw_parts(rv.image_value as *const u8, width * height * elsize);
                         
-                        // all Julia image buffers (e.g. Matrix{RGB24,ARGB32,UInt32}) are of element size 4 bytes
-                        let slice = std::slice::from_raw_parts(rv.image_value as *const u8, 800 * 600 * 4);
-                        let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(slice, 800, 600);
-                        
-                        /*
-                        //let pixel_buffer2 = rv.image_value as *const SharedPixelBuffer<Rgb8Pixel>;
-                        //let pixel_buffer3: &SharedPixelBuffer<Rgb8Pixel> = &*pixel_buffer2;
-                        //let mut pixel_buffer: SharedPixelBuffer<Rgb8Pixel> = pixel_buffer3.clone();
-                        //let mut pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::new(800, 600);
-                        
-                        let pitch: f32 = args2[0].clone().try_into().unwrap();
-                        let yaw: f32 = args2[1].clone().try_into().unwrap();
-                        let amplitude: f32 = args2[2].clone().try_into().unwrap();
-
-                        //let mut pixel_buffer = SharedPixelBuffer::new(640, 480);
-                        let size = (pixel_buffer.width(), pixel_buffer.height());
-                        let backend = BitMapBackend::with_buffer(pixel_buffer.make_mut_bytes(), size);
-                        let root = backend.into_drawing_area();
-                        root.fill(&GREEN).expect("error filling drawing area");
-                        let mut chart = ChartBuilder::on(&root)
-                            .build_cartesian_3d(-3.0..3.0, 0.0..6.0, -3.0..3.0)
-                            .expect("error building coordinate system");
-                        chart.with_projection(|mut p| {
-                            p.pitch = pitch as f64;
-                            p.yaw = yaw as f64;
-                            p.scale = 0.7;
-                            p.into_matrix() // build the projection matrix
-                        });
-
-                        chart.configure_axes().draw().expect("error drawing");
-                        chart
-                            .draw_series(
-                                SurfaceSeries::xoz(
-                                    (-15..=15).map(|x| x as f64 / 5.0),
-                                    (-15..=15).map(|x| x as f64 / 5.0),
-                                    |x, y| pdf(x, y, amplitude as f64),
-                                )
-                                .style_func(&|&v| {
-                                    (&HSLColor(240.0 / 360.0 - 240.0 / 360.0 * v / 5.0, 1.0, 0.7)).into()
-                                }),
-                            )
-                            .expect("error drawing series");
-
-                        root.present().expect("error presenting");
-                        drop(chart);
-                        drop(root);
-
-                        */
-
-                        let image = Image::from_rgba8(pixel_buffer);
-                        return Value::from(image);
+                        if elsize == 3 {
+                            debug!("r_set_callback:callback return value of type Image with elsize 3");
+                            let mut pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::clone_from_slice(slice, width as u32, height as u32);
+                            let image = Image::from_rgb8(pixel_buffer);
+                            return Value::from(image);
+                        }
+                        if elsize == 4 {
+                            debug!("r_set_callback:callback return value of type Image with elsize 4");
+                            let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(slice, width as u32, height as u32);
+                            let image = Image::from_rgba8(pixel_buffer);
+                            return Value::from(image);
+                        }
+                        warn!("r_set_callback:callback return value of type Image with elsize {} is not implemented",elsize);
                     }
                     else {
                         error!("r_set_callback:callback return value of type {} is not implemented",rv_type);
@@ -1209,7 +1178,6 @@ impl CellsModel {
             },
             None => {
                 debug!("update_cell:no new value");
-
             },
         }
         Some(())
