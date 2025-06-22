@@ -9,7 +9,7 @@ use env_logger::Env;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
 use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, Image, Rgba8Pixel, Rgb8Pixel };
-use slint_interpreter::BackendSelector;
+//use slint_interpreter::BackendSelector;
 use slint::{Model, ModelRc, ModelTracker, ModelNotify, SharedString};
 use slint::StandardListViewItem;
 use slint::VecModel;
@@ -487,13 +487,13 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
                         
                         if elsize == 3 {
                             debug!("r_set_callback:callback return value of type Image with elsize 3");
-                            let mut pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::clone_from_slice(slice, width as u32, height as u32);
+                            let pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::clone_from_slice(slice, width as u32, height as u32);
                             let image = Image::from_rgb8(pixel_buffer);
                             return Value::from(image);
                         }
                         if elsize == 4 {
                             debug!("r_set_callback:callback return value of type Image with elsize 4");
-                            let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(slice, width as u32, height as u32);
+                            let pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(slice, width as u32, height as u32);
                             let image = Image::from_rgba8(pixel_buffer);
                             return Value::from(image);
                         }
@@ -1239,6 +1239,130 @@ impl slint::Model for RowModel {
 //
 // API to models for arrays/matrices ends here
 //
+
+//
+// Rendering the image wih Julia turns out to be too slow, so we do it in Rust:
+//   This is a 3D surface plot of a Gaussian distribution
+//   From Slint example plotter.slint + main.rs
+// 
+
+fn pdf(x: f64, y: f64, a: f64) -> f64 {
+    const SDX: f64 = 0.1;
+    const SDY: f64 = 0.1;
+    let x = x as f64 / 10.0;
+    let y = y as f64 / 10.0;
+    a * (-x * x / 2.0 / SDX / SDX - y * y / 2.0 / SDY / SDY).exp()
+}
+
+#[unsafe(no_mangle)]
+unsafe extern "C" fn render_plot_rgb(julia_buffer: JRvalue, pitch: f32, yaw: f32, amplitude: f32) { unsafe {
+
+    let width = julia_buffer.width as usize;
+    let height = julia_buffer.height as usize;
+    let elsize = julia_buffer.elsize as usize;
+
+    let slice = std::slice::from_raw_parts(julia_buffer.image_value as *const u8, width * height * elsize);
+    
+    //let mut pixel_buffer = SharedPixelBuffer::new(640, 480);
+    let mut pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::clone_from_slice(slice, width as u32, height as u32);
+    //let image = Image::from_rgb8(pixel_buffer);
+    let size = (pixel_buffer.width(), pixel_buffer.height());
+
+    let backend = BitMapBackend::with_buffer(pixel_buffer.make_mut_bytes(), size);
+    // Plotters requires TrueType fonts from the file system to draw axis text - we skip that for
+    // WASM for now.
+    #[cfg(target_arch = "wasm32")]
+    let backend = wasm_backend::BackendWithoutText { backend };
+
+    let root = backend.into_drawing_area();
+
+    root.fill(&WHITE).expect("error filling drawing area");
+
+    let mut chart = ChartBuilder::on(&root)
+        .build_cartesian_3d(-3.0..3.0, 0.0..6.0, -3.0..3.0)
+        .expect("error building coordinate system");
+    chart.with_projection(|mut p| {
+        p.pitch = pitch as f64;
+        p.yaw = yaw as f64;
+        p.scale = 0.7;
+        p.into_matrix() // build the projection matrix
+    });
+
+    chart.configure_axes().draw().expect("error drawing");
+
+    chart
+        .draw_series(
+            SurfaceSeries::xoz(
+                (-15..=15).map(|x| x as f64 / 5.0),
+                (-15..=15).map(|x| x as f64 / 5.0),
+                |x, y| pdf(x, y, amplitude as f64),
+            )
+            .style_func(&|&v| {
+                (&HSLColor(240.0 / 360.0 - 240.0 / 360.0 * v / 5.0, 1.0, 0.7)).into()
+            }),
+        )
+        .expect("error drawing series");
+
+    root.present().expect("error presenting");
+    drop(chart);
+    drop(root);
+
+}}
+
+#[unsafe(no_mangle)]
+unsafe extern "C" fn render_plot_rgba(julia_buffer: JRvalue, pitch: f32, yaw: f32, amplitude: f32) { unsafe {
+
+    let width = julia_buffer.width as usize;
+    let height = julia_buffer.height as usize;
+    let elsize = julia_buffer.elsize as usize;
+
+    let slice = std::slice::from_raw_parts(julia_buffer.image_value as *const u8, width * height * elsize);
+
+    //let mut pixel_buffer = SharedPixelBuffer::new(640, 480);
+    let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(slice, width as u32, height as u32);
+    //let image = Image::from_rgba8(pixel_buffer);
+    let size = (pixel_buffer.width(), pixel_buffer.height());
+
+    let backend = BitMapBackend::with_buffer(pixel_buffer.make_mut_bytes(), size);
+    // Plotters requires TrueType fonts from the file system to draw axis text - we skip that for
+    // WASM for now.
+    #[cfg(target_arch = "wasm32")]
+    let backend = wasm_backend::BackendWithoutText { backend };
+
+    let root = backend.into_drawing_area();
+
+    root.fill(&WHITE).expect("error filling drawing area");
+
+    let mut chart = ChartBuilder::on(&root)
+        .build_cartesian_3d(-3.0..3.0, 0.0..6.0, -3.0..3.0)
+        .expect("error building coordinate system");
+    chart.with_projection(|mut p| {
+        p.pitch = pitch as f64;
+        p.yaw = yaw as f64;
+        p.scale = 0.7;
+        p.into_matrix() // build the projection matrix
+    });
+
+    chart.configure_axes().draw().expect("error drawing");
+
+    chart
+        .draw_series(
+            SurfaceSeries::xoz(
+                (-15..=15).map(|x| x as f64 / 5.0),
+                (-15..=15).map(|x| x as f64 / 5.0),
+                |x, y| pdf(x, y, amplitude as f64),
+            )
+            .style_func(&|&v| {
+                (&HSLColor(240.0 / 360.0 - 240.0 / 360.0 * v / 5.0, 1.0, 0.7)).into()
+            }),
+        )
+        .expect("error drawing series");
+
+    root.present().expect("error presenting");
+    drop(chart);
+    drop(root);
+
+}}
 
 
 

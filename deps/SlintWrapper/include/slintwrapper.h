@@ -53,3 +53,7 @@ void r_set_property_model(const char *id,
                           int32_t rows,
                           int32_t cols,
                           struct JRvalue (*func)(const void *par_ptr, int32_t len));
+
+void render_plot_rgb(struct JRvalue julia_buffer, float pitch, float yaw, float amplitude);
+
+void render_plot_rgba(struct JRvalue julia_buffer, float pitch, float yaw, float amplitude);
