@@ -3,6 +3,7 @@ use once_cell::sync::Lazy;
 use std::ffi::{CStr, CString, c_void, c_char};
 use std::convert::From;
 use std::collections::HashMap;
+//use std::io;
 
 use log::*;
 use env_logger::Env;
@@ -262,7 +263,7 @@ struct JRvalue {
     int_value: i32,
     float_value: f64,
     string_value: *const c_char,
-    image_value: *const c_void,
+    image_value: *mut c_void,
     width: i32, // optional, for images
     height: i32, // optional, for images
     elsize: i32, // optional, for images
@@ -276,7 +277,7 @@ impl JRvalue {
             int_value: b.into(),
             float_value: 0.0,
             string_value: CString::new("").unwrap().into_raw(),
-            image_value: std::ptr::null(),
+            image_value: std::ptr::null_mut(),
             width: 0,
             height: 0,
             elsize: 0,
@@ -290,7 +291,7 @@ impl JRvalue {
             int_value: 0,
             float_value: 0.0,
             string_value: CString::new("").unwrap().into_raw(),
-            image_value: std::ptr::null(),
+            image_value: std::ptr::null_mut(),
             width: 0,
             height: 0,
             elsize: 0,
@@ -324,7 +325,7 @@ impl From<Value> for JRvalue {
                     int_value: 0,
                     float_value: 0.0,
                     string_value: c_ptr,
-                    image_value: std::ptr::null(),
+                    image_value: std::ptr::null_mut(),
                     width: 0,
                     height: 0,
                     elsize: 0,
@@ -342,7 +343,7 @@ impl From<Value> for JRvalue {
                     int_value: 0,
                     float_value: n,
                     string_value: CString::new("").unwrap().into_raw(),
-                    image_value: std::ptr::null(),
+                    image_value: std::ptr::null_mut(),
                     width: 0,
                     height: 0,
                     elsize: 0,
@@ -1255,14 +1256,15 @@ fn pdf(x: f64, y: f64, a: f64) -> f64 {
 }
 
 #[unsafe(no_mangle)]
-unsafe extern "C" fn render_plot_rgb(julia_buffer: JRvalue, pitch: f32, yaw: f32, amplitude: f32) { unsafe {
+unsafe extern "C" fn r_render_plot_rgb(julia_buffer: JRvalue, pitch: f32, yaw: f32, amplitude: f32) { unsafe {
 
     let width = julia_buffer.width as usize;
     let height = julia_buffer.height as usize;
     let elsize = julia_buffer.elsize as usize;
 
-    let slice = std::slice::from_raw_parts(julia_buffer.image_value as *const u8, width * height * elsize);
-    
+    let nbytes = width * height * elsize;
+    let slice = std::slice::from_raw_parts(julia_buffer.image_value as *const u8, nbytes);
+
     //let mut pixel_buffer = SharedPixelBuffer::new(640, 480);
     let mut pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::clone_from_slice(slice, width as u32, height as u32);
     //let image = Image::from_rgb8(pixel_buffer);
@@ -1306,20 +1308,30 @@ unsafe extern "C" fn render_plot_rgb(julia_buffer: JRvalue, pitch: f32, yaw: f32
     root.present().expect("error presenting");
     drop(chart);
     drop(root);
-
+    
+    let writer = julia_buffer.image_value as *mut u8;
+    let reader = pixel_buffer.make_mut_bytes().as_ptr();
+    writer.copy_from(reader, nbytes);
 }}
 
 #[unsafe(no_mangle)]
-unsafe extern "C" fn render_plot_rgba(julia_buffer: JRvalue, pitch: f32, yaw: f32, amplitude: f32) { unsafe {
+unsafe extern "C" fn r_render_plot_rgba(julia_buffer: JRvalue, pitch: f32, yaw: f32, amplitude: f32) { unsafe {
 
     let width = julia_buffer.width as usize;
     let height = julia_buffer.height as usize;
     let elsize = julia_buffer.elsize as usize;
 
-    let slice = std::slice::from_raw_parts(julia_buffer.image_value as *const u8, width * height * elsize);
+    debug!("r_render_plot_rgba: width={}, height={}, elsize={}, image_value={:?}", width, height, elsize, julia_buffer.image_value);
+
+    let nbytes = width * height * elsize;
+    let slice = std::slice::from_raw_parts(julia_buffer.image_value as *mut u8, nbytes);
+
+    //let buf = julia_buffer.image_value as *mut u8;
+    //*buf = 0xff;
 
     //let mut pixel_buffer = SharedPixelBuffer::new(640, 480);
     let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(slice, width as u32, height as u32);
+
     //let image = Image::from_rgba8(pixel_buffer);
     let size = (pixel_buffer.width(), pixel_buffer.height());
 
@@ -1362,6 +1374,9 @@ unsafe extern "C" fn render_plot_rgba(julia_buffer: JRvalue, pitch: f32, yaw: f3
     drop(chart);
     drop(root);
 
+    let writer = julia_buffer.image_value as *mut u8;
+    let reader = pixel_buffer.make_mut_bytes().as_ptr();
+    writer.copy_from(reader, nbytes);
 }}
 
 

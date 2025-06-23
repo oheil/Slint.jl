@@ -11,7 +11,7 @@ typedef struct JRvalue {
   int32_t int_value;
   double float_value;
   const char *string_value;
-  const void *image_value;
+  void *image_value;
   int32_t width;
   int32_t height;
   int32_t elsize;
@@ -54,6 +54,6 @@ void r_set_property_model(const char *id,
                           int32_t cols,
                           struct JRvalue (*func)(const void *par_ptr, int32_t len));
 
-void render_plot_rgb(struct JRvalue julia_buffer, float pitch, float yaw, float amplitude);
+void r_render_plot_rgb(struct JRvalue julia_buffer, float pitch, float yaw, float amplitude);
 
-void render_plot_rgba(struct JRvalue julia_buffer, float pitch, float yaw, float amplitude);
+void r_render_plot_rgba(struct JRvalue julia_buffer, float pitch, float yaw, float amplitude);

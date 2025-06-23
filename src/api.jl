@@ -80,3 +80,11 @@ function r_set_property_model(id, rows, cols, func)
     ccall((:r_set_property_model, slintwrapper), Cvoid, (Ptr{Cchar}, Int32, Int32, Ptr{Cvoid}), id, rows, cols, func)
 end
 
+function r_render_plot_rgb(julia_buffer, pitch, yaw, amplitude)
+    ccall((:r_render_plot_rgb, slintwrapper), Cvoid, (JRvalue, Cfloat, Cfloat, Cfloat), julia_buffer, pitch, yaw, amplitude)
+end
+
+function r_render_plot_rgba(julia_buffer, pitch, yaw, amplitude)
+    ccall((:r_render_plot_rgba, slintwrapper), Cvoid, (JRvalue, Cfloat, Cfloat, Cfloat), julia_buffer, pitch, yaw, amplitude)
+end
+

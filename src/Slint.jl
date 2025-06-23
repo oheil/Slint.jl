@@ -122,11 +122,7 @@ function JRvalue(v::Float64)
         Cint(0),
     )
 end
-function JRvalue(v::Matrix{T}) where T
-    #if sizeof(T) != 4
-    #    @warn "Slint.JRvalue: only matrices of element size 4 (e.g. UInt32) are currently supported, returning empty JRvalue"
-    #    return JRvalue()
-    #end 
+function JRvalue(v::AbstractArray)
     JRvalue(
         Cint(rMagic),
         Base.unsafe_convert(Cstring,rtypes[Int(rImage)]),
@@ -134,15 +130,16 @@ function JRvalue(v::Matrix{T}) where T
         Cdouble(0.0),
         Base.unsafe_convert(Cstring,""),
         pointer(v),
-        Cint(size(v,1)),
-        Cint(size(v,2)),
-        Cint(sizeof(eltype(v))),
+        Cint(size(v,1)),         #width
+        Cint(size(v,2)),         #height
+        #Cint(sizeof(eltype(v))), #RGB=3 bytes, ARGB=4 bytes, etc.
+        Cint(div(length(v),(size(v,1)*size(v,2)))), #RGB=3 bytes, ARGB=4 bytes, etc.
     )
 end
-function JRvalue(v::AbstractArray)
-    @warn "Slint.JRvalue: only arrays of element size 4 bytes (e.g. RGB24,ARGB32,UInt32) are supported, returning empty JRvalue"
-    JRvalue()
-end
+#function JRvalue(v::AbstractArray)
+#    @warn "Slint.JRvalue: only arrays of element size 4 bytes (e.g. RGB24,ARGB32,UInt32) are supported, returning empty JRvalue"
+#    JRvalue()
+#end
 
 function run()
     check_init()
@@ -553,6 +550,28 @@ function c_function(f, rt, at)
     end
     cfun = Expr(:cfunction, typ, fptr, rt, at, QuoteNode(:ccall))
     return cfun
+end
+
+function render_plot_rgb(r, pitch, yaw, amplitude)
+    check_init()
+    if typeof(r) <: AbstractArray
+        rv = JRvalue(r)
+    else
+        @warn "Slint.render_plot_rgb: call with a value of type "*string(typeof(r))*", which is not supported."
+        return
+    end
+    r_render_plot_rgb(rv, pitch, yaw, amplitude)
+end
+
+function render_plot_rgba(r, pitch, yaw, amplitude)
+    check_init()
+    if typeof(r) <: AbstractArray
+        rv = JRvalue(r)
+    else
+        @warn "Slint.render_plot_rgba: call with a value of type "*string(typeof(r))*", which is not supported."
+        return
+    end
+    r_render_plot_rgba(rv, pitch, yaw, amplitude)
 end
 
 # below code for testing interaction between rust <-> Julia still included:

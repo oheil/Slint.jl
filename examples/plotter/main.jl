@@ -3,8 +3,8 @@ using Slint
 #using GLMakie
 #using GLMakie.Colors
 #using Plots, FileIO
-
-using PyPlot
+#using PyPlot
+using GLMakie.Colors
 
 slintFile = "examples\\plotter\\plotter.slint"
 startComponent = "MainWindow"
@@ -14,11 +14,11 @@ Slint.compile_from_file(slintFile,startComponent)
 #buffer = zeros(RGB24, 600, 800)   # 4 x w=800 x h=600 Bytes, sizeof(buffer)
 #buffer = zeros(UInt32, 800, 600)   # 4 x 800 x 600 Bytes
 
-#buffer = zeros(ARGB32, 600, 800)  # 4 x 800 x 600 Bytes
+#buffer = zeros(ARGB32, 800, 600)  # 4 x 800 x 600 Bytes
 #buffer4io = zeros(UInt8, 800*600*4);
 #buffer_rot = zeros(ARGB32, 600, 800)
 
-buffer = zeros(UInt32, 800, 600)
+buffer = zeros(UInt8, 800, 600, 3) # width=800, height=600, 3 channels (RGB)
 
 #GLMakie.activate!(; visible = false)
 #fig = GLMakie.Figure(resolution = (800, 600), backgroundcolor = :black)
@@ -26,6 +26,7 @@ buffer = zeros(UInt32, 800, 600)
 #fig = GLMakie.Figure(size = (800, 600))
 #scr = GLMakie.Screen(fig.scene; start_renderloop=false)
 
+#=
 function initFig()
     fig = GLMakie.Figure(size = (800, 600))
     scr = GLMakie.Screen(fig.scene, Makie.ImageStorageFormat; start_renderloop=false)
@@ -35,6 +36,7 @@ function initFig()
     end
     return f
 end
+=#
 #GetFig = initFig()
 
 #ax = Axis3(fig[1, 1], aspect = :data)
@@ -57,13 +59,17 @@ end
 # implementation of callback:
 #       pure callback render_plot(/* pitch */ float, /* yaw */ float, /* amplitude */ float) -> image;
 function on_render_plot(params...)
-    for p in params
-        println(p," ",typeof(p))
-    end
+    #for p in params
+    #    println(p," ",typeof(p))
+    #end
 
-    amplitude = 1.0 * params[3] / 5.0
+    amplitude = 1.0 * params[3] / 2.0
     elevation = 30.0 + 10.0 * params[1]
     azimuthal = 30.0 + 10.0 * params[2]
+
+    Slint.render_plot_rgb(buffer, elevation, azimuthal, amplitude)
+
+    return buffer
 
     # Makie NOT WORKGING, CairoMakie, GLMakie, WGLMakie all not working!
 
@@ -191,6 +197,7 @@ function on_render_plot(params...)
     buffer .= PermutedDimsArray(view(buffer_rot, :, 1:1:size(buffer_rot, 2)), (2, 1))
     =#
 
+    #=
     PyPlot.ioff()
     fig = figure(figsize=(8, 6), dpi=100)
     ax = fig.add_subplot(111, projection="3d")
@@ -210,8 +217,9 @@ function on_render_plot(params...)
     b = getindex.(reinterpret.(UInt32,g),1)
     buffer .= reshape(b,(size(buf,2),size(buf,1)))
     #close(fig)
+    =#
     
-    return buffer
+    #return buffer
     
 end
 # register callback for:
