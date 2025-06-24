@@ -122,7 +122,15 @@ function JRvalue(v::Float64)
         Cint(0),
     )
 end
-function JRvalue(v::AbstractArray)
+function JRvalue(v::Matrix{T}) where T
+    width = size(v,1)
+    height = size(v,2)
+    elsize = sizeof(T)
+    if elsize < 3 || elsize > 4
+        @warn "Slint.JRvalue: only arrays of element size 3 bytes (e.g. RGB24) or 4 bytes (ARGB32,UInt32) are supported"
+        @warn "Slint.JRvalue: got element size "*string(elsize)
+        return JRvalue()
+    end 
     JRvalue(
         Cint(rMagic),
         Base.unsafe_convert(Cstring,rtypes[Int(rImage)]),
@@ -130,10 +138,33 @@ function JRvalue(v::AbstractArray)
         Cdouble(0.0),
         Base.unsafe_convert(Cstring,""),
         pointer(v),
-        Cint(size(v,1)),         #width
-        Cint(size(v,2)),         #height
-        #Cint(sizeof(eltype(v))), #RGB=3 bytes, ARGB=4 bytes, etc.
-        Cint(div(length(v),(size(v,1)*size(v,2)))), #RGB=3 bytes, ARGB=4 bytes, etc.
+        Cint(width),
+        Cint(height),
+        Cint(elsize),
+    )
+end
+function JRvalue(v::AbstractArray)
+    width = size(v,1)
+    height = size(v,2)
+    if length(v) % (width*height) != 0
+        @warn "Slint.JRvalue: array length is not a multiple of width*height"
+    end
+    elsize = div(length(v),(width*height)) # RGB=3 bytes, ARGB=4 bytes, etc.
+    if elsize < 3 || elsize > 4
+        @warn "Slint.JRvalue: only arrays of element size 3 bytes (e.g. RGB24) or 4 bytes (ARGB32,UInt32) are supported"
+        @warn "Slint.JRvalue: got element size "*string(elsize)
+        return JRvalue()
+    end
+    JRvalue(
+        Cint(rMagic),
+        Base.unsafe_convert(Cstring,rtypes[Int(rImage)]),
+        Cint(-1),
+        Cdouble(0.0),
+        Base.unsafe_convert(Cstring,""),
+        pointer(v),
+        Cint(width),
+        Cint(height),
+        Cint(elsize),
     )
 end
 #function JRvalue(v::AbstractArray)
@@ -552,23 +583,23 @@ function c_function(f, rt, at)
     return cfun
 end
 
-function render_plot_rgb(r, pitch, yaw, amplitude)
+function render_plot_rgb!(buffer, pitch, yaw, amplitude)
     check_init()
-    if typeof(r) <: AbstractArray
-        rv = JRvalue(r)
+    if typeof(buffer) <: AbstractArray
+        rv = JRvalue(buffer)
     else
-        @warn "Slint.render_plot_rgb: call with a value of type "*string(typeof(r))*", which is not supported."
+        @warn "Slint.render_plot_rgb: call with a value of type "*string(typeof(buffer))*", which is not supported."
         return
     end
     r_render_plot_rgb(rv, pitch, yaw, amplitude)
 end
 
-function render_plot_rgba(r, pitch, yaw, amplitude)
+function render_plot_rgba!(buffer, pitch, yaw, amplitude)
     check_init()
-    if typeof(r) <: AbstractArray
-        rv = JRvalue(r)
+    if typeof(buffer) <: AbstractArray
+        rv = JRvalue(buffer)
     else
-        @warn "Slint.render_plot_rgba: call with a value of type "*string(typeof(r))*", which is not supported."
+        @warn "Slint.render_plot_rgba: call with a value of type "*string(typeof(buffer))*", which is not supported."
         return
     end
     r_render_plot_rgba(rv, pitch, yaw, amplitude)

@@ -1324,10 +1324,7 @@ unsafe extern "C" fn r_render_plot_rgba(julia_buffer: JRvalue, pitch: f32, yaw: 
     debug!("r_render_plot_rgba: width={}, height={}, elsize={}, image_value={:?}", width, height, elsize, julia_buffer.image_value);
 
     let nbytes = width * height * elsize;
-    let slice = std::slice::from_raw_parts(julia_buffer.image_value as *mut u8, nbytes);
-
-    //let buf = julia_buffer.image_value as *mut u8;
-    //*buf = 0xff;
+    let slice = std::slice::from_raw_parts(julia_buffer.image_value as *const u8, nbytes);
 
     //let mut pixel_buffer = SharedPixelBuffer::new(640, 480);
     let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(slice, width as u32, height as u32);
