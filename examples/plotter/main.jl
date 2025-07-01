@@ -67,7 +67,7 @@ function render_surface!(buffer, elevation, azimuthal, amplitude)
 end
 =#
 
-#=
+#\=
 #
 # This example uses rust to render a 3D surface plot.
 #   performance is good enough for interactive use.
@@ -76,9 +76,9 @@ buffer = zeros(UInt8, 800, 600, 3) # width=800, height=600, 3 channels (RGB)
 function render_surface!(buffer, elevation, azimuthal, amplitude)
     Slint.render_plot_rgb!(buffer, elevation, azimuthal, amplitude)
 end
-=#
+#\=#
 
-#\=
+#=
 #
 # This example uses rust to render a 3D surface plot.
 #   performance is good enough for interactive use.
@@ -87,7 +87,7 @@ buffer = zeros(UInt8, 800, 600, 4) # width=800, height=600, 4 channels (RGBA)
 function render_surface!(buffer, elevation, azimuthal, amplitude)
     Slint.render_plot_rgba!(buffer, elevation, azimuthal, amplitude)
 end
-#\=#
+=#
 
 # implementation of callback:
 #       pure callback render_plot(/* pitch */ float, /* yaw */ float, /* amplitude */ float) -> image;
