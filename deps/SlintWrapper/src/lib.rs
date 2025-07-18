@@ -22,7 +22,9 @@ use std::rc::Rc;
 mod slint_value;
 use crate::slint_value::*;
 
-use plotters::prelude::*;  //REMOVE THIS LATER
+// provide two plotting functions, one for RGB and one for RGBA, for demonstration purposes because of Julia plotting performance issues
+//   see examples/plotter/main.jl
+use plotters::prelude::*;  // not needed for library, only for examples/plotter/main.jl
 
 // only hold a single instance at index 0
 static INSTANCES: Lazy<Mutex<Vec<Weak<ComponentInstance>>>> = Lazy::new(|| {
@@ -166,9 +168,7 @@ unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: 
 
     let start_component = CStr::from_ptr(slint_comp).to_str().unwrap();
     
-    //let mut compiler = ComponentCompiler::default();
     let compiler = Compiler::default();
-    //compilers.push(&compiler);
 
     //let selector = BackendSelector::new().backend_name(String::from("winit-skia-software"));
     //if let Err(err) = selector.select() {
@@ -178,13 +178,7 @@ unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: 
     let result = spin_on::spin_on(
         compiler.build_from_path(filename)
     );
-    //definitions.push(&definition);
 
-    //let code = r#"
-    //    ...
-    //"#;
-    //let definition = spin_on::spin_on(
-    //    compiler.build_from_source(code.into(), Default::default()));
     let diagnostics : Vec<_> = result.diagnostics().collect();
     if diagnostics.is_empty() {
         debug!("r_compile_from_file: diagnostics is empty");
@@ -203,7 +197,6 @@ unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: 
         }
     } else {
         debug!("r_compile_from_file: diagnostics is not empty");
-        //slint_interpreter::print_diagnostics(&compiler.diagnostics());
         result.print_diagnostics();
     }
 }}
@@ -220,7 +213,6 @@ unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_co
 
     let start_component = CStr::from_ptr(slint_comp).to_str().unwrap();
 
-    //let mut compiler = ComponentCompiler::default();
     let compiler = Compiler::default();
 
     let result = spin_on::spin_on(compiler.build_from_source(slint_code.into(), Default::default()));
@@ -240,7 +232,6 @@ unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_co
             register_bridge_2_standard_list_view_item(&instance);
         }
     } else {
-        //slint_interpreter::print_diagnostics(&compiler.diagnostics());
         result.print_diagnostics();
     }
 }}
@@ -380,11 +371,6 @@ impl From<JRvalue> for Value {
                     debug!("Value::From<JRvalue>:rv_type is String {}",cs);
                     return Value::from(cs);
                 }
-                //if rv_type == "StandardListViewItem" {
-                //    let cs: SharedString = CStr::from_ptr(rv.slvi_value).to_string_lossy().into_owned().into();
-                //    debug!("Value::From<JRvalue>:rv_type is String {}",cs);
-                //    return Value::from(cs);
-                //}
                 if rv_type == "Unknown" {
                     warn!("From<JRvalue>:can't set an unknown value type");
                 }
@@ -409,8 +395,6 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
     debug!("r_set_callback");
     let funcid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     if ! INSTANCES.lock().unwrap().is_empty() {
-        //let ref i_ref = &(INSTANCES.lock().unwrap())[0];
-        //let instance = i_ref.upgrade();
         let instance = (&(INSTANCES.lock().unwrap())[0]).upgrade();
         if instance.is_some() {
             let _ = instance.unwrap().set_callback(&funcid, move |args: &[Value]| {
@@ -522,9 +506,6 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
 extern "C" fn r_run() {
     debug!("r_run");
     if ! INSTANCES.lock().unwrap().is_empty() {
-        //let v = INSTANCES.lock().unwrap();
-        //let ref i = &v[0];
-        //let instance = i.upgrade();
         let instance = (&(INSTANCES.lock().unwrap())[0]).upgrade();
         if instance.is_some() {
             instance.unwrap().run().unwrap();
@@ -644,8 +625,6 @@ static mut MODELS: Lazy<Mutex<HashMap<String,Rc<CellsModel>>>> = Lazy::new(|| {
     Mutex::new(HashMap::new())
 });
 unsafe fn model_contains(propertyid: &String) -> bool { unsafe {
-    //let model = MODELS.lock().unwrap();
-    //return (*model).contains_key(&propertyid);
     let mod_ptr = ptr::addr_of_mut!(MODELS);
     return (*mod_ptr).lock().unwrap().contains_key(propertyid);
 }}
@@ -701,12 +680,10 @@ unsafe extern "C" fn r_clear_rows(id: *const c_char) { unsafe {
 unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) { unsafe {
     debug!("r_pop_row");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
-    //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
     if ! model_contains(&propertyid) {
         warn!("r_pop_row:no model available for property id <{}>",propertyid);
     } else {
         debug!("r_pop_row: index: {}",index);
-        //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
         let model: Rc<CellsModel> = model_get(&propertyid);
         model.remove_row(index);
         slvi_bridges_changed(propertyid);
@@ -720,12 +697,10 @@ unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) { unsafe {
 unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalue, len: usize) { unsafe {
     debug!("r_push_row");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
-    //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
     if ! model_contains(&propertyid) {
         warn!("r_push_row:no model available for property id <{}>",propertyid);
     } else {
         debug!("r_push_row: new_values size: {}",len);
-        //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
         let model: Rc<CellsModel> = model_get(&propertyid);
         let row_count = model.row_count() + 1;
         let some_row = model.rows.borrow()[0].clone();
@@ -864,15 +839,10 @@ unsafe extern "C" fn r_set_cell_value(id: *const c_char, mut row: i32, mut col: 
     col -= 1;
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
 
-    //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
     if ! model_contains(&propertyid) {
         warn!("r_set_cell_value:no model available for property id <{}>",propertyid);
     } else {
-        //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
         let model: Rc<CellsModel> = model_get(&propertyid);
-
-        //let v: String = CStr::from_ptr(new_value.string_value).to_string_lossy().into_owned();
-        //let shstr = slint_interpreter::SharedString::try_from(v).unwrap();
 
         set_skip_callback(true);
         model.update_cell(row as usize, col as usize, Some(new_value));
@@ -899,15 +869,11 @@ unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut col: 
 
     let mut rv = JRvalue::new_undefined();
 
-    //if ! MODELS.lock().unwrap().contains_key(&propertyid) {
     if ! model_contains(&propertyid) {
         warn!("r_get_cell_value:no model available for property id <{}>",propertyid);
     } else {
-        //let model: Rc<CellsModel> = MODELS.lock().unwrap().get(&propertyid).unwrap().clone();
         let model: Rc<CellsModel> = model_get(&propertyid);
-        //let v: Option<String> = model.get_cell_value(row as usize, col as usize);
         let rv_tmp: Option<JRvalue> = model.get_cell_value(row as usize, col as usize);
-        //match v {
         match rv_tmp {
             Some(x) => {
                 debug!("r_get_cell_value:cell value: {:p}",x.string_value);
@@ -944,12 +910,9 @@ unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols: i3
     debug!("r_set_property_model");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     if ! INSTANCES.lock().unwrap().is_empty() {
-        //let ref i_ref = &(INSTANCES.lock().unwrap())[0];
-        //let instance = i_ref.upgrade();
         let instance = (&(INSTANCES.lock().unwrap())[0]).upgrade();
         if instance.is_some() {
-
-            //test code start
+            //debug code start
             let v = instance.as_ref().unwrap().get_property(&propertyid);
             match v {
                 Ok(value) => {
@@ -958,8 +921,7 @@ unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols: i3
                 },
                 Err(error) => warn!("r_set_property_model:getting property <{}> failed: {:?}", propertyid, error),
             };
-
-            //test code end
+            //debug code end
 
             let model = CellsModel::new(rows as usize,cols as usize, func);
 
@@ -1004,7 +966,6 @@ impl Model for CellsModel {
     }
     fn model_tracker(&self) -> &dyn ModelTracker {
         debug!("CellsModel.model_tracker");
-        //&()
         &self.notify
     }
 }
@@ -1060,7 +1021,6 @@ impl CellsModel {
         r
     }
 
-    //fn get_cell_value(&self, row: usize, col: usize) -> Option<String> {
     fn get_cell_value(&self, row: usize, col: usize) -> Option<JRvalue> {
         debug!("CellsModel.get_cell_value");
         debug!("CellsModel.get_cell_value: row={} col={}",row,col);
@@ -1070,19 +1030,15 @@ impl CellsModel {
         if col >= self.col_count() {
             warn!("CellsModel.get_cell_value: col index <{}> not in range of existing column indices <1..{}>",col,self.col_count());
         }
-        //let v: String = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
         let mut rv = JRvalue::new_undefined();
-        //rv.string_value = self.rows.get(row)?.row_elements.borrow().get(col)?.value_s.clone();
         rv.int_value = self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_i;
         rv.float_value = self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_f;
         rv.string_value = CString::new(self.rows.borrow().get(row)?.row_elements.borrow().get(col)?.value_s.clone()).unwrap().into_raw();
         Some(rv)
     }
 
-    //fn update_cell(&self, row: usize, col: usize, new_value: Option<SharedString>) -> Option<()> {
     fn update_cell(&self, row: usize, col: usize, new_value: Option<JRvalue>) -> Option<()> {
         debug!("CellsModel.update_cell");
-        //debug!("CellsModel.update_cell: row={} col={} new_value={}",row,col,new_value.as_ref().unwrap());
         match new_value {
             Some(new_v) => {
                 debug!("CellsModel.update_cell: row={} col={}",row,col);
@@ -1105,7 +1061,6 @@ impl CellsModel {
                     let args = &[
                         Value::Number((row as i32).into()),
                         Value::Number((col as i32).into()),
-                        //Value::String(new_value.as_ref().unwrap().clone()),
                         Value::String(CStr::from_ptr(new_v.string_value).to_string_lossy().into_owned().into()),
                         Value::String(data.value_s.clone().into())
                         ];
@@ -1207,12 +1162,10 @@ impl slint::Model for RowModel {
             debug!("RowModel.row_data: row_element.value_i={}",row_element.value_i);
             debug!("RowModel.row_data: row_element.value_f={}",row_element.value_f);
             debug!("RowModel.row_data: row_element.value_s={}",row_element.value_s);
-            //debug!("RowModel.row_data: row_element.value_slvi={}",row_element.value_slvi.text);
             let mut stru = slint_interpreter::Struct::default();
             stru.set_field("value_i".into(), Value::Number(row_element.value_i.into()));
             stru.set_field("value_f".into(), Value::Number(row_element.value_f.into()));
             stru.set_field("value_s".into(), Value::String(row_element.value_s.clone().into()));
-            //stru.set_field("value_slvi".into(), Value::String(row_element.value_slvi.text.clone().into()));
             stru.into()
         })
     }
@@ -1231,7 +1184,6 @@ impl slint::Model for RowModel {
             let shstr = slint_interpreter::SharedString::try_from(val).unwrap();
             let mut rv = JRvalue::new_undefined();
             rv.string_value = CString::new(shstr.as_str()).unwrap().into_raw();
-            //cells.update_cell(self.row, row, Some(shstr));
             cells.update_cell(self.row, row, Some(rv));
         }
     }
@@ -1327,7 +1279,7 @@ unsafe extern "C" fn r_render_plot_rgba(julia_buffer: JRvalue, pitch: f32, yaw: 
     let slice = std::slice::from_raw_parts(julia_buffer.image_value as *const u8, nbytes);
 
     //let mut pixel_buffer = SharedPixelBuffer::new(640, 480);
-    let mut pixel_buffer = SharedPixelBuffer::<Rgb8Pixel>::clone_from_slice(slice, width as u32, height as u32);
+    let mut pixel_buffer = SharedPixelBuffer::<Rgba8Pixel>::clone_from_slice(slice, width as u32, height as u32);
 
     //let image = Image::from_rgba8(pixel_buffer);
     let size = (pixel_buffer.width(), pixel_buffer.height());

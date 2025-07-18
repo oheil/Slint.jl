@@ -2,9 +2,7 @@ using Slint
 
 #using GLMakie
 #using GLMakie.Colors
-#using Plots, FileIO
-#using PyPlot
-#using GLMakie.Colors
+#  a GLMake example wasn't feasible, because of Slint uses GL too, dind't found a way to use both together
 
 slintFile = "examples\\plotter\\plotter.slint"
 startComponent = "MainWindow"
@@ -83,6 +81,8 @@ end
 # This example uses rust to render a 3D surface plot.
 #   performance is good enough for interactive use.
 #
+#   RGBA variant does not work, color information is mixed up somewhere
+#
 buffer = zeros(UInt8, 800, 600, 4) # width=800, height=600, 4 channels (RGBA)
 function render_surface!(buffer, elevation, azimuthal, amplitude)
     Slint.render_plot_rgba!(buffer, elevation, azimuthal, amplitude)
@@ -92,9 +92,6 @@ end
 # implementation of callback:
 #       pure callback render_plot(/* pitch */ float, /* yaw */ float, /* amplitude */ float) -> image;
 function on_render_plot(params...)
-    #for p in params
-    #    println(p," ",typeof(p))
-    #end
     elevation = 30.0 + 10.0 * params[1]
     azimuthal = 30.0 + 10.0 * params[2]
     amplitude = 1.0 * params[3] / 2.0

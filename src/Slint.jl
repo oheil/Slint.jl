@@ -46,6 +46,7 @@ const rMagic = r_get_magic()
 @enum Rtype rUnknown=1 rBool rString rInteger rFloat rImage
 rtypes = ["Unknown","Bool","String","Integer","Float","Image"]
 rstring_value = [""]
+# This struct is auto-generated in api.jl, just here for reference:
 #struct JRvalue
 #   magic::Int32
 #   rtype::Ptr{Cchar}
