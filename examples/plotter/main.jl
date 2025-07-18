@@ -103,6 +103,10 @@ end
 #       pure callback render_plot(/* pitch */ float, /* yaw */ float, /* amplitude */ float) -> image;
 Slint.set_callback("render_plot", on_render_plot)
 
+# trigger initial render with some good values for view angle
+Slint.set_value("pitch", 0.175)
+Slint.set_value("yaw", 0.876)
+
 Slint.run()
 # unload library
 Slint.close()

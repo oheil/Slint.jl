@@ -43,7 +43,7 @@ cargo run --release --bin crud
 cargo run --release --bin cells
 
 cargo add plotters
-cargo run --release --bin plotters
+cargo run --release --bin plotter
 ```
 
 ```shell
