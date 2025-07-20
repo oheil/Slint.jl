@@ -16,6 +16,10 @@ env_logger = "0.11.1"
 plotters = "0.3.7"
 
 [[bin]]
+path = "src/gallery/main.rs"
+name = "gallery"
+
+[[bin]]
 path = "src/plotter/main.rs"
 name = "plotter"
 

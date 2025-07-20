@@ -1,6 +1,6 @@
 # Slint.jl
 
-## This package is in a VERY EARLY development state! You need rust installed if you want to try it out
+## This package is in an EARLY development state! You need rust installed if you want to try it out
 
 Slint GUI for Julia
 
@@ -38,6 +38,10 @@ include("examples\\7guis\\cells.jl")
 include("examples\\7guis\\circledraw.jl")
 include("examples\\7guis\\counter.jl")
 include("examples\\7guis\\crud.jl")
+include("examples/7guis/tempconv.jl")
+include("examples/7guis/timer.jl")
+
+include("examples/plotter/main.jl")
 ```
 
 ## Development and Build
@@ -58,7 +62,7 @@ include("contrib\\generator.jl")
 ## Current example work in progress
 
 ```julia
-include("examples/plotter/main.jl")
+include("examples/gallery/gallery.jl")
 ```
 
 ## REPL examples

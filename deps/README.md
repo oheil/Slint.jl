@@ -44,6 +44,8 @@ cargo run --release --bin cells
 
 cargo add plotters
 cargo run --release --bin plotter
+
+cargo run --release --bin gallery
 ```
 
 ```shell
@@ -89,6 +91,8 @@ Slint.__init__()  # load slintwrapper.dll again
 ## Julia Examples
 
 ```julia
+include("examples/plotter/main.jl")
+
 include("examples/7guis/timer.jl")
 include("examples/7guis/tempconv.jl")
 include("examples/7guis/crud.jl")
