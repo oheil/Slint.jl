@@ -92,6 +92,7 @@ Slint.__init__()  # load slintwrapper.dll again
 ## Julia Examples
 
 ```julia
+include("examples/gallery/main.jl")
 include("examples/plotter/main.jl")
 
 include("examples/7guis/timer.jl")

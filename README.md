@@ -44,6 +44,7 @@ include("examples/7guis/tempconv.jl")
 include("examples/7guis/timer.jl")
 
 include("examples/plotter/main.jl")
+include("examples/gallery/gallery.jl")
 ```
 
 ## Development and Build
@@ -64,8 +65,10 @@ include("contrib\\generator.jl")
 ## Current example work in progress
 
 ```julia
-include("examples/gallery/gallery.jl")
+# none
 ```
+
+#### Testing linux build procedure is next.
 
 ## REPL examples
 
