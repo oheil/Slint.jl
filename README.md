@@ -4,6 +4,8 @@
 
 Slint GUI for Julia
 
+Providing a library for Julia to use [Slint](https://github.com/slint-ui/slint), a GUI library for rust.
+
 ## Prerequisites
 
 - Rust

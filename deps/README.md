@@ -45,6 +45,7 @@ cargo run --release --bin cells
 cargo add plotters
 cargo run --release --bin plotter
 
+# can't get this to run because of env SLINT_INCLUDE_GENERATED not properly set
 cargo run --release --bin gallery
 ```
 
