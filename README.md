@@ -109,16 +109,34 @@ Slint.run()
 ## Install Build prerequisites for Linux (tested with Ubuntu)
 
 as root:
-```
+
+```bash
 apt install rustup
 apt install build-essential cmake
 apt install libfontconfig1-dev
 ```
+
 as developer/user:
-```
+
+```bash
 #installing juliaup:
 curl -fsSL https://install.julialang.org | sh
 rustup default stable
+```
+
+cloning and building the project:
+
+```bash
+git clone https://github.com/oheil/Slint.jl.git
+cd Slint.jl
+julia
+```
+
+in Julia:
+
+```julia
+julia> using Pkg; Pkg.activate("."); Pkg.build("Slint"; verbose = true)
+julia> include("examples/7guis/booker.jl")
 ```
 
 ## Install Build prerequisites in Visual Studio Installer
