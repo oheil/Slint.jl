@@ -9,7 +9,8 @@ Providing a library for Julia to use [Slint](https://github.com/slint-ui/slint),
 ## Prerequisites
 
 - Rust
-- Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequsites-in-visual-studio-installer) )
+- Windows: Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequsites-in-visual-studio-installer) )
+- Linux: [see below]()
 
 ## Download/install
 
@@ -35,11 +36,11 @@ and a solution will be found at some time.
 using Slint
 cd(joinpath(dirname(pathof(Slint)), ".."))
 
-include("examples\\7guis\\booker.jl")
-include("examples\\7guis\\cells.jl")
-include("examples\\7guis\\circledraw.jl")
-include("examples\\7guis\\counter.jl")
-include("examples\\7guis\\crud.jl")
+include("examples/7guis/booker.jl")
+include("examples/7guis/cells.jl")
+include("examples/7guis/circledraw.jl")
+include("examples/7guis/counter.jl")
+include("examples/7guis/crud.jl")
 include("examples/7guis/tempconv.jl")
 include("examples/7guis/timer.jl")
 
@@ -59,7 +60,7 @@ using Pkg
 cd(".julia/dev/Slint")
 Pkg.activate(".")
 Pkg.build("Slint"; verbose = true);
-include("contrib\\generator.jl")
+include("contrib/generator.jl")
 ```
 
 ## Current example work in progress
@@ -86,7 +87,7 @@ Slint.run()
 
 ```julia
 using Slint
-file1 = "examples\\7guis\\booker.slint"
+file1 = "examples/7guis/booker.slint"
 file2 = "helloworld.slint"
 file3 = "SingleButton.slint"
 
@@ -103,6 +104,21 @@ Slint.set_callback("button-clicked",print_callback)
 Slint.compile_from_file(file3,"SingleButton")
 
 Slint.run()
+```
+
+## Install Build prerequisites for Linux (tested with Ubuntu)
+
+as root:
+```
+apt install rustup
+apt install build-essential cmake
+apt install libfontconfig1-dev
+```
+as developer/user:
+```
+#installing juliaup:
+curl -fsSL https://install.julialang.org | sh
+rustup default stable
 ```
 
 ## Install Build prerequisites in Visual Studio Installer

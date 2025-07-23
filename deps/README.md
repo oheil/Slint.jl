@@ -69,7 +69,7 @@ How to build the projekt:
 
 ```julia
 using Pkg; Pkg.activate("."); Pkg.build("Slint"; verbose = true);
-include("contrib\\generator.jl")
+include("contrib/generator.jl")
 ```
 
 ```julia
@@ -81,7 +81,7 @@ Slint.close()   # release slintwrapper.dll
 
 #a new build can be done now:
 using Pkg; Pkg.build("Slint"; verbose = true);
-include("contrib\\generator.jl")
+include("contrib/generator.jl")
 
 Slint.__init__()  # load slintwrapper.dll again
 ...
@@ -98,10 +98,10 @@ include("examples/plotter/main.jl")
 include("examples/7guis/timer.jl")
 include("examples/7guis/tempconv.jl")
 include("examples/7guis/crud.jl")
-include("examples\\7guis\\counter.jl")
+include("examples/7guis/counter.jl")
 include("examples/7guis/circledraw.jl")
 include("examples/7guis/cells.jl")
-include("examples\\7guis\\booker.jl")
+include("examples/7guis/booker.jl")
 ```
 
 ```julia
@@ -118,7 +118,7 @@ Slint.run()
 
 ```julia
 using Slint
-file1 = "examples\\7guis\\booker.slint"
+file1 = "examples/7guis/booker.slint"
 file2 = "helloworld.slint"
 file3 = "SingleButton.slint"
 
@@ -139,9 +139,9 @@ Slint.run()
 ```
 
 ```julia
-# include("examples\\7guis\\booker.jl")
+# include("examples/7guis/booker.jl")
 using Slint
-file1 = "examples\\7guis\\booker.slint"
+file1 = "examples/7guis/booker.slint"
 Slint.compile_from_file(file1,"Booker")
 function on_validate_date(date)
     println(date)
@@ -156,7 +156,7 @@ Slint.run()
 
 ```julia
 using Slint
-file1 = "examples\\7guis\\booker.slint"
+file1 = "examples/7guis/booker.slint"
 file2 = "SingleButton.slint"
 
 #setting callbacks needs to be before the next call to CompileFromFile
