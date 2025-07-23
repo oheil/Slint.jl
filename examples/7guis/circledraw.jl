@@ -1,6 +1,6 @@
 using Slint
 
-slintFile = "examples\\7guis\\circledraw.slint"
+slintFile = "examples/7guis/circledraw.slint"
 startComponent = "MainWindow"
 
 Slint.compile_from_file(slintFile, startComponent)
