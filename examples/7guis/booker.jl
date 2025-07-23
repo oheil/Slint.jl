@@ -1,6 +1,6 @@
 using Slint, Dates
 
-slintFile = "examples\\7guis\\booker.slint"
+slintFile = "examples/7guis/booker.slint"
 startComponent = "Booker"
 
 # Main/Start component is "Booker"
