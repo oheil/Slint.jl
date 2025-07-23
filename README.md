@@ -10,7 +10,7 @@ Providing a library for Julia to use [Slint](https://github.com/slint-ui/slint),
 
 - Rust
 - Windows: Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequsites-in-visual-studio-installer) )
-- Linux: [see below]()
+- Linux: [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequisites-for-linux-tested-with-ubuntu)
 
 ## Download/install
 
