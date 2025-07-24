@@ -31,8 +31,16 @@ end
 function close()
     global handle
     r = Libdl.dlclose(handle)
-    while !r && in(slintwrapper,Libdl.dllist())
+    sleep(0.1) # wait a bit to ensure the library is unloaded
+    count=1
+    while count < 4 && in(slintwrapper,Libdl.dllist())
+        print("Slint.close: waiting for slintwrapper to be unloaded... ")
         r = Libdl.dlclose(handle)
+        sleep(count)
+        count += 1
+    end
+    if in(slintwrapper,Libdl.dllist())
+        @warn "Slint.close: slintwrapper is still loaded after 4 attempts, this may cause problems in the future."
     end
     handle = C_NULL
     return
