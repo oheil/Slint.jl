@@ -21,7 +21,7 @@ function build_dylib()
     mv(release_dylib_filepath, joinpath(@__DIR__, dylib))
     #rm(release_dir, recursive=true)
 
-    write_deps_file(libname, dylib, juliapackage)
+    #write_deps_file(libname, dylib, juliapackage)
 end
 
 
@@ -92,4 +92,11 @@ function clean()
 
 end
 
-#build_dylib()
+if get(ENV, "JULIA_SLINT_REBUILD", "0") == "1"
+    build_dylib()
+end
+
+dylib = dylib_filename()
+write_deps_file(libname, dylib, juliapackage)
+
+

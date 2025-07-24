@@ -50,6 +50,20 @@ include("examples/gallery/gallery.jl")
 
 ## Development and Build
 
+To rebuild libraries set the environment variable
+
+```bash
+export JULIA_SLINT_REBUILD=1
+``` 
+
+```shell
+set JULIA_SLINT_REBUILD=1
+```
+
+```julia
+julia> ENV["JULIA_SLINT_REBUILD"]=1
+```
+
 ```julia
 using Pkg
 Pkg.develop("Slint")
