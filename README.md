@@ -18,7 +18,7 @@ Providing a library for Julia to use [Slint](https://github.com/slint-ui/slint),
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/oheil/Slint.jl.git")  # build errors (see below) should be resolved now
+Pkg.add(url="https://github.com/oheil/Slint.jl.git")
 ```
 
 ## Current known minor issues
