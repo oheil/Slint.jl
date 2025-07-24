@@ -34,7 +34,7 @@ function close()
     sleep(0.1) # wait a bit to ensure the library is unloaded
     count=1
     while count < 4 && in(slintwrapper,Libdl.dllist())
-        print("Slint.close: waiting for slintwrapper to be unloaded... ")
+        println("Slint.close: waiting for slintwrapper to be unloaded... ")
         r = Libdl.dlclose(handle)
         sleep(count)
         count += 1
