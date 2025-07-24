@@ -45,7 +45,7 @@ include("examples/7guis/tempconv.jl")
 include("examples/7guis/timer.jl")
 
 include("examples/plotter/main.jl")
-include("examples/gallery/gallery.jl")
+include("examples/gallery/main.jl")
 ```
 
 ## Development and Build
