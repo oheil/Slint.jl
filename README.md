@@ -19,7 +19,11 @@ using Pkg
 Pkg.add(url="https://github.com/oheil/Slint.jl.git")  # build errors (see below) should be resolved now
 ```
 
-### Remarks to build errors after `Pkg.add(url="https://github.com/oheil/Slint.jl.git")`
+## Current known minor issues
+
+- Linux: when closing the Slint window it needs an additional CTRL-C on the REPL to come back to the prompt
+
+- Windows: build errors after `Pkg.add(url="https://github.com/oheil/Slint.jl.git")`
 
 On Windows, packages are added to folders like `.julia\packages\Slint\uZ1Dp\`. All folders have full access rights for the current user, but files only have restricted access rights, typically read only. This prevents the build process to succeed because some build artefacts need to be overwritten during build which will fail because of insufficient access rights.
 In this case the problematic file is
@@ -120,7 +124,7 @@ Slint.compile_from_file(file3,"SingleButton")
 Slint.run()
 ```
 
-## Install Build prerequisites for Linux (tested with Ubuntu)
+## Install Build prerequisites for Linux (tested with Ubuntu, CachyOS)
 
 as root:
 
@@ -143,12 +147,16 @@ cloning and building the project:
 ```bash
 git clone https://github.com/oheil/Slint.jl.git
 cd Slint.jl
+
+export JULIA_SLINT_REBUILD=1  #bash or set it on in Julia
+
 julia
 ```
 
 in Julia:
 
 ```julia
+julia> ENV["JULIA_SLINT_REBUILD"]=1  # if not set in the shell
 julia> using Pkg; Pkg.activate("."); Pkg.build("Slint"; verbose = true)
 julia> include("examples/7guis/booker.jl")
 ```
