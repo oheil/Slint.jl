@@ -56,6 +56,8 @@ cargo run --release --bin gallery
 ```shell
 set RUST_LOG=debug
 set RUST_LOG=
+
+set JULIA_SLINT_REBUILD=1
 ```
 
 ```powershell
@@ -68,6 +70,7 @@ set RUST_LOG=
 How to build the projekt:
 
 ```julia
+ENV["JULIA_SLINT_REBUILD"]=1
 using Pkg; Pkg.activate("."); Pkg.build("Slint"; verbose = true);
 include("contrib/generator.jl")
 ```
@@ -80,6 +83,7 @@ using Slint
 Slint.close()   # release slintwrapper.dll
 
 #a new build can be done now:
+ENV["JULIA_SLINT_REBUILD"]=1
 using Pkg; Pkg.build("Slint"; verbose = true);
 include("contrib/generator.jl")
 
