@@ -46,11 +46,11 @@ const $rustlibname = joinpath(@__DIR__, "$libfile")
 function check_deps()
     global $rustlibname
     if !isfile($rustlibname)
-        error("\$$rustlibname does not exist, Please re-run Pkg.build(\\"$juliapackage\\"), and restart Julia.")
+        error("\$$rustlibname does not exist, Please re-run ENV[\\"JULIA_SLINT_REBUILD\\"]=1;Pkg.build(\\"$juliapackage\\"), and restart Julia.")
     end
     handle = Libdl.dlopen_e($rustlibname)
     if handle == C_NULL
-        error("\$$rustlibname cannot be opened, Please re-run Pkg.build(\\"$juliapackage\\"), and restart Julia.")
+        error("\$$rustlibname cannot be opened, Please re-run ENV[\\"JULIA_SLINT_REBUILD\\"]=1;Pkg.build(\\"$juliapackage\\"), and restart Julia.")
     end
     return handle
 end

@@ -23,7 +23,7 @@ function check_init()
         __init__()
     end
     if handle == C_NULL
-        error("Slint.check_init: can't load $slintwrapper, Please re-run Pkg.build(\"Slint\"), and restart Julia.")
+        error("Slint.check_init: can't load $slintwrapper, Please re-run ENV[\"JULIA_SLINT_REBUILD\"]=1;Pkg.build(\"Slint\"), and restart Julia.")
     end
     return
 end
@@ -31,7 +31,7 @@ end
 function close()
     global handle
     r = Libdl.dlclose(handle)
-    while in(slintwrapper,Libdl.dllist())
+    while !r && in(slintwrapper,Libdl.dllist())
         r = Libdl.dlclose(handle)
     end
     handle = C_NULL
