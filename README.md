@@ -23,9 +23,9 @@ Pkg.add(url="https://github.com/oheil/Slint.jl.git")  # build errors (see below)
 
 ## Current known minor issues
 
-- Linux: when closing the Slint window it needs an additional CTRL-C on the REPL to come back to the prompt
+- Linux: when closing the Slint window and running again => segmentation fault (problem with Libdl.dlclose)
 
-- Windows: build errors after `Pkg.add(url="https://github.com/oheil/Slint.jl.git")`
+- RESOLVED Windows: build errors after `Pkg.add(url="https://github.com/oheil/Slint.jl.git")`
 
 On Windows, packages are added to folders like `.julia\packages\Slint\uZ1Dp\`. All folders have full access rights for the current user, but files only have restricted access rights, typically read only. This prevents the build process to succeed because some build artefacts need to be overwritten during build which will fail because of insufficient access rights.
 In this case the problematic file is
