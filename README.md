@@ -1,12 +1,14 @@
 # Slint.jl
 
-## This package is in an EARLY development state! You need rust installed if you want to try it out
+## This package is in an EARLY development state!
+
+## For Windows and Linux no build is needed anymore.
 
 Slint GUI for Julia
 
 Providing a library for Julia to use [Slint](https://github.com/slint-ui/slint), a GUI library for rust.
 
-## Prerequisites
+## Build prerequisites
 
 - Rust
 - Windows: Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequsites-in-visual-studio-installer) )
@@ -49,6 +51,8 @@ include("examples/7guis/tempconv.jl")
 include("examples/7guis/timer.jl")
 
 include("examples/plotter/main.jl")
+
+# showcase all Slint widgets
 include("examples/gallery/main.jl")
 ```
 
