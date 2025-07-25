@@ -128,7 +128,7 @@ Slint.compile_from_file(file3,"SingleButton")
 Slint.run()
 ```
 
-## Install Build prerequisites for Linux (tested with Ubuntu, CachyOS)
+## Install Build prerequisites for Linux (tested with Ubuntu)
 
 as root:
 
