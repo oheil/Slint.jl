@@ -8,18 +8,25 @@ Slint GUI for Julia
 
 Providing a library for Julia to use [Slint](https://github.com/slint-ui/slint), a GUI library for rust.
 
-## Build prerequisites
-
-- Rust
-- Windows: Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequsites-in-visual-studio-installer) )
-- Linux: [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequisites-for-linux-tested-with-ubuntu)
-
-## Download/install
+## Download/install/examples
 
 ```julia
 using Pkg
 Pkg.add(url="https://github.com/oheil/Slint.jl.git")
 ```
+
+```julia
+using Slint
+cd(joinpath(dirname(pathof(Slint)), ".."))
+include("examples/gallery/main.jl")
+```
+
+
+## Build prerequisites
+
+- Rust
+- Windows: Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequsites-in-visual-studio-installer) )
+- Linux: [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequisites-for-linux-tested-with-ubuntu)
 
 ## Current known minor issues
 
