@@ -25,16 +25,38 @@ Pkg.add(url="https://github.com/oheil/Slint.jl.git")
 
 - Linux: when closing the Slint window and running again => segmentation fault (problem with Libdl.dlclose)
 
+    The library can't be unloaded.
+
+    See: https://github.com/JuliaLang/julia/issues/44722
+
+    First clang experiments did not resolve:
+
+    /home/oheil/.cargo/config.toml:
+
+    ```
+    rustflags = [
+    "-C", "linker=clang",
+    ]
+    ```
+
+    ```
+    export JULIA_SLINT_REBUILD=1
+    export CC=/usr/bin/clang
+    export CXX=/usr/bin/clang++
+    ```
+
+    Building everything didn't change a thing.
+
 - RESOLVED Windows: build errors after `Pkg.add(url="https://github.com/oheil/Slint.jl.git")`
 
-On Windows, packages are added to folders like `.julia\packages\Slint\uZ1Dp\`. All folders have full access rights for the current user, but files only have restricted access rights, typically read only. This prevents the build process to succeed because some build artefacts need to be overwritten during build which will fail because of insufficient access rights.
-In this case the problematic file is
+    On Windows, packages are added to folders like `.julia\packages\Slint\uZ1Dp\`. All folders have full access rights for the current user, but files only have restricted access rights, typically read only. This prevents the build process to succeed because some build artefacts need to be overwritten during build which will fail because of insufficient access rights.
+    In this case the problematic file is
 
-```julia
-.julia\packages\Slint\uZ1Dp\deps\SlintWrapper\include\slintwrapper.h
-```
+    ```julia
+    .julia\packages\Slint\uZ1Dp\deps\SlintWrapper\include\slintwrapper.h
+    ```
 
-and a solution will be found at some time.
+    and a solution will be found at some time.
 
 ## Working examples
 
@@ -61,15 +83,15 @@ include("examples/gallery/main.jl")
 To rebuild libraries set the environment variable
 
 ```bash
-export JULIA_SLINT_REBUILD=1
+export JULIA_SLINT_REBUILD=1  #bash
 ``` 
 
 ```shell
-set JULIA_SLINT_REBUILD=1
+set JULIA_SLINT_REBUILD=1   #csh
 ```
 
 ```julia
-julia> ENV["JULIA_SLINT_REBUILD"]=1
+julia> ENV["JULIA_SLINT_REBUILD"]=1  #julia REPL
 ```
 
 ```julia
@@ -128,6 +150,20 @@ Slint.compile_from_file(file3,"SingleButton")
 Slint.run()
 ```
 
+## Install Build prerequisites for Linux (tested with CachyOS)
+
+as root:
+
+```fish
+pacman -S rustup
+```
+
+as developer/user:
+
+```fish
+rustup default stable
+```
+
 ## Install Build prerequisites for Linux (tested with Ubuntu)
 
 as root:
@@ -146,13 +182,13 @@ curl -fsSL https://install.julialang.org | sh
 rustup default stable
 ```
 
-cloning and building the project:
+## Cloning and building the project:
 
 ```bash
 git clone https://github.com/oheil/Slint.jl.git
 cd Slint.jl
 
-export JULIA_SLINT_REBUILD=1  #bash or set it on in Julia
+export JULIA_SLINT_REBUILD=1  #bash or set it in Julia REPL
 
 julia
 ```
