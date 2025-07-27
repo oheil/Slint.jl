@@ -18,13 +18,13 @@ function on_changed_element(params...)
     old_value = params[4]
 
     # print the parameters to the console for general debugging:
-    println("on_changed_element")
-    for p in params
-        println(p," ",typeof(p))
-    end
+    #println("on_changed_element")
+    #for p in params
+    #    println(p," ",typeof(p))
+    #end
 
     # get the value of a specific cell and print it:
-    println( "cell 1,1 value: ", Slint.get_cell_value("cells",1,1) )
+    #println( "cell 1,1 value: ", Slint.get_cell_value("cells",1,1) )
     # set the value of a specific cell:
     Slint.set_cell_value("cells",rows,columns,new_value)
 
