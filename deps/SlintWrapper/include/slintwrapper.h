@@ -17,6 +17,8 @@ typedef struct JRvalue {
   int32_t elsize;
 } JRvalue;
 
+struct JRvalue r_get_error_state(void);
+
 void r_init(void);
 
 void r_compile_from_file(const char *slint_file, const char *slint_comp);

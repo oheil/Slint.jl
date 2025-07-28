@@ -7,6 +7,8 @@ use std::collections::HashMap;
 
 use log::*;
 use env_logger::Env;
+use std::error::Error;
+use std::fmt;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
 use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, Image, Rgba8Pixel, Rgb8Pixel };
@@ -25,6 +27,28 @@ use crate::slint_value::*;
 // provide two plotting functions, one for RGB and one for RGBA, for demonstration purposes because of Julia plotting performance issues
 //   see examples/plotter/main.jl
 use plotters::prelude::*;  // not needed for library, only for examples/plotter/main.jl
+
+#[derive(Debug)]
+struct ErrorState {
+    desc: String,
+    state: bool
+}
+impl fmt::Display for ErrorState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let desc = &self.desc;
+        write!(f, "{desc}")
+    }
+}
+impl Error for ErrorState {}
+#[unsafe(no_mangle)]
+unsafe extern "C" fn r_get_error_state() -> JRvalue {
+    debug!("r_get_error_state");
+    let error_state = ErrorState {
+        desc: String::from(""),
+        state: true,
+    };
+    return JRvalue::new_bool(error_state.state);
+}
 
 // only hold a single instance at index 0
 static INSTANCES: Lazy<Mutex<Vec<Weak<ComponentInstance>>>> = Lazy::new(|| {
@@ -233,6 +257,10 @@ unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_co
         }
     } else {
         result.print_diagnostics();
+        ErrorState {
+            desc: format!("r_compile_from_string: diagnostics is not empty: {:?}", diagnostics),
+            state: false,
+        };
     }
 }}
 
