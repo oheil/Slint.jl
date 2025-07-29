@@ -859,12 +859,29 @@ unsafe extern "C" fn r_set_value(id: *const c_char, new_value: JRvalue) { unsafe
             debug!("r_set_value: new_value.int_value={}",new_value.int_value);
             debug!("r_set_value: new_value.float_value={}",new_value.float_value);
             debug!("r_set_value: new_value.string_value={:p}",new_value.string_value);
-            let _ = instance.unwrap().set_property(&propertyid, Value::from(new_value));
+            let sp_ret = instance.unwrap().set_property(&propertyid, Value::from(new_value));
+            if sp_ret.is_err() {
+                set_error_state(
+                    format!("r_set_value:setting property \"{}\" failed: {:?}", propertyid, sp_ret),
+                    true
+                );
+                warn!("r_set_value:setting property \"{}\" failed: {:?}", propertyid, sp_ret);
+            } else {
+                debug!("r_set_value:property \"{}\" set successfully", propertyid);
+            }
             slvi_bridges_changed(propertyid);
         } else {
+            set_error_state(
+                format!("r_set_value:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again"),
+                true
+            );
             warn!("r_set_value:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again");
         }
     } else {
+        set_error_state(
+            format!("r_set_value:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString"),
+            true
+        );
         warn!("r_set_value:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
     }
 }}
@@ -890,10 +907,10 @@ unsafe extern "C" fn r_get_value(id: *const c_char) -> JRvalue { unsafe {
                 return rv;                    
             } else {
                 set_error_state(
-                    format!("r_get_value:property \"{}\" not found",propertyid),
+                    format!("r_get_value:getting property \"{}\" failed: {:?}",propertyid,value),
                     true
                 );
-                warn!("r_get_value:property <{}> not found",propertyid);
+                warn!("r_get_value:getting property <{}> failed: {:?}",propertyid,value);
             }
         }
         else {

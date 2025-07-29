@@ -145,4 +145,14 @@ end;
     Slint.set_value("usertext","new text")
     usertext = Slint.get_value("usertext")
     @test usertext == "new text"
+
+    Slint.set_value("unknown-property","new text")
+    rv = Slint.get_error_state()
+    if rv.int_value == 1
+        if verbose
+            @info("This error is provoked by purpose, the property 'unknown-property' is not defined in the Slint string.")
+            @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        end
+    end
+    @test rv.int_value == 1
 end;
