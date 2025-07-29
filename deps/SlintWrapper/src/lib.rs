@@ -889,13 +889,25 @@ unsafe extern "C" fn r_get_value(id: *const c_char) -> JRvalue { unsafe {
                 rv = JRvalue::from(value);
                 return rv;                    
             } else {
+                set_error_state(
+                    format!("r_get_value:property \"{}\" not found",propertyid),
+                    true
+                );
                 warn!("r_get_value:property <{}> not found",propertyid);
             }
         }
         else {
+            set_error_state(
+                format!("r_get_value:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again"),
+                true
+            );
             warn!("r_get_value:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again");
         }
     } else {
+        set_error_state(
+            format!("r_get_value:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString"),
+            true
+        );
         warn!("r_get_value:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
     }
     return rv;

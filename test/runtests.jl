@@ -3,6 +3,11 @@ using Test
 ENV["RUST_LOG"]=""   # Disable logging for tests, you can set it to "debug" for more verbose output
 ENV["JULIA_SLINT_REBUILD"]=0 # Disable rebuild of SlintWrapper, set to "1" to force rebuild
 
+verbose = false
+if "--verbose" in ARGS
+    verbose = true
+end
+
 using Slint
 
 @testset "Slint compilation from a string" begin
@@ -82,8 +87,10 @@ end;
     rv = Slint.get_error_state()
 
     if rv.int_value == 1
-        #@info("This warning is provoked by purpose, the callback 'wrong-callback-by-purpose' is not defined in the Slint file.")
-        #@info("  Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        if verbose
+            @info("This error is provoked by purpose, the callback 'wrong-callback-by-purpose' is not defined in the Slint file.")
+            @info("  Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        end
     end
     @test rv.int_value == 1
 end;
@@ -106,4 +113,36 @@ end;
     @test rv.int_value == 0
 end;
 
+@testset "Set/get values of properties   " begin
+    #
+    # Test setting and getting values of properties
+    #
+    s = raw"""
+        import { LineEdit } from "std-widgets.slint";
+        export component MyWin inherits Window {
+            in-out property <string> usertext: "some text";
+            Text {
+                LineEdit {
+                    text <=> root.usertext;
+                }
+            }
+        }
+        """
+    Slint.compile_from_string(s,"MyWin")
+    usertext = Slint.get_value("usertext")
+    @test usertext == "some text"
 
+    usertext = Slint.get_value("unknown-property")
+    rv = Slint.get_error_state()
+    if rv.int_value == 1
+        if verbose
+            @info("This error is provoked by purpose, the property 'unknown-property' is not defined in the Slint string.")
+            @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        end
+    end
+    @test rv.int_value == 1
+
+    Slint.set_value("usertext","new text")
+    usertext = Slint.get_value("usertext")
+    @test usertext == "new text"
+end;

@@ -213,6 +213,14 @@ julia> using Pkg; Pkg.activate("."); Pkg.build("Slint"; verbose = true)
 julia> include("examples/7guis/booker.jl")
 ```
 
+## Running Tests
+
+```julia
+using Pkg;
+Pkg.test("Slint")
+Pkg.test("Slint"; test_args=["--verbose"])
+```
+
 ## Install Build prerequisites in Visual Studio Installer
 
 ![wi1](https://github.com/user-attachments/assets/fed0a9ed-8c6d-40b5-bd3c-4ef5b8d69351)
