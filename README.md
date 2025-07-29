@@ -218,7 +218,8 @@ julia> include("examples/7guis/booker.jl")
 ```julia
 using Pkg;
 Pkg.test("Slint")
-Pkg.test("Slint"; test_args=["--verbose"])
+Pkg.test("Slint"; test_args=["-v"])   # verbose tests
+Pkg.test("Slint"; test_args=["-vv"])  # more verbose tests
 ```
 
 ## Install Build prerequisites in Visual Studio Installer

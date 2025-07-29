@@ -4,8 +4,12 @@ ENV["RUST_LOG"]=""   # Disable logging for tests, you can set it to "debug" for 
 ENV["JULIA_SLINT_REBUILD"]=0 # Disable rebuild of SlintWrapper, set to "1" to force rebuild
 
 verbose = false
-if "--verbose" in ARGS
+if "-v" in ARGS
     verbose = true
+end
+if "-vv" in ARGS
+    verbose = true
+    ENV["RUST_LOG"]="debug"
 end
 
 using Slint
