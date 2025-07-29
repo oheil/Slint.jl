@@ -36,6 +36,11 @@ static mut ERROR_STATE: Lazy<Mutex<ErrorState>> = Lazy::new(|| {
     Mutex::new(ErrorState{desc: String::from(""), state: false})
 });
 #[unsafe(no_mangle)]
+unsafe extern "C" fn r_clear_error_state() {
+    debug!("r_clear_error_state");
+    set_error_state(String::from(""), false);
+}
+#[unsafe(no_mangle)]
 unsafe extern "C" fn r_get_error_state() -> JRvalue {
     debug!("r_get_error_state");
     let error_state_ptr = ptr::addr_of_mut!(ERROR_STATE);
@@ -233,6 +238,10 @@ unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: 
     } else {
         debug!("r_compile_from_file: diagnostics is not empty");
         result.print_diagnostics();
+        set_error_state(
+            format!("r_compile_from_file: diagnostics is not empty: {:?}", diagnostics),
+            true
+        );
     }
 }}
 
@@ -267,6 +276,7 @@ unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_co
             register_bridge_2_standard_list_view_item(&instance);
         }
     } else {
+        debug!("r_compile_from_string: diagnostics is not empty");
         result.print_diagnostics();
         set_error_state(
             format!("r_compile_from_string: diagnostics is not empty: {:?}", diagnostics),
@@ -436,7 +446,7 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
     if ! INSTANCES.lock().unwrap().is_empty() {
         let instance = (&(INSTANCES.lock().unwrap())[0]).upgrade();
         if instance.is_some() {
-            let _ = instance.unwrap().set_callback(&funcid, move |args: &[Value]| {
+            let sc_ret = instance.unwrap().set_callback(&funcid, move |args: &[Value]| {
                 // debug list of arguments
                 debug!("r_set_callback:slint calls callback with {} arguments", args.len());
                 for arg in args {
@@ -524,19 +534,49 @@ unsafe extern "C" fn r_set_callback(id: *const c_char, func: extern "C" fn(par_p
                         warn!("r_set_callback:callback return value of type Image with elsize {} is not implemented",elsize);
                     }
                     else {
+                        set_error_state(
+                            format!("r_set_callback:callback return value of type {} is not implemented",rv_type),
+                            true
+                        );
                         error!("r_set_callback:callback return value of type {} is not implemented",rv_type);
                     }
                 } 
                 else {
+                    set_error_state(
+                        format!("r_set_callback:callback must return a valid JRvalue, JRvalue.magic must equal {}",JRMAGIC),
+                        true
+                    );
                     error!("r_set_callback:callback must return a valid JRvalue, JRvalue.magic must equal {}",JRMAGIC);
                 }
-                // Unvalid or not implemented JRvalue type, return an empty/void
+                // Invalid or not implemented JRvalue type, return an empty/void
+                set_error_state(
+                    format!("r_set_callback:invalid or not implemented JRvalue type, return an empty/void"),
+                    true
+                );
                 return Value::from(Value::Void);
             } );
+            if sc_ret.is_err() {
+                set_error_state(
+                    format!("r_set_callback:setting callback \"{}\" failed: {:?}", funcid, sc_ret),
+                    true
+                );
+                warn!("r_set_callback:setting callback \"{}\" failed: {:?}", funcid, sc_ret);
+            } else {
+                debug!("r_set_callback:callback \"{}\" set successfully", funcid);
+            }
+
         } else {
+            set_error_state(
+                format!("r_set_callback:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again"),
+                true
+            );
             warn!("r_set_callback:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again");
         }
     } else {
+        set_error_state(
+            format!("r_set_callback:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString"),
+            true
+        );
         warn!("r_set_callback:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
     }
 }}

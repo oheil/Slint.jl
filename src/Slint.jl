@@ -186,6 +186,11 @@ function get_error_state()
     r_get_error_state()
 end
 
+function clear_error_state()
+    check_init()
+    r_clear_error_state()
+end
+
 function run()
     check_init()
     r_run()

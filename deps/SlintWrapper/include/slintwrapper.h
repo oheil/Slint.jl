@@ -17,6 +17,8 @@ typedef struct JRvalue {
   int32_t elsize;
 } JRvalue;
 
+void r_clear_error_state(void);
+
 struct JRvalue r_get_error_state(void);
 
 void r_init(void);

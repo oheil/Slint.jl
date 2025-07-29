@@ -12,6 +12,10 @@ struct JRvalue
     elsize::Int32
 end
 
+function r_clear_error_state()
+    ccall((:r_clear_error_state, slintwrapper), Cvoid, ())
+end
+
 function r_get_error_state()
     ccall((:r_get_error_state, slintwrapper), JRvalue, ())
 end
