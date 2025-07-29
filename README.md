@@ -1,8 +1,8 @@
 # Slint.jl
 
-## This package is in an EARLY development state!
+## This package is in an EARLY development state
 
-## For Windows and Linux no build is needed anymore.
+## For Windows and Linux no build is needed anymore
 
 Slint GUI for Julia
 
@@ -21,7 +21,6 @@ cd(joinpath(dirname(pathof(Slint)), ".."))
 include("examples/gallery/main.jl")
 ```
 
-
 ## Build prerequisites
 
 - Rust
@@ -34,19 +33,19 @@ include("examples/gallery/main.jl")
 
     The library can't be unloaded.
 
-    See: https://github.com/JuliaLang/julia/issues/44722
+    See: [https://github.com/JuliaLang/julia/issues/44722](https://github.com/JuliaLang/julia/issues/44722)
 
     First clang experiments did not resolve:
 
     /home/oheil/.cargo/config.toml:
 
-    ```
+    ```TOML
     rustflags = [
     "-C", "linker=clang",
     ]
     ```
 
-    ```
+    ```bash
     export JULIA_SLINT_REBUILD=1
     export CC=/usr/bin/clang
     export CXX=/usr/bin/clang++
@@ -91,7 +90,7 @@ To rebuild libraries set the environment variable
 
 ```bash
 export JULIA_SLINT_REBUILD=1  #bash
-``` 
+```
 
 ```shell
 set JULIA_SLINT_REBUILD=1   #csh + cmd
@@ -115,6 +114,7 @@ include("contrib/generator.jl")
 ```
 
 More verbose debug output of the rust library:
+
 ```shell
 set RUST_LOG="debug"
 ```
@@ -125,7 +125,7 @@ set RUST_LOG="debug"
 # none
 ```
 
-#### Testing linux build procedure is next.
+### Testing linux build procedure is next
 
 ## REPL examples
 
@@ -194,7 +194,7 @@ curl -fsSL https://install.julialang.org | sh
 rustup default stable
 ```
 
-## Cloning and building the project:
+## Cloning and building the project
 
 ```bash
 git clone https://github.com/oheil/Slint.jl.git
