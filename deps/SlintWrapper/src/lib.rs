@@ -3,12 +3,9 @@ use once_cell::sync::Lazy;
 use std::ffi::{CStr, CString, c_void, c_char};
 use std::convert::From;
 use std::collections::HashMap;
-//use std::io;
 
 use log::*;
 use env_logger::Env;
-use std::error::Error;
-use std::fmt;
 
 //use slint_interpreter::{Weak, Value, ValueType, ComponentCompiler, ComponentInstance, ComponentHandle, SharedString};
 use slint_interpreter::{Weak, Value, ValueType, Compiler, ComponentInstance, ComponentHandle, Image, Rgba8Pixel, Rgb8Pixel };
@@ -28,26 +25,40 @@ use crate::slint_value::*;
 //   see examples/plotter/main.jl
 use plotters::prelude::*;  // not needed for library, only for examples/plotter/main.jl
 
-#[derive(Debug)]
+//#[derive(Debug)]
 struct ErrorState {
     desc: String,
     state: bool
 }
-impl fmt::Display for ErrorState {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let desc = &self.desc;
-        write!(f, "{desc}")
-    }
-}
-impl Error for ErrorState {}
+// this is used to store the latest global error state, e.g. if a slint file could not be compiled
+//   state is false if no error, true if an error occurred
+static mut ERROR_STATE: Lazy<Mutex<ErrorState>> = Lazy::new(|| {
+    Mutex::new(ErrorState{desc: String::from(""), state: false})
+});
 #[unsafe(no_mangle)]
 unsafe extern "C" fn r_get_error_state() -> JRvalue {
     debug!("r_get_error_state");
-    let error_state = ErrorState {
-        desc: String::from(""),
-        state: true,
+    let error_state_ptr = ptr::addr_of_mut!(ERROR_STATE);
+    let state = (*error_state_ptr).lock().unwrap().state;
+    let desc = (*error_state_ptr).lock().unwrap().desc.clone();
+    let rv = JRvalue {
+        magic: JRMAGIC,
+        rtype: CString::new("ErrorState").unwrap().into_raw(),
+        int_value: state as i32,
+        float_value: 0.0,
+        string_value: CString::new(desc).unwrap().into_raw(),
+        image_value: std::ptr::null_mut(),
+        width: 0,
+        height: 0,
+        elsize: 0,
     };
-    return JRvalue::new_bool(error_state.state);
+    return rv;
+}
+unsafe fn set_error_state(desc: String, state: bool) {
+    debug!("set_error_state: {}, {}", desc, state);
+    let error_state_ptr = ptr::addr_of_mut!(ERROR_STATE);
+    (*error_state_ptr).lock().unwrap().desc = desc;
+    (*error_state_ptr).lock().unwrap().state = state;
 }
 
 // only hold a single instance at index 0
@@ -257,10 +268,10 @@ unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_co
         }
     } else {
         result.print_diagnostics();
-        ErrorState {
-            desc: format!("r_compile_from_string: diagnostics is not empty: {:?}", diagnostics),
-            state: false,
-        };
+        set_error_state(
+            format!("r_compile_from_string: diagnostics is not empty: {:?}", diagnostics),
+            true
+        );
     }
 }}
 

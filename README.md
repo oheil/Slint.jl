@@ -94,7 +94,7 @@ export JULIA_SLINT_REBUILD=1  #bash
 ``` 
 
 ```shell
-set JULIA_SLINT_REBUILD=1   #csh
+set JULIA_SLINT_REBUILD=1   #csh + cmd
 ```
 
 ```julia
@@ -112,6 +112,11 @@ cd(".julia/dev/Slint")
 Pkg.activate(".")
 Pkg.build("Slint"; verbose = true);
 include("contrib/generator.jl")
+```
+
+More verbose debug output of the rust library:
+```shell
+set RUST_LOG="debug"
 ```
 
 ## Current example work in progress

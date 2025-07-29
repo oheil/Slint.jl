@@ -51,8 +51,8 @@ include("api.jl")
 const rMagic = r_get_magic()
 
 # globals for persistance of string return values of callbacks
-@enum Rtype rUnknown=1 rBool rString rInteger rFloat rImage
-rtypes = ["Unknown","Bool","String","Integer","Float","Image"]
+@enum Rtype rUnknown=1 rBool rString rInteger rFloat rImage rErrorState
+rtypes = ["Unknown","Bool","String","Integer","Float","Image","ErrorState"]
 rstring_value = [""]
 # This struct is auto-generated in api.jl, just here for reference:
 #struct JRvalue
@@ -180,6 +180,11 @@ end
 #    @warn "Slint.JRvalue: only arrays of element size 4 bytes (e.g. RGB24,ARGB32,UInt32) are supported, returning empty JRvalue"
 #    JRvalue()
 #end
+
+function get_error_state()
+    check_init()
+    r_get_error_state()
+end
 
 function run()
     check_init()
