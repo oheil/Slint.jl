@@ -176,7 +176,7 @@ as developer/user:
 rustup default stable
 ```
 
-## Install Build prerequisites for Linux (tested with Ubuntu)
+## Install Build prerequisites for Linux (tested with Ubuntu 24.04 LTS (Noble Numbat), Debian Trixie in WSL)
 
 as root:
 
