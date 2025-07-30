@@ -6,8 +6,8 @@ authors = ["oheil <git@heilbit.de>"]
 build="build/build.rs"
 
 [dependencies]
-slint = "1.11.0"
-slint-interpreter = { version = "1.11.0", features = ["display-diagnostics"] }
+slint = "1.12"
+slint-interpreter = { version = "1.12", features = ["display-diagnostics"] }
 spin_on = "0.1.1"
 once_cell = "1.21.3"
 log = "0.4.27"
