@@ -218,7 +218,7 @@ julia> include("examples/7guis/booker.jl")
 as root
 
 ```bash
-apt install x11-apps
+apt install x11-apps # shortcut to get some needed x11 libs as dependency
 apt install libxkbcommon-x11-dev
 apt install freeglut3-dev
 apt install xdg-desktop-portal-gtk  # only if you want to get rid of error: Error watching for xdg color schemes: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.portal.Desktop was not provided by any .service files
