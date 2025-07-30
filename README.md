@@ -213,6 +213,16 @@ julia> using Pkg; Pkg.activate("."); Pkg.build("Slint"; verbose = true)
 julia> include("examples/7guis/booker.jl")
 ```
 
+### For WSL Debian Trixie to show the Slint GUI
+
+as root
+
+```bash
+apt install x11-apps
+apt install libxkbcommon-x11-dev
+apt install freeglut3-dev
+```
+
 ## Running Tests
 
 ```julia
