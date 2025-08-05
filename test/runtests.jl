@@ -160,3 +160,11 @@ end;
     end
     @test rv.int_value == 1
 end;
+
+@testset "Set/get cell values             " begin
+    #
+    # Test setting and getting cell values
+    #
+
+
+end;
