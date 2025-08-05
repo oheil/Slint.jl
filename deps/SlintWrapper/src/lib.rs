@@ -948,6 +948,10 @@ unsafe extern "C" fn r_set_cell_value(id: *const c_char, mut row: i32, mut col: 
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
 
     if ! model_contains(&propertyid) {
+        set_error_state(
+            format!("r_set_cell_value:no model available for property id \"{}\"",propertyid),
+            true
+        );
         warn!("r_set_cell_value:no model available for property id <{}>",propertyid);
     } else {
         let model: Rc<CellsModel> = model_get(&propertyid);
@@ -978,31 +982,41 @@ unsafe extern "C" fn r_get_cell_value(id: *const c_char, mut row: i32, mut col: 
     let mut rv = JRvalue::new_undefined();
 
     if ! model_contains(&propertyid) {
-        warn!("r_get_cell_value:no model available for property id <{}>",propertyid);
+        set_error_state(
+            format!("r_get_cell_value: no model available for property id \"{}\"",propertyid),
+            true
+        );
+        warn!("r_get_cell_value: no model available for property id <{}>",propertyid);
     } else {
         let model: Rc<CellsModel> = model_get(&propertyid);
         let rv_tmp: Option<JRvalue> = model.get_cell_value(row as usize, col as usize);
         match rv_tmp {
             Some(x) => {
-                debug!("r_get_cell_value:cell value: {:p}",x.string_value);
+                debug!("r_get_cell_value: cell value: {:p}",x.string_value);
                 rv.rtype = x.rtype;
                 rv.string_value = x.string_value;
                 rv.int_value = x.int_value;
                 rv.float_value = x.float_value;
             },
-            None => debug!("r_get_cell_value:no cell value"),
+            None => {
+                set_error_state(
+                    format!("r_get_cell_value: no cell value at row {}, col {}",row+1,col+1),
+                    true
+                );
+                debug!("r_get_cell_value: no cell value at row {}, col {}",row+1,col+1);
+            },
         }
     }
 
-    debug!("r_get_cell_value:return value: {}",rv.magic);
+    debug!("r_get_cell_value: return value: {}",rv.magic);
     let rv_cstr = CStr::from_ptr(rv.rtype);
     let rv_type: String = rv_cstr.to_string_lossy().into_owned();
-    debug!("r_get_cell_value:return value type: {}",rv_type);
-    debug!("r_get_cell_value:return value int: {}",rv.int_value);
-    debug!("r_get_cell_value:return value float: {}",rv.float_value);
-    debug!("r_get_cell_value:return value string_p: {:p}",rv.string_value);
+    debug!("r_get_cell_value: return value type: {}",rv_type);
+    debug!("r_get_cell_value: return value int: {}",rv.int_value);
+    debug!("r_get_cell_value: return value float: {}",rv.float_value);
+    debug!("r_get_cell_value: return value string_p: {:p}",rv.string_value);
     let cs: SharedString = CStr::from_ptr(rv.string_value).to_string_lossy().into_owned().into();
-    debug!("r_get_cell_value:return value string: {}",cs);
+    debug!("r_get_cell_value: return value string: {}",cs);
 
     return rv;
 }}
@@ -1024,10 +1038,16 @@ unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols: i3
             let v = instance.as_ref().unwrap().get_property(&propertyid);
             match v {
                 Ok(value) => {
-                    debug!("r_set_property_model:property <{}> has value: {:?}", propertyid, value);
+                    debug!("r_set_property_model:property \"{}\" has value: {:?}", propertyid, value);
                     print_type_of(&value);
                 },
-                Err(error) => warn!("r_set_property_model:getting property <{}> failed: {:?}", propertyid, error),
+                Err(error) => {
+                    set_error_state(
+                        format!("r_set_property_model:getting property \"{}\" failed: {:?}", propertyid, error),
+                        true
+                    );
+                    warn!("r_set_property_model:getting property \"{}\" failed: {:?}", propertyid, error)
+                },
             };
             //debug code end
 
@@ -1039,12 +1059,26 @@ unsafe extern "C" fn r_set_property_model(id: *const c_char, rows: i32, cols: i3
                     model_insert(propertyid.clone(),model.clone());
                     slvi_bridges_changed(propertyid);                        
                 },
-                Err(error) => warn!("r_set_property_model:setting model for property <{}> failed: {:?}", propertyid, error),
+                Err(error) => {
+                    set_error_state(
+                        format!("r_set_property_model:setting model for property \"{}\" failed: {:?}", propertyid, error),
+                        true
+                    );
+                    warn!("r_set_property_model:setting model for property <{}> failed: {:?}", propertyid, error)
+                },
             };
         } else {
+            set_error_state(
+                format!("r_set_property_model:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again"),
+                true
+            );
             warn!("r_set_property_model:last slint instance dropped, call Slint.CompileFromFile or Slint.CompileFromString again");
         }
     } else {
+        set_error_state(
+            format!("r_set_property_model:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString"),
+            true
+        );
         warn!("r_set_property_model:no slint instance available, call Slint.CompileFromFile or Slint.CompileFromString");
     }
 }}
@@ -1154,10 +1188,22 @@ impl CellsModel {
                 debug!("CellsModel.update_cell: new_v.float_value={}",new_v.float_value);
                 debug!("CellsModel.update_cell: new_v.string_value={:p}",new_v.string_value);
                 if row >= self.row_count() {
-                    warn!("CellsModel.update_cell: row index <{}> not in range of existing row indices <1..{}>",row,self.row_count());
+                    unsafe {
+                        set_error_state(
+                            format!("CellsModel.update_cell: row index \"{}\" not in range of existing row indices \"1..{}\"",row+1,self.row_count()),
+                            true
+                        );
+                    }
+                    warn!("CellsModel.update_cell: row index <{}> not in range of existing row indices <1..{}>",row+1,self.row_count());
                 }
                 if col >= self.col_count() {
-                    warn!("CellsModel.update_cell: col index <{}> not in range of existing column indices <1..{}>",col,self.col_count());
+                    unsafe {
+                        set_error_state(
+                            format!("CellsModel.update_cell: col index \"{}\" not in range of existing column indices \"1..{}\"",col+1,self.col_count()),
+                            true
+                        );
+                    }
+                    warn!("CellsModel.update_cell: col index <{}> not in range of existing column indices <1..{}>",col+1,self.col_count());
                 }
                 let rows_tmp = self.rows.borrow();
                 let r_model = rows_tmp.get(row)?;

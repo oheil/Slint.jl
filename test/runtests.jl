@@ -159,12 +159,77 @@ end;
         end
     end
     @test rv.int_value == 1
+    
+    Slint.clear_error_state()
 end;
 
 @testset "Set/get cell values             " begin
     #
     # Test setting and getting cell values
     #
+    slintFile = "../examples/7guis/cells.slint"
+    startComponent = "MainWindow"
 
+    Slint.compile_from_file(slintFile, startComponent)
 
+    rows = 10
+    columns = 5
+
+    function on_changed_element(params...)
+        return true
+    end
+    Slint.set_property_model("cells",rows,columns,on_changed_element)
+
+    rv = Slint.get_error_state()
+    @test rv.int_value == 0
+
+    for row in 1:rows
+        for col in 1:columns
+            Slint.set_cell_value("cells", row, col, string(row * col))
+            cell_value = Slint.get_cell_value("cells", row, col)
+            @test cell_value == string(row * col)
+        end
+    end
+
+    Slint.set_cell_value("cells", rows+1, columns+1, "cell not existing")
+    rv = Slint.get_error_state()
+    if rv.int_value == 1
+        if verbose
+            @info("This error is provoked by purpose, the cell at row $(rows+1), column $(columns+1) does not exist.")
+            @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        end
+    end
+    @test rv.int_value == 1
+
+    Slint.get_cell_value("cells", rows+1, columns+1)
+    rv = Slint.get_error_state()
+    if rv.int_value == 1
+        if verbose
+            @info("This error is provoked by purpose, the cell at row $(rows+1), column $(columns+1) does not exist.")
+            @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        end
+    end
+    @test rv.int_value == 1
+
+    Slint.set_cell_value("Not existing", rows, columns, "cell not existing")
+    rv = Slint.get_error_state()
+    if rv.int_value == 1
+        if verbose
+            @info("This error is provoked by purpose, the property 'Not existing' does not exist.")
+            @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        end
+    end
+    @test rv.int_value == 1
+
+    Slint.get_cell_value("Not existing", rows, columns)
+    rv = Slint.get_error_state()
+    if rv.int_value == 1
+        if verbose
+            @info("This error is provoked by purpose, the property 'Not existing' does not exist.")
+            @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        end
+    end
+    @test rv.int_value == 1
+
+    Slint.clear_error_state()
 end;
