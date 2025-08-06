@@ -27,8 +27,8 @@ using Slint
         }
         """
     Slint.compile_from_string(s,"MyWin")
-    rv = Slint.get_error_state()
 
+    rv = Slint.get_error_state()
     if rv.magic != Slint.rMagic
         @warn("Slint.get_error_state() returned an unexpected magic number: $(rv.magic)")
     end
@@ -53,8 +53,8 @@ end;
     slintFile = "../examples/gallery/gallery.slint"
     startComponent = "App"
     Slint.compile_from_file(slintFile,startComponent)
-    rv = Slint.get_error_state()
 
+    rv = Slint.get_error_state()
     if rv.int_value == 1
         @warn("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
     end
@@ -69,8 +69,8 @@ end;
     slintFile = "../examples/7guis/booker.slint"
     startComponent = "Booker"
     Slint.compile_from_file(slintFile,startComponent)
-    rv = Slint.get_error_state()
 
+    rv = Slint.get_error_state()
     if rv.int_value == 1
         @warn("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
     end
@@ -80,16 +80,18 @@ end;
         return true
     end
     Slint.set_callback("validate-date", on_validate_date)
-    rv = Slint.get_error_state()
 
+    rv = Slint.get_error_state()
     if rv.int_value == 1
         @warn("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
     end
     @test rv.int_value == 0
 
-    Slint.set_callback("wrong-callback-by-purpose", on_validate_date)
-    rv = Slint.get_error_state()
+    Slint.clear_error_state()
 
+    Slint.set_callback("wrong-callback-by-purpose", on_validate_date)
+
+    rv = Slint.get_error_state()
     if rv.int_value == 1
         if verbose
             @info("This error is provoked by purpose, the callback 'wrong-callback-by-purpose' is not defined in the Slint file.")
@@ -110,6 +112,7 @@ end;
     @test rv.int_value == 1
 
     Slint.clear_error_state()
+
     rv = Slint.get_error_state()
     if rv.int_value == 1
         @warn("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
@@ -136,7 +139,10 @@ end;
     usertext = Slint.get_value("usertext")
     @test usertext == "some text"
 
+    Slint.clear_error_state()
+
     usertext = Slint.get_value("unknown-property")
+
     rv = Slint.get_error_state()
     if rv.int_value == 1
         if verbose
@@ -150,7 +156,10 @@ end;
     usertext = Slint.get_value("usertext")
     @test usertext == "new text"
 
+    Slint.clear_error_state()
+
     Slint.set_value("unknown-property","new text")
+
     rv = Slint.get_error_state()
     if rv.int_value == 1
         if verbose
@@ -191,41 +200,142 @@ end;
         end
     end
 
+    Slint.clear_error_state()
+
     Slint.set_cell_value("cells", rows+1, columns+1, "cell not existing")
+
     rv = Slint.get_error_state()
     if rv.int_value == 1
         if verbose
+            @info("set_cell_value")
             @info("This error is provoked by purpose, the cell at row $(rows+1), column $(columns+1) does not exist.")
             @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
         end
     end
     @test rv.int_value == 1
+
+    Slint.clear_error_state()
 
     Slint.get_cell_value("cells", rows+1, columns+1)
+
     rv = Slint.get_error_state()
     if rv.int_value == 1
         if verbose
+            @info("get_cell_value")
             @info("This error is provoked by purpose, the cell at row $(rows+1), column $(columns+1) does not exist.")
             @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
         end
     end
     @test rv.int_value == 1
 
+    Slint.clear_error_state()
+
     Slint.set_cell_value("Not existing", rows, columns, "cell not existing")
+
     rv = Slint.get_error_state()
     if rv.int_value == 1
         if verbose
+            @info("set_cell_value")
             @info("This error is provoked by purpose, the property 'Not existing' does not exist.")
             @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
         end
     end
     @test rv.int_value == 1
 
+    Slint.clear_error_state()
+
     Slint.get_cell_value("Not existing", rows, columns)
+
     rv = Slint.get_error_state()
     if rv.int_value == 1
         if verbose
+            @info("get_cell_value")
             @info("This error is provoked by purpose, the property 'Not existing' does not exist.")
+            @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        end
+    end
+    @test rv.int_value == 1
+
+    Slint.clear_error_state()
+end;
+
+@testset "StandardListViewItem bridge    " begin
+    #
+    # Test the StandardListViewItem bridge
+    #
+    s = raw"""
+            import { StandardListView } from "std-widgets.slint";
+
+            struct SlintValue  { value_s: string, value_i: int, value_f: float }
+
+            export component MainWindow inherits Window {
+                in property <[StandardListViewItem]> names-list;
+
+                callback bridge2StandardListViewItem( string, string );
+
+                in property <[[SlintValue]]> names-list-bridge;
+                changed names-list-bridge => {
+                    bridge2StandardListViewItem("names-list-bridge","names-list");
+                }
+
+                StandardListView {
+                    model: root.names-list;
+                }
+            }
+        """
+    Slint.compile_from_string(s,"MainWindow")
+
+    Slint.set_property_model("names-list-bridge",1,1)
+
+    rv = Slint.get_error_state()
+    @test rv.int_value == 0
+
+    Slint.push_rows("names-list-bridge",["Emil, Hans", "Mustermann, Max", "Tisch, Roman"])
+
+    rv = Slint.get_error_state()
+    @test rv.int_value == 0
+
+    Slint.clear_rows("names-list-bridge")
+
+    rv = Slint.get_error_state()
+    @test rv.int_value == 0
+
+    Slint.clear_error_state()
+
+    Slint.set_property_model("other-list-bridge",1,1)
+
+    rv = Slint.get_error_state()
+    if rv.int_value == 1
+        if verbose
+            @info("set_property_model")
+            @info("This error is provoked by purpose, the property 'other-list-bridge' does not exist.")
+            @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        end
+    end
+    @test rv.int_value == 1
+
+    Slint.clear_error_state()
+
+    Slint.push_rows("other-list-bridge",["Emil, Hans", "Mustermann, Max", "Tisch, Roman"])
+
+    rv = Slint.get_error_state()
+    if rv.int_value == 1
+        if verbose
+            @info("push_rows")
+            @info("This error is provoked by purpose, the property 'other-list-bridge' does not exist.")
+            @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
+        end
+    end
+    @test rv.int_value == 1
+
+    Slint.clear_error_state()
+
+    Slint.clear_rows("other-list-bridge")
+    rv = Slint.get_error_state()
+    if rv.int_value == 1
+        if verbose
+            @info("clear_rows")
+            @info("This error is provoked by purpose, the property 'other-list-bridge' does not exist.")
             @info("Slint.get_error_state() returned an error state: $(unsafe_string(rv.string_value))")
         end
     end

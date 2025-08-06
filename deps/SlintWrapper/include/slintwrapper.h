@@ -43,7 +43,7 @@ void r_clear_rows(const char *id);
 
 void r_remove_row(const char *id, uintptr_t index);
 
-void r_push_row(const char *id, const struct JRvalue *new_values, uintptr_t len);
+void r_push_rows(const char *id, const struct JRvalue *new_values, uintptr_t len);
 
 void r_set_value(const char *id, struct JRvalue new_value);
 

@@ -10,7 +10,7 @@ Slint.compile_from_file(slintFile,startComponent)
 Slint.set_property_model("names-list-bridge",1,1)
 
 entries = ["Emil, Hans","Mustermann, Max","Tisch, Roman"]
-Slint.push_row("names-list-bridge",entries)
+Slint.push_rows("names-list-bridge",entries)
 
 filtered_indices = getindex.(collect(enumerate(entries)),1)
 
@@ -22,7 +22,7 @@ function on_prefix_edited(params...)
     global filtered_indices = findall(e -> startswith(e, prefix), entries)
     filtered_entries = entries[filtered_indices]
     Slint.clear_rows("names-list-bridge")
-    Slint.push_row("names-list-bridge",filtered_entries)
+    Slint.push_rows("names-list-bridge",filtered_entries)
 
     return true
 end
@@ -46,7 +46,7 @@ function on_update_clicked(params...)
     global filtered_indices = findall(e -> startswith(e, prefix), entries)
     filtered_entries = entries[filtered_indices]
     Slint.clear_rows("names-list-bridge")
-    Slint.push_row("names-list-bridge",filtered_entries)
+    Slint.push_rows("names-list-bridge",filtered_entries)
 
     return true
 end
@@ -64,7 +64,7 @@ function on_delete_clicked(params...)
     global filtered_indices = findall(e -> startswith(e, Slint.get_value("prefix")), entries)
     filtered_entries = entries[filtered_indices]
     Slint.clear_rows("names-list-bridge")
-    Slint.push_row("names-list-bridge",filtered_entries)
+    Slint.push_rows("names-list-bridge",filtered_entries)
 
     return true
 end
@@ -85,7 +85,7 @@ function on_create_clicked(params...)
     global filtered_indices = findall(e -> startswith(e, prefix), entries)
     filtered_entries = entries[filtered_indices]
     Slint.clear_rows("names-list-bridge")
-    Slint.push_row("names-list-bridge",filtered_entries)
+    Slint.push_rows("names-list-bridge",filtered_entries)
 
     return true
 end

@@ -64,8 +64,8 @@ function r_remove_row(id, index)
     ccall((:r_remove_row, slintwrapper), Cvoid, (Ptr{Cchar}, Csize_t), id, index)
 end
 
-function r_push_row(id, new_values, len)
-    ccall((:r_push_row, slintwrapper), Cvoid, (Ptr{Cchar}, Ptr{JRvalue}, Csize_t), id, new_values, len)
+function r_push_rows(id, new_values, len)
+    ccall((:r_push_rows, slintwrapper), Cvoid, (Ptr{Cchar}, Ptr{JRvalue}, Csize_t), id, new_values, len)
 end
 
 function r_set_value(id, new_value)

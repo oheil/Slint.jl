@@ -9,12 +9,21 @@ export component MainWindow inherits Window {
     in property <[StandardListViewItem]> names-list;
 
     // Above [StandardListViewItem] property needs to be bridged with a SlintValue property.
-    // This is the generic way. In your Julia code use names-list-bridge:
-    in property <[[SlintValue]]> names-list-bridge;
+    // This is the generic way. In your Julia code use "names-list-bridge":
+
     callback bridge2StandardListViewItem( string, string );
+
+    // for every needed bridge:
+    in property <[[SlintValue]]> names-list-bridge;
     changed names-list-bridge => {
         bridge2StandardListViewItem("names-list-bridge","names-list");
     }
+    // in property <[[SlintValue]]> other-list-bridge;
+    // changed other-list-bridge => {
+    //     bridge2StandardListViewItem("other-list-bridge","other-list");
+    // }
+
+    // end bridge
 
     out property <int> current-item: list.current-item;
     out property <string> name;

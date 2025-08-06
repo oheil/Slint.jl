@@ -167,7 +167,13 @@ unsafe fn slvi_bridges_move_values(propertyid: String, propertyid2: String) { un
             debug!("slvi_bridges_move_values: remember bridge from <{}> to <{}>", propertyid, propertyid2);
             slvi_bridges_insert(propertyid.clone(), propertyid2.clone());
         },
-        Err(error) => warn!("slvi_bridges_move_values: setting model for property <{}> failed: {:?}", propertyid2, error),
+        Err(error) => {
+            set_error_state(
+                format!("slvi_bridges_move_values: setting model for property \"{}\" failed: {:?}", propertyid2, error),
+                true
+            );
+            warn!("slvi_bridges_move_values: setting model for property <{}> failed: {:?}", propertyid2, error)
+        },
     };
 }}
 unsafe fn slvi_bridges_changed(propertyid: String) { unsafe {
@@ -179,6 +185,9 @@ unsafe fn slvi_bridges_changed(propertyid: String) { unsafe {
             debug!("slvi_bridges_changed: moving values to target: {}", target);
             slvi_bridges_move_values(propertyid.clone(), target.clone());
         }
+    }
+    else {
+        debug!("slvi_bridges_changed: no bridges for propertyid: {}, this is not an error", propertyid);
     }
 }}
 
@@ -740,6 +749,10 @@ unsafe extern "C" fn r_clear_rows(id: *const c_char) { unsafe {
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
 
     if ! model_contains(&propertyid) {
+        set_error_state(
+            format!("r_clear_rows:no model available for property id <{}>",propertyid),
+            true
+        );
         warn!("r_clear_rows:no model available for property id <{}>",propertyid);
     } else {
         let model: Rc<CellsModel> = model_get(&propertyid);
@@ -773,13 +786,17 @@ unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) { unsafe {
 //
 //
 #[unsafe(no_mangle)]
-unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalue, len: usize) { unsafe {
-    debug!("r_push_row");
+unsafe extern "C" fn r_push_rows(id: *const c_char, new_values: *const JRvalue, len: usize) { unsafe {
+    debug!("r_push_rows");
     let propertyid: String = CStr::from_ptr(id).to_string_lossy().into_owned();
     if ! model_contains(&propertyid) {
-        warn!("r_push_row:no model available for property id <{}>",propertyid);
+        set_error_state(
+            format!("r_push_rows:no model available for property id <{}>",propertyid),
+            true
+        );
+        warn!("r_push_rows:no model available for property id <{}>",propertyid);
     } else {
-        debug!("r_push_row: new_values size: {}",len);
+        debug!("r_push_rows: new_values size: {}",len);
         let model: Rc<CellsModel> = model_get(&propertyid);
         let row_count = model.row_count() + 1;
         let some_row = model.rows.borrow()[0].clone();
@@ -789,33 +806,33 @@ unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalue, l
 
         for index in 0..len {
             let value: JRvalue = new_values_vec[index];
-            debug!("r_push_row: value.magic is {}",value.magic);
+            debug!("r_push_rows: value.magic is {}",value.magic);
             if value.magic == JRMAGIC {
                 let rv_cstr = CStr::from_ptr(value.rtype);
                 let rv_type: String = rv_cstr.to_string_lossy().into_owned();
-                debug!("r_push_row: rv_type is {}",rv_type);
+                debug!("r_push_rows: rv_type is {}",rv_type);
                 if rv_type == "Bool" {
                     let mut sv = SlintValue::default();
                     sv.value_i = value.int_value;
-                    debug!("r_push_row: sv.value_i is {}",sv.value_i);
+                    debug!("r_push_rows: sv.value_i is {}",sv.value_i);
                     values.push(sv);
                 }        
                 if rv_type == "Integer" {
                     let mut sv = SlintValue::default();
                     sv.value_i = value.int_value;
-                    debug!("r_push_row: sv.value_i is {}",sv.value_i);
+                    debug!("r_push_rows: sv.value_i is {}",sv.value_i);
                     values.push(sv);
                 }        
                 if rv_type == "Float" {
                     let mut sv = SlintValue::default();
                     sv.value_f = value.float_value;
-                    debug!("r_push_row: sv.value_f is {}",sv.value_f);
+                    debug!("r_push_rows: sv.value_f is {}",sv.value_f);
                     values.push(sv);
                 }        
                 if rv_type == "String" {
                     let mut sv = SlintValue::default();
                     sv.value_s = CStr::from_ptr(value.string_value).to_string_lossy().into_owned().into();
-                    debug!("r_push_row: sv.value_s is {}",sv.value_s);
+                    debug!("r_push_rows: sv.value_s is {}",sv.value_s);
                     values.push(sv);
                 }        
                 if rv_type == "Unknown" {
@@ -823,9 +840,9 @@ unsafe extern "C" fn r_push_row(id: *const c_char, new_values: *const JRvalue, l
                     sv.value_i = value.int_value;
                     sv.value_f = value.float_value;
                     sv.value_s = CStr::from_ptr(value.string_value).to_string_lossy().into_owned().into();
-                    debug!("r_push_row: sv.value_i is {}",sv.value_i);
-                    debug!("r_push_row: sv.value_f is {}",sv.value_f);
-                    debug!("r_push_row: sv.value_s is {}",sv.value_s);
+                    debug!("r_push_rows: sv.value_i is {}",sv.value_i);
+                    debug!("r_push_rows: sv.value_f is {}",sv.value_f);
+                    debug!("r_push_rows: sv.value_s is {}",sv.value_s);
                     values.push(sv);
                 }
             }

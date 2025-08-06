@@ -34,7 +34,7 @@ function close()
     sleep(0.1) # wait a bit to ensure the library is unloaded
     count=1
     while count < 4 && in(slintwrapper,Libdl.dllist())
-        println("Slint.close: waiting for slintwrapper to be unloaded... ")
+        @debug "Slint.close: waiting for slintwrapper to be unloaded... "
         r = Libdl.dlclose(handle)
         sleep(count)
         count += 1
@@ -276,9 +276,9 @@ function remove_row(id, index)
 end
 
 #
-# push a full row into model
+# push full rows into model
 #  
-function push_row(id, new_values)
+function push_rows(id, new_values)
     check_init()
     nvalues = Vector{JRvalue}()
     len = length(new_values)
@@ -286,7 +286,7 @@ function push_row(id, new_values)
         nvalue=JRvalue(nv)
         push!(nvalues,nvalue)
     end
-    r_push_row(id, nvalues, len)
+    r_push_rows(id, nvalues, len)
     nothing
 end
 
