@@ -4,7 +4,7 @@ using Slint
 #using GLMakie.Colors
 #  a GLMake example wasn't feasible, because of Slint uses GL too, dind't found a way to use both together
 
-slintFile = "examples\\plotter\\plotter.slint"
+slintFile = "examples/plotter/plotter.slint"
 startComponent = "MainWindow"
 
 Slint.compile_from_file(slintFile,startComponent)
