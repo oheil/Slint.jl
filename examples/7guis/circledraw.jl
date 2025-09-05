@@ -74,7 +74,7 @@ function on_redo_clicked(params...)
         Slint.set_value("undoable",true)
         if u.a == draw
             #println(u.x," ",u.y," ",u.width)
-            Slint.push_row("model",[u.x,u.y,u.width])
+            Slint.push_rows("model",[u.x,u.y,u.width])
             inc_circle_count()
         elseif u.a == resize
             row=u.index
@@ -101,7 +101,7 @@ function on_background_clicked(params...)
     x=Int(params[1])
     y=Int(params[2])
     w=30 # default diameter
-    Slint.push_row("model",[x,y,w])
+    Slint.push_rows("model",[x,y,w])
     Slint.set_value("undoable",true)
     inc_circle_count()
     push!(UndoStack,Undo(draw,get_circle_count(),w,x,y))
