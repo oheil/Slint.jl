@@ -9,12 +9,12 @@ const juliapackage = "Slint"
 const libname = Sys.iswindows() ? rustlibname : "lib" * rustlibname
 
 function build_dylib()
-    clean()
+    dylib,deps_filename = dylib_filenames()
+    clean(dylib,deps_filename)
 
     run(Cmd(`cargo build --release`, dir=joinpath(@__DIR__, rustprojname)))
 
     release_dir = joinpath(@__DIR__, "release")
-    dylib = dylib_filename()
 
     release_dylib_filepath = joinpath(release_dir, dylib)
     @assert isfile(release_dylib_filepath) "$release_dylib_filepath not found. Build may have failed."
@@ -25,19 +25,19 @@ function build_dylib()
 end
 
 
-function dylib_filename()
+function dylib_filenames()
     @static if Sys.isapple()
-        "$libname.dylib"
+        "$libname.dylib","deps_apple.jl"
     elseif Sys.islinux()
-        "$libname.so"
+        "$libname.so","deps_linux.jl"
     elseif Sys.iswindows()
-        "$libname.dll"
+        "$libname.dll","deps_windows.jl"
     else
         error("Not supported: $(Sys.KERNEL)")
     end
 end
 
-function write_deps_file(libname, libfile, juliapackage)
+function write_deps_file(libname, libfile, juliapackage, deps_filename)
     script = """
 import Libdl
 
@@ -55,20 +55,19 @@ function check_deps()
     return handle
 end
 """
-
-    open(joinpath(@__DIR__, "deps.jl"), "w") do f
+    open(joinpath(@__DIR__, deps_filename), "w") do f
         write(f, script)
     end
 end
 
-function clean()
-    deps_file = joinpath(@__DIR__, "deps.jl")
+function clean(dylib,deps_filename)
+    deps_file = joinpath(@__DIR__, deps_filename)
     isfile(deps_file) && rm(deps_file)
 
     #release_dir = joinpath(@__DIR__, "release")
     #isdir(release_dir) && rm(release_dir, recursive=true)
 
-    dylib_file = joinpath(@__DIR__, dylib_filename())
+    dylib_file = joinpath(@__DIR__, dylib)
     isfile(dylib_file) && rm(dylib_file)
 
     # remove deps\SlintWrapper\include\slintwrapper.h in case it can not be removed or
@@ -96,7 +95,8 @@ if get(ENV, "JULIA_SLINT_REBUILD", "0") == "1"
     build_dylib()
 end
 
-dylib = dylib_filename()
-write_deps_file(libname, dylib, juliapackage)
+dylib,deps_filename = dylib_filenames()
+
+write_deps_file(libname, dylib, juliapackage, deps_filename)
 
 
