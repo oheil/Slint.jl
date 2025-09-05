@@ -37,7 +37,7 @@ function dylib_filenames()
     end
 end
 
-function write_deps_file(libname, libfile, juliapackage, deps_filename)
+function write_deps_file(libfile, juliapackage, deps_filename)
     script = """
 import Libdl
 
@@ -97,6 +97,6 @@ end
 
 dylib,deps_filename = dylib_filenames()
 
-write_deps_file(libname, dylib, juliapackage, deps_filename)
+write_deps_file(dylib, juliapackage, deps_filename)
 
 
