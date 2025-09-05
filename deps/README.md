@@ -18,6 +18,26 @@
 
 [https://github.com/felipenoris/JuliaPackageWithRustDep.jl]
 
+## Julia Registrator workflow
+
+- Edit Project.toml with next version number, e.g. version = "0.1.2" => version = "0.1.3"
+- Commit and Sync
+- On GitHub comment on latest commit with e.g.:
+
+```
+@JuliaRegistrator register
+
+Release notes:
+
+## General notes
+
+- slint v1.13 build
+- minor bugs in examples
+- ...
+```
+
+- wait and repeat until TagBot does the work
+
 ## General Rust workflows
 
 ```shell
