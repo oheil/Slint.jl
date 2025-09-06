@@ -45,7 +45,49 @@ include("examples/plotter/main.jl")
 include("examples/gallery/main.jl")
 ```
 
-## Current known minor issues
+## REPL examples
+
+```julia
+using Slint
+s = "export component MyWin inherits Window {
+        Text {
+            text: \"Hello, World\";
+        }
+    }
+    "
+Slint.compile_from_string(s,"MyWin")
+Slint.run()
+```
+
+This will work with v0.1.5 again:
+
+```julia
+using Slint
+
+cd(joinpath(dirname(pathof(Slint)), ".."))
+
+file1 = "examples/7guis/booker.slint"
+file2 = "examples/helloworld.slint"
+file3 = "examples/SingleButton.slint"
+
+Slint.compile_from_file(file1,"Booker")
+
+#setting callbacks needs to be before the next call to CompileFromFile
+Slint.compile_from_file(file2,"Demo")
+#after last command no callback can be set for file1 anymore!
+function print_callback()
+    println("Button clicked, Julia responded")
+    # return true, not nothing
+    return true
+end
+Slint.set_callback("button-clicked",print_callback)
+
+Slint.compile_from_file(file3,"SingleButton")
+
+Slint.run()
+```
+
+## Current known issues
 
 - Linux: when closing the Slint window and running again => segmentation fault (problem with Libdl.dlclose)
 
@@ -94,7 +136,7 @@ In general you need:
 
 ## Development and Build
 
-To rebuild libraries set the environment variable
+To rebuild libraries set the environment variable `JULIA_SLINT_REBUILD`:
 
 ```bash
 export JULIA_SLINT_REBUILD=1  #bash
@@ -118,56 +160,14 @@ using Pkg
 cd(".julia/dev/Slint")
 Pkg.activate(".")
 Pkg.build("Slint"; verbose = true);
-include("contrib/generator.jl")
+
+include("contrib/generator.jl") # only needed if you want to change the API (=> changes in deps\SlintWrapper\src\lib.rs)
 ```
 
 More verbose debug output of the rust library:
 
 ```shell
 set RUST_LOG="debug"
-```
-
-## Current example work in progress
-
-```julia
-# none
-```
-
-### Testing linux build procedure is next
-
-## REPL examples
-
-```julia
-using Slint
-s = "export component MyWin inherits Window {
-        Text {
-            text: \"Hello, World\";
-        }
-    }
-    "
-Slint.compile_from_string(s,"MyWin")
-Slint.run()
-```
-
-```julia
-using Slint
-file1 = "examples/7guis/booker.slint"
-file2 = "helloworld.slint"
-file3 = "SingleButton.slint"
-
-Slint.compile_from_file(file1,"Booker")
-
-#setting callbacks needs to be before the next call to CompileFromFile
-Slint.compile_from_file(file2,"Demo")
-#after last command no callback can be set for file1 anymore!
-function print_callback()
-    println("Button clicked, Julia responded")
-end
-Slint.set_callback("button-clicked",print_callback)
-
-Slint.compile_from_file(file3,"SingleButton")
-
-Slint.run()
 ```
 
 ## Install Build prerequisites for Linux (tested with CachyOS)
