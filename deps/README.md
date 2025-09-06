@@ -24,7 +24,7 @@
 - Commit and Sync
 - On GitHub comment on latest commit with e.g.:
 
-```
+```text
 @JuliaRegistrator register
 
 Release notes:
@@ -36,7 +36,7 @@ Release notes:
 - ...
 ```
 
-- wait and repeat until TagBot does the work
+- wait and repeat until Registrator and TagBot does the work
 
 ## General Rust workflows
 

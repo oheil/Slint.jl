@@ -1,31 +1,49 @@
 # Slint.jl
 
-## This package is in an EARLY development state
-
-## For Windows and Linux no build is needed anymore
-
 Slint GUI for Julia
 
 Providing a library for Julia to use [Slint](https://github.com/slint-ui/slint), a GUI library for rust.
 
-## Download/install/examples
+## For Windows and Linux no build is needed anymore
+
+Make sure you have at least v0.1.4 installed!
+
+## Download and Install
 
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/oheil/Slint.jl.git")
+Pkg.add("Slint")
 ```
+
+## Examples
+
+All you need to do to see an example is:
+
+```julia
+using Slint
+example = joinpath(dirname(pathof(Slint)),"..","examples/gallery/main.jl")
+include(example)
+```
+
+All examples available:
 
 ```julia
 using Slint
 cd(joinpath(dirname(pathof(Slint)), ".."))
+
+include("examples/7guis/booker.jl")
+include("examples/7guis/cells.jl")
+include("examples/7guis/circledraw.jl")
+include("examples/7guis/counter.jl")
+include("examples/7guis/crud.jl")
+include("examples/7guis/tempconv.jl")
+include("examples/7guis/timer.jl")
+
+include("examples/plotter/main.jl")
+
+# showcase all Slint widgets
 include("examples/gallery/main.jl")
 ```
-
-## Build prerequisites
-
-- Rust
-- Windows: Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequisites-in-visual-studio-installer) )
-- Linux: [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequisites-for-linux-tested-with-cachyos)
 
 ## Current known minor issues
 
@@ -64,25 +82,15 @@ include("examples/gallery/main.jl")
 
     and a solution will be found at some time.
 
-## Working examples
+## Build prerequisites
 
-```julia
-using Slint
-cd(joinpath(dirname(pathof(Slint)), ".."))
+For Linux it's recommended to build the wrapper library on your system.
 
-include("examples/7guis/booker.jl")
-include("examples/7guis/cells.jl")
-include("examples/7guis/circledraw.jl")
-include("examples/7guis/counter.jl")
-include("examples/7guis/crud.jl")
-include("examples/7guis/tempconv.jl")
-include("examples/7guis/timer.jl")
+In general you need:
 
-include("examples/plotter/main.jl")
-
-# showcase all Slint widgets
-include("examples/gallery/main.jl")
-```
+- Rust
+- Windows: Visual Studio Community 2017 (or later) with C++ Build Tools ( [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequisites-in-visual-studio-installer) )
+- Linux: [see below](https://github.com/oheil/Slint.jl?tab=readme-ov-file#install-build-prerequisites-for-linux-tested-with-cachyos)
 
 ## Development and Build
 
