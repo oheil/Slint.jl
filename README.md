@@ -21,8 +21,8 @@ All you need to do to see an example is:
 
 ```julia
 using Slint
-example = joinpath(dirname(pathof(Slint)),"..","examples/gallery/main.jl")
-include(example)
+cd(joinpath(dirname(pathof(Slint)), ".."))
+include("examples/gallery/main.jl")
 ```
 
 All examples available:
