@@ -3,15 +3,6 @@ module Slint
 using CEnum
 
 deps_filename = "deps.jl"
-if Sys.isapple()
-    deps_filename = "deps_apple.jl"
-elseif Sys.islinux()
-    deps_filename = "deps_linux.jl"
-elseif Sys.iswindows()
-    deps_filename = "deps_windows.jl"
-else
-    error("Not supported: $(Sys.KERNEL)")
-end
 
 const deps_file = joinpath(dirname(@__FILE__), "..", "deps", deps_filename)
 if !isfile(deps_file)

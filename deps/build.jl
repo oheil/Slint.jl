@@ -8,9 +8,21 @@ const juliapackage = "Slint"
 # Windows .dlls do not have the "lib" prefix
 const libname = Sys.iswindows() ? rustlibname : "lib" * rustlibname
 
+function dylib_filename()
+    @static if Sys.isapple()
+        "$libname.dylib"
+    elseif Sys.islinux()
+        "$libname.so"
+    elseif Sys.iswindows()
+        "$libname.dll"
+    else
+        error("Not supported: $(Sys.KERNEL)")
+    end
+end
+
 function build_dylib()
-    dylib,deps_filename = dylib_filenames()
-    clean(dylib,deps_filename)
+    dylib = dylib_filename()
+    clean(dylib)
 
     run(Cmd(`cargo build --release`, dir=joinpath(@__DIR__, rustprojname)))
 
@@ -20,50 +32,9 @@ function build_dylib()
     @assert isfile(release_dylib_filepath) "$release_dylib_filepath not found. Build may have failed."
     mv(release_dylib_filepath, joinpath(@__DIR__, dylib))
     #rm(release_dir, recursive=true)
-
-    #write_deps_file(libname, dylib, juliapackage)
 end
 
-
-function dylib_filenames()
-    @static if Sys.isapple()
-        "$libname.dylib","deps_apple.jl"
-    elseif Sys.islinux()
-        "$libname.so","deps_linux.jl"
-    elseif Sys.iswindows()
-        "$libname.dll","deps_windows.jl"
-    else
-        error("Not supported: $(Sys.KERNEL)")
-    end
-end
-
-function write_deps_file(libfile, juliapackage, deps_filename)
-    script = """
-import Libdl
-
-const $rustlibname = joinpath(@__DIR__, "$libfile")
-
-function check_deps()
-    global $rustlibname
-    if !isfile($rustlibname)
-        error("\$$rustlibname does not exist, Please re-run ENV[\\"JULIA_SLINT_REBUILD\\"]=1;Pkg.build(\\"$juliapackage\\"), and restart Julia.")
-    end
-    handle = Libdl.dlopen_e($rustlibname)
-    if handle == C_NULL
-        error("\$$rustlibname cannot be opened, Please re-run ENV[\\"JULIA_SLINT_REBUILD\\"]=1;Pkg.build(\\"$juliapackage\\"), and restart Julia.")
-    end
-    return handle
-end
-"""
-    open(joinpath(@__DIR__, deps_filename), "w") do f
-        write(f, script)
-    end
-end
-
-function clean(dylib,deps_filename)
-    deps_file = joinpath(@__DIR__, deps_filename)
-    isfile(deps_file) && rm(deps_file)
-
+function clean(dylib)
     #release_dir = joinpath(@__DIR__, "release")
     #isdir(release_dir) && rm(release_dir, recursive=true)
 
@@ -95,8 +66,5 @@ if get(ENV, "JULIA_SLINT_REBUILD", "0") == "1"
     build_dylib()
 end
 
-dylib,deps_filename = dylib_filenames()
-
-write_deps_file(dylib, juliapackage, deps_filename)
 
 
