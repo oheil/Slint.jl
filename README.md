@@ -2,7 +2,7 @@
 
 Slint GUI for Julia
 
-Providing a library for Julia to use [Slint](https://github.com/slint-ui/slint), a GUI library for rust.
+Providing a library for Julia to use Slint ([GitHub](https://github.com/slint-ui/slint), [Webpage](https://slint.dev/)), a GUI library for rust.
 
 ## For Windows and Linux no build is needed anymore
 
@@ -16,6 +16,8 @@ Pkg.add("Slint")
 ```
 
 ## Examples
+
+See [below for WSL(Windows Subsystem for Linux) prerequisites](https://github.com/oheil/Slint.jl?tab=readme-ov-file#for-wsl-debian-trixie-to-show-the-slint-gui) for this GUI to show up.
 
 All you need to do to see an example is:
 
@@ -161,13 +163,13 @@ cd(".julia/dev/Slint")
 Pkg.activate(".")
 Pkg.build("Slint"; verbose = true);
 
-include("contrib/generator.jl") # only needed if you want to change the API (=> changes in deps\SlintWrapper\src\lib.rs)
+include("contrib/generator.jl") # only needed if you have changed the API (i.e. changes in deps\SlintWrapper\src\lib.rs)
 ```
 
 More verbose debug output of the rust library:
 
 ```shell
-set RUST_LOG="debug"
+set RUST_LOG=debug
 ```
 
 ## Install Build prerequisites for Linux (tested with CachyOS)
