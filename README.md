@@ -17,9 +17,55 @@ Pkg.add("Slint")
 
 ## Examples
 
-See [below for WSL(Windows Subsystem for Linux) prerequisites](https://github.com/oheil/Slint.jl?tab=readme-ov-file#for-wsl-debian-trixie-to-show-the-slint-gui) for this GUI to show up.
+See [below for WSL (Windows Subsystem for Linux) prerequisites](https://github.com/oheil/Slint.jl?tab=readme-ov-file#for-wsl-debian-trixie-to-show-the-slint-gui) for the Slint GUIs to show up in WSL.
 
-All you need to do to see an example is:
+A small and non-trivial Julia program using Slint GUI looks as clear and comprehensible as this example:
+
+```julia
+using Slint, Dates
+
+cd(joinpath(dirname(pathof(Slint)), ".."))
+
+slintFile = "examples/7guis/booker.slint" # the Slint GUI declaration is here inside
+startComponent = "Booker"
+
+# Main/Start component is "Booker"
+Slint.compile_from_file(slintFile,startComponent)
+
+# implementation of callback:
+#       pure callback validate-date(string) -> bool;
+function on_validate_date(params...)
+    if isnothing(match(r"^\d\d\.\d\d.\d\d\d\d$",params[1]))
+        return false
+    end
+    return true
+end
+# register callback for:
+#       pure callback validate-date(string) -> bool;
+Slint.set_callback("validate-date", on_validate_date)
+
+# implementation of callback:
+#       pure callback compare-date(string, string) -> bool;
+function on_compare_date(params...)
+    d1 = Dates.tryparse(Date,params[1],dateformat"d.m.Y")
+    d2 = Dates.tryparse(Date,params[2],dateformat"d.m.Y")
+    if isnothing(d1) || isnothing(d2) || d1 > d2
+        return false
+    end
+    return true
+end
+# register callback for:
+#       pure callback compare-date(string, string) -> bool;
+Slint.set_callback("compare-date", on_compare_date)
+
+# run the application
+Slint.run()
+
+# unload library
+Slint.close()
+```
+
+This example shows a complete (at the time) overview of all GUI components:
 
 ```julia
 using Slint
