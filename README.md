@@ -148,6 +148,8 @@ Slint.run()
     
     No solution yet
 
+    Dependency is only from plotters v0.3.7 which is only needed for example plotter :-(
+
 - Linux: when closing the Slint window and running again => segmentation fault (problem with Libdl.dlclose)
 
     The library can't be unloaded.
