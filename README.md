@@ -137,6 +137,17 @@ Slint.run()
 
 ## Current known issues
 
+- Linux: can't build for Slint 1.14
+
+    On Debian build fails for font-kit v0.14.3
+
+    see https://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg2060874.html
+
+    apt-get install librust-font-kit-dev
+       (0.14.2-2)
+    
+    No solution yet
+
 - Linux: when closing the Slint window and running again => segmentation fault (problem with Libdl.dlclose)
 
     The library can't be unloaded.
