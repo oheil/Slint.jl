@@ -137,19 +137,6 @@ Slint.run()
 
 ## Current known issues
 
-- Linux: can't build for Slint 1.14
-
-    On Debian build fails for font-kit v0.14.3
-
-    see <https://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg2060874.html>
-
-    apt-get install librust-font-kit-dev
-       (0.14.2-2)
-
-    No solution yet
-
-    Dependency is only from plotters v0.3.7 which is only needed for example plotter :-(
-
 - Linux: when closing the Slint window and running again => segmentation fault (problem with Libdl.dlclose)
 
     The library can't be unloaded.
@@ -173,6 +160,21 @@ Slint.run()
     ```
 
     Building everything didn't change a thing.
+
+- RESOLVED Linux: can't build for Slint 1.14
+
+    On Debian build fails for font-kit v0.14.3
+
+    see <https://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg2060874.html>
+
+    apt-get install librust-font-kit-dev
+       (0.14.2-2)
+
+    No solution yet
+
+    Dependency is only from plotters v0.3.7 which is only needed for example plotter :-(
+
+    Automagically resolved with Slint 1.14.1, Julia 1.12.4, Debian Trixy latest updates
 
 - RESOLVED Windows: build errors after `Pkg.add(url="https://github.com/oheil/Slint.jl.git")`
 
