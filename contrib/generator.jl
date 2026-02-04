@@ -38,13 +38,15 @@ ctx = create_context(headers, args, options)
 # run generator
 build!(ctx)
 
-if isfile("..\\src\\api.jl.old")
-    Base.Filesystem.rm("..\\src\\api.jl.old")
+apiFile = joinpath("..", "src", "api.jl")
+apiFileOld = joinpath("..", "src", "api.jl.old")
+if isfile(apiFileOld)
+    Base.Filesystem.rm(apiFileOld)
 end
-if isfile("..\\src\\api.jl")
-    Base.Filesystem.mv("..\\src\\api.jl","..\\src\\api.jl.old")
+if isfile(apiFile)
+    Base.Filesystem.mv(apiFile,apiFileOld)
 end
-Base.Filesystem.mv("api.jl","..\\src\\api.jl")
+Base.Filesystem.mv("api.jl",apiFile)
 
 cd("..")
 Pkg.activate(".")
