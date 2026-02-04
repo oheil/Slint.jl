@@ -1,4 +1,4 @@
-using CEnum
+using CEnum: CEnum, @cenum
 
 struct JRvalue
     magic::Int32
