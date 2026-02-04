@@ -141,11 +141,11 @@ Slint.run()
 
     On Debian build fails for font-kit v0.14.3
 
-    see https://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg2060874.html
+    see <https://www.mail-archive.com/debian-bugs-dist@lists.debian.org/msg2060874.html>
 
     apt-get install librust-font-kit-dev
        (0.14.2-2)
-    
+
     No solution yet
 
     Dependency is only from plotters v0.3.7 which is only needed for example plotter :-(
