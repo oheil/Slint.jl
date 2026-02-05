@@ -295,6 +295,20 @@ apt install freeglut3-dev
 apt install xdg-desktop-portal-gtk  # only if you want to get rid of error: Error watching for xdg color schemes: org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.portal.Desktop was not provided by any .service files
 ```
 
+## Running Tests headless (no display, only terminal)
+
+as root
+
+```bash
+apt install xvfb-run
+```
+
+as user:
+
+```bash
+export DISPLAY=:0 ; xvfb-run --server-num=0 julia
+```
+
 ## Running Tests
 
 ```julia
