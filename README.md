@@ -300,7 +300,7 @@ apt install xdg-desktop-portal-gtk  # only if you want to get rid of error: Erro
 as root
 
 ```bash
-apt install xvfb-run
+apt install xvfb
 ```
 
 as user:
