@@ -14,8 +14,9 @@ jobs:
       matrix:
         version:
           - "nightly"
-        os:
-          - ubuntu-latest
+        include:
+        - os: ubuntu-latest
+          prefix: xvfb-run
         arch:
           - x64
     steps:
@@ -37,6 +38,9 @@ jobs:
             ${{ runner.os }}-
       - uses: julia-actions/julia-buildpkg@latest
       - uses: julia-actions/julia-runtest@latest
+        with:
+          version: ${{ matrix.version }}
+          arch: ${{ matrix.arch }}
       - uses: julia-actions/julia-uploadcodecov@latest
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
