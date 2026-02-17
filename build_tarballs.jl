@@ -12,6 +12,8 @@ sources = [
 
 # Adapted from the justfile of the repo
 script = raw"""
+install_license Slint.jl/LICENSE
+
 mkdir opt-x86_64-linux-musl
 mkdir opt-x86_64-linux-musl/registry
 ln -s /workspace/srcdir/opt-x86_64-linux-musl/registry /opt/x86_64-linux-musl/registry
@@ -41,7 +43,11 @@ Cflags: -I${includedir}
 cd Slint.jl/deps/SlintWrapper
 cargo build --release 
 
-install_license Slint.jl/LICENSE
+if [[ "${target}" == *-mingw* ]]; then
+	install -Dvm 755 target/${rust_target}/release/slintwrapper.${dlext} "${libdir}/libslintwrapper.${dlext}"
+else
+	install -Dvm 755 target/${rust_target}/release/libslintwrapper.${dlext} "${libdir}/libslintwrapper.${dlext}"
+fi
 """
 
 # These are the platforms we will build for by default, unless further
@@ -49,13 +55,13 @@ install_license Slint.jl/LICENSE
 platforms = [
 #    Platform("x86_64", "macos"; ),
     Platform("x86_64", "linux"; libc = "glibc"),
-#    Platform("x86_64", "windows")
+    Platform("x86_64", "windows")
 ]
 
 # The products that we will ensure are always built
 products = [
     LibraryProduct("libslintwrapper", :libslintwrapper),
-    FileProduct("deps/SlintWrapper/include/slintwrapper.h", :slintwrapper_h),
+    #FileProduct("deps/SlintWrapper/include/slintwrapper.h", :slintwrapper_h),
 ]
 
 # Dependencies that must be installed before this package can be built
