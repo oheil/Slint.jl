@@ -1,0 +1,140 @@
+BinaryBuilder.jl version: 0.6.6-tree-517005cebc
+
+`/bin/bash -l -c 'set -x
+cc --version
+c++ --version
+gcc --version
+g++ --version
+clang --version
+clang++ --version
+objc --version
+f77 --version
+gfortran --version
+ld -v
+rustc --version
+rustup --version
+cargo --version
+'`
+x86_64-linux-gnu-gcc (GCC) 5.2.0
+Copyright (C) 2015 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+x86_64-linux-gnu-g++ (GCC) 5.2.0
+Copyright (C) 2015 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+x86_64-linux-gnu-gcc (GCC) 5.2.0
+Copyright (C) 2015 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+x86_64-linux-gnu-g++ (GCC) 5.2.0
+Copyright (C) 2015 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+clang version 18.1.7 (/home/tim/.cache/BinaryBuilder/downloads/clones/llvm-project.git-1df819a03ecf6890e3787b27bfd4f160aeeeeacd50a98d003be8b0893f11a9be 768118d1ad38bf13c545828f67bd6b474d61fc55)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/x86_64-linux-musl/bin
+clang version 18.1.7 (/home/tim/.cache/BinaryBuilder/downloads/clones/llvm-project.git-1df819a03ecf6890e3787b27bfd4f160aeeeeacd50a98d003be8b0893f11a9be 768118d1ad38bf13c545828f67bd6b474d61fc55)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/x86_64-linux-musl/bin
+verbose sandbox enabled (running in unprivileged container mode)
+Parsed --rootfs as "/home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62"
+Parsed --cd as "/workspace/srcdir"
+Parsed --workspace as "/mnt/c/Z-Temp/Temp/Slint.jl/build/x86_64-linux-gnu/GQEZKStR" -> "/workspace"
+Parsed --workspace as "/mnt/c/Z-Temp/Temp/Slint.jl/build/x86_64-linux-gnu/GQEZKStR/metadir" -> "/meta"
+Parsed --workspace as "/tmp/jl_PRIEPN" -> "/opt/bin"
+Parsed --workspace as "/tmp/jl_6cFO6C" -> "/opt/toolchains"
+Parsed --workspace as "/tmp/jl_fjrEPM" -> "/etc/resolv.conf"
+Parsed --map as "/home/oheil/.julia/artifacts/0a4fcd057d87f56cd0a41a9e860a8a3ee80498a2" -> "/opt/x86_64-linux-gnu/PlatformSupport-2025.8.13"
+Parsed --map as "/home/oheil/.julia/artifacts/31abd3802c6567a9311dc0888a0d8b35f75c9017" -> "/opt/x86_64-linux-gnu/GCCBootstrap-5.2.0"
+Parsed --map as "/home/oheil/.julia/artifacts/ba75276dcd66d7dbc627c61fc86e6d6ea2d4cd31" -> "/opt/x86_64-linux-musl/LLVMBootstrap-18.1.7"
+Parsed --map as "/home/oheil/.julia/artifacts/48c62c84f3fd6e8f422e5ed57e952d138f5d120e" -> "/opt/x86_64-linux-musl/RustBase-1.91.0"
+Parsed --map as "/home/oheil/.julia/artifacts/49b38d54f1cdb190d5cba4c9680441ef09d8c102" -> "/opt/x86_64-linux-musl/RustToolchain-1.91.0-x86_64-linux-gnu)"
+Parsed --map as "/home/oheil/.julia/artifacts/9304cec09cffa2b5916c5d2215ea858dd82020ec" -> "/opt/x86_64-linux-musl/RustToolchain-1.91.0-x86_64-linux-musl)"
+Parsed --map as "/home/oheil/.julia/artifacts/2490e039b539ff034f738a037cec466a9710c963" -> "/opt/x86_64-linux-musl/PlatformSupport-2025.8.13"
+Parsed --map as "/home/oheil/.julia/artifacts/4b130fc0a90fc0edda99060f71968057ddb0fc25" -> "/opt/x86_64-linux-musl/GCCBootstrap-5.2.0"
+Parsed --map as "/tmp/jl_UMEBz0" -> "/opt/x86_64-linux-musl/nonce"
+Child Process PID is 2697
+--> Mapping 1000:1000 to root:root within container namespace
+--> Creating overlay workdir at /proc
+--> Mounting overlay of /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62 at /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62 (modifications in /proc/upper/rootfs, workspace in /proc/work/rootfs)
+--> mapping /tmp/jl_UMEBz0 to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/nonce
+--> mapping /home/oheil/.julia/artifacts/4b130fc0a90fc0edda99060f71968057ddb0fc25 to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/GCCBootstrap-5.2.0
+--> mapping /home/oheil/.julia/artifacts/2490e039b539ff034f738a037cec466a9710c963 to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/PlatformSupport-2025.8.13
+--> mapping /home/oheil/.julia/artifacts/9304cec09cffa2b5916c5d2215ea858dd82020ec to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/RustToolchain-1.91.0-x86_64-linux-musl)
+--> mapping /home/oheil/.julia/artifacts/49b38d54f1cdb190d5cba4c9680441ef09d8c102 to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/RustToolchain-1.91.0-x86_64-linux-gnu)
+--> mapping /home/oheil/.julia/artifacts/48c62c84f3fd6e8f422e5ed57e952d138f5d120e to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/RustBase-1.91.0
+--> mapping /home/oheil/.julia/artifacts/ba75276dcd66d7dbc627c61fc86e6d6ea2d4cd31 to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/LLVMBootstrap-18.1.7
+--> mapping /home/oheil/.julia/artifacts/31abd3802c6567a9311dc0888a0d8b35f75c9017 to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-gnu/GCCBootstrap-5.2.0
+--> mapping /home/oheil/.julia/artifacts/0a4fcd057d87f56cd0a41a9e860a8a3ee80498a2 to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-gnu/PlatformSupport-2025.8.13
+--> Mounting overlay of /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-gnu/PlatformSupport-2025.8.13:/home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-gnu/GCCBootstrap-5.2.0 at /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-gnu (modifications in /proc/upper/x86_64-linux-gnu, workspace in /proc/work/x86_64-linux-gnu)
+--> Mounting overlay of /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/LLVMBootstrap-18.1.7:/home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/RustBase-1.91.0:/home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/RustToolchain-1.91.0-x86_64-linux-gnu):/home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/RustToolchain-1.91.0-x86_64-linux-musl):/home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/PlatformSupport-2025.8.13:/home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/GCCBootstrap-5.2.0:/home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl/nonce at /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/x86_64-linux-musl (modifications in /proc/upper/x86_64-linux-musl, workspace in /proc/work/x86_64-linux-musl)
+--> Mounting procfs at /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/proc
+--> Bind-mounting /dev/null over /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/dev/null
+--> Bind-mounting /dev/tty over /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/dev/tty
+--> Bind-mounting /dev/urandom over /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/dev/urandom
+--> Bind-mounting /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/dev/pts/ptmx over /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/dev/ptmx
+--> workspacing /tmp/jl_fjrEPM to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/etc/resolv.conf
+--> workspacing /tmp/jl_6cFO6C to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/toolchains
+--> workspacing /tmp/jl_PRIEPN to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/opt/bin
+--> workspacing /mnt/c/Z-Temp/Temp/Slint.jl/build/x86_64-linux-gnu/GQEZKStR/metadir to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/meta
+--> workspacing /mnt/c/Z-Temp/Temp/Slint.jl/build/x86_64-linux-gnu/GQEZKStR to /home/oheil/.julia/artifacts/e8c56f9c44dbe45e2f378f5b44bf8e81190c3e62/workspace
+--> Mounting procfs at /proc
+About to run `/bin/bash` `-l` `-c` `set -x
+cc --version
+c++ --version
+gcc --version
+g++ --version
+clang --version
+clang++ --version
+objc --version
+f77 --version
+gfortran --version
+ld -v
+rustc --version
+rustup --version
+cargo --version
+` 
++ cc --version
++ c++ --version
++ gcc --version
++ g++ --version
++ clang --version
++ clang++ --version
++ objc --version
+/bin/bash: line 8: objc: command not found
++ f77 --version
++ gfortran --version
++ ld -v
+GNU Fortran (GCC) 5.2.0
+Copyright (C) 2015 Free Software Foundation, Inc.
+
+GNU Fortran comes with NO WARRANTY, to the extent permitted by law.
+You may redistribute copies of GNU Fortran
+under the terms of the GNU General Public License.
+For more information about these matters, see the file named COPYING
+
+GNU Fortran (GCC) 5.2.0
+Copyright (C) 2015 Free Software Foundation, Inc.
+
+GNU Fortran comes with NO WARRANTY, to the extent permitted by law.
+You may redistribute copies of GNU Fortran
+under the terms of the GNU General Public License.
+For more information about these matters, see the file named COPYING
+
+GNU ld (GNU Binutils) 2.25.1
++ rustc --version
+rustc 1.91.0 (f8297e351 2025-10-28)
++ rustup --version
+rustup 1.24.3 (2021-05-31)
+info: This is the version for the rustup toolchain manager, not the rustc compiler.
+info: The currently active `rustc` version is `rustc 1.91.0 (f8297e351 2025-10-28)`
++ cargo --version
+cargo 1.91.0 (ea2d97820 2025-10-10)
+Child Process exited, exit code 0

@@ -12,17 +12,44 @@ sources = [
 
 # Adapted from the justfile of the repo
 script = raw"""
+mkdir opt-x86_64-linux-musl
+mkdir opt-x86_64-linux-musl/registry
+ln -s /workspace/srcdir/opt-x86_64-linux-musl/registry /opt/x86_64-linux-musl/registry
 
+mv /tmp .
+ln -s /workspace/srcdir/tmp /tmp
+apk add fontconfig-dev
 
+echo '
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+sysconfdir=/etc
+localstatedir=/var
+PACKAGE=fontconfig
+confdir=${sysconfdir}/fonts
+cachedir=${localstatedir}/cache/${PACKAGE}
 
+Name: Fontconfig
+Description: Font configuration and customization library
+Version: 1.12.0
+Libs: -L${libdir} -lfontconfig
+Cflags: -I${includedir}
+' > /usr/local/lib/pkgconfig/fontconfig.pc
+
+cd Slint.jl/deps/SlintWrapper
+cargo build --release 
+
+install_license Slint.jl/LICENSE
 """
 
 # These are the platforms we will build for by default, unless further
 # platforms are passed in on the command line
 platforms = [
-    Platform("x86_64", "macos"; ),
+#    Platform("x86_64", "macos"; ),
     Platform("x86_64", "linux"; libc = "glibc"),
-    Platform("x86_64", "windows")
+#    Platform("x86_64", "windows")
 ]
 
 # The products that we will ensure are always built
