@@ -20,8 +20,8 @@ ln -s /workspace/srcdir/opt-x86_64-linux-musl/registry /opt/x86_64-linux-musl/re
 
 mv /tmp .
 ln -s /workspace/srcdir/tmp /tmp
-apk add fontconfig-dev
 
+apk add fontconfig-dev
 echo '
 prefix=/usr
 exec_prefix=${prefix}
