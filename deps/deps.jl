@@ -1,7 +1,7 @@
 import Libdl
 
 const rustlibname = "slintwrapper"
-const libname = Sys.iswindows() ? rustlibname : "lib" * rustlibname
+const libname = "lib" * rustlibname
 
 function dylib_filenames()
     @static if Sys.isapple()

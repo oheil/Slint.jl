@@ -5,8 +5,7 @@ const rustprojname = "SlintWrapper"
 const rustlibname = "slintwrapper"
 const juliapackage = "Slint"
 
-# Windows .dlls do not have the "lib" prefix
-const libname = Sys.iswindows() ? rustlibname : "lib" * rustlibname
+const libname = "lib" * rustlibname
 
 function dylib_filename()
     @static if Sys.isapple()
@@ -28,7 +27,12 @@ function build_dylib()
 
     release_dir = joinpath(@__DIR__, "release")
 
+    if Sys.iswindows()
+        # Windows .dlls do not have the "lib" prefix
+        mv(joinpath(release_dir, rustlibname*".dll"), joinpath(release_dir, dylib))
+    end
     release_dylib_filepath = joinpath(release_dir, dylib)
+
     @assert isfile(release_dylib_filepath) "$release_dylib_filepath not found. Build may have failed."
     mv(release_dylib_filepath, joinpath(@__DIR__, dylib))
     #rm(release_dir, recursive=true)
