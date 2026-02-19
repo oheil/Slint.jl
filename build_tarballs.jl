@@ -7,7 +7,7 @@ version = v"0.1.8"
 
 # Collection of sources required to complete build
 sources = [
-    GitSource("https://github.com/oheil/Slint.jl.git", "83ac1ad0db4bfd2a5b7c3869f51c4d3a798c8822")
+    GitSource("https://github.com/oheil/Slint.jl.git", "ff7d5fbc6057da9a4160f9963c0615e121a74465")
 ]
 
 # Adapted from the justfile of the repo
