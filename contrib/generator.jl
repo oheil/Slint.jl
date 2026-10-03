@@ -12,7 +12,6 @@ Pkg.activate(@__DIR__)
 Pkg.instantiate()
 
 using Clang.Generators
-using Clang.LibClang.Clang_jll
 
 cd(@__DIR__)
 

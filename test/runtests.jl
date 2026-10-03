@@ -200,6 +200,13 @@ end;
         end
     end
 
+    Slint.push_rows("cells", fill("added row", columns))
+    @test Slint.get_cell_value("cells", rows + 1, 1) == "added row"
+
+    Slint.clear_rows("cells")
+    Slint.get_cell_value("cells", rows + 1, 1)
+    @test Slint.get_error_state().int_value == 1
+
     Slint.clear_error_state()
 
     Slint.set_cell_value("cells", rows+1, columns+1, "cell not existing")

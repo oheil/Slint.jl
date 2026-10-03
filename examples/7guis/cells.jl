@@ -26,7 +26,7 @@ function on_changed_element(params...)
     # get the value of a specific cell and print it:
     #println( "cell 1,1 value: ", Slint.get_cell_value("cells",1,1) )
     # set the value of a specific cell:
-    Slint.set_cell_value("cells",rows,columns,new_value)
+    Slint.set_cell_value("cells", rows, columns, new_value)
 
     return true
 end

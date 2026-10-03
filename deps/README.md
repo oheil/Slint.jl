@@ -99,6 +99,13 @@ include("contrib/generator.jl")
 ```
 
 ```julia
+using Pkg;
+Pkg.test("Slint")
+Pkg.test("Slint"; test_args=["-v"])   # verbose tests
+Pkg.test("Slint"; test_args=["-vv"])  # more verbose tests
+```
+
+```julia
 using Slint
 ...
     # slintwrapper.dll is locked because loaded by `Libdl.dlopen_e`

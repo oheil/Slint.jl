@@ -28,6 +28,10 @@ path = "src/7guis/my_cells.rs"
 name = "my_cells"
 
 [[bin]]
+path = "src/7guis/cells.rs"
+name = "cells"
+
+[[bin]]
 path = "src/7guis/my_cells_listview.rs"
 name = "my_cells_listview"
 

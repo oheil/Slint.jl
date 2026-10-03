@@ -228,9 +228,12 @@ unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: 
         compiler.build_from_path(filename)
     );
 
-    let diagnostics : Vec<_> = result.diagnostics().collect();
-    if diagnostics.is_empty() {
-        debug!("r_compile_from_file: diagnostics is empty");
+    let diagnostics: Vec<_> = result.diagnostics().collect();
+    if !diagnostics.is_empty() {
+        result.print_diagnostics();
+    }
+    if !result.has_errors() {
+        debug!("r_compile_from_file: no compilation errors");
         if let Some(definition) = result.component(start_component) {
             let instance = definition.create().unwrap();
             if ! INSTANCES.lock().unwrap().is_empty() {
@@ -245,8 +248,7 @@ unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: 
             register_bridge_2_standard_list_view_item(&instance);
         }
     } else {
-        debug!("r_compile_from_file: diagnostics is not empty");
-        result.print_diagnostics();
+        debug!("r_compile_from_file: compilation errors");
         set_error_state(
             format!("r_compile_from_file: diagnostics is not empty: {:?}", diagnostics),
             true
@@ -270,8 +272,11 @@ unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_co
 
     let result = spin_on::spin_on(compiler.build_from_source(slint_code.into(), Default::default()));
 
-    let diagnostics : Vec<_> = result.diagnostics().collect();
-    if diagnostics.is_empty() {
+    let diagnostics: Vec<_> = result.diagnostics().collect();
+    if !diagnostics.is_empty() {
+        result.print_diagnostics();
+    }
+    if !result.has_errors() {
         if let Some(definition) = result.component(start_component) {
             let instance = definition.create().unwrap();
             if ! INSTANCES.lock().unwrap().is_empty() {
@@ -285,8 +290,7 @@ unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_co
             register_bridge_2_standard_list_view_item(&instance);
         }
     } else {
-        debug!("r_compile_from_string: diagnostics is not empty");
-        result.print_diagnostics();
+        debug!("r_compile_from_string: compilation errors");
         set_error_state(
             format!("r_compile_from_string: diagnostics is not empty: {:?}", diagnostics),
             true
@@ -759,7 +763,7 @@ unsafe extern "C" fn r_clear_rows(id: *const c_char) { unsafe {
         debug!("r_clear_rows: removing from index {} to {}",1,model.row_count());
         for _ in 1..model.row_count() {
             // clear all rows, but keep the first row as a template
-            model.remove_row(1);
+            model.delete_row(1);
         }   
         slvi_bridges_changed(propertyid);
     }
@@ -777,7 +781,7 @@ unsafe extern "C" fn r_remove_row(id: *const c_char, index: usize) { unsafe {
     } else {
         debug!("r_pop_row: index: {}",index);
         let model: Rc<CellsModel> = model_get(&propertyid);
-        model.remove_row(index);
+        model.delete_row(index);
         slvi_bridges_changed(propertyid);
     }
 }}
@@ -798,7 +802,7 @@ unsafe extern "C" fn r_push_rows(id: *const c_char, new_values: *const JRvalue, 
     } else {
         debug!("r_push_rows: new_values size: {}",len);
         let model: Rc<CellsModel> = model_get(&propertyid);
-        let row_count = model.row_count() + 1;
+        let row_index = model.row_count();
         let some_row = model.rows.borrow()[0].clone();
 
         let mut values: Vec<SlintValue> = Vec::new();
@@ -849,14 +853,14 @@ unsafe extern "C" fn r_push_rows(id: *const c_char, new_values: *const JRvalue, 
         }
 
         let _new_row = Rc::new(RowModel {
-                row: row_count,
+                row: row_index,
                 row_elements: values.into(),
                 base_model: some_row.base_model.clone(),
                 notify: Default::default(),
                 func: some_row.func,
             });
         
-        model.push_row(_new_row);
+        model.append_row(_new_row);
         slvi_bridges_changed(propertyid);
     }
 }}
@@ -1152,21 +1156,21 @@ impl CellsModel {
         })
     }
 
-    fn push_row(&self, row: Rc<RowModel>) {
-        debug!("CellsModel.push_row");
+    fn append_row(&self, row: Rc<RowModel>) {
+        debug!("CellsModel.append_row");
         self.rows.borrow_mut().push(row);
         let c = self.rows.borrow().len();
         self.notify.row_added(c-1,c);
     }
 
-    fn remove_row(&self, index: usize ) {
-        debug!("CellsModel.remove_row");
+    fn delete_row(&self, index: usize ) {
+        debug!("CellsModel.delete_row");
         if index > 0 && index < self.rows.borrow().len() {
             self.rows.borrow_mut().remove(index);
             let c = self.rows.borrow().len();
             self.notify.row_removed(index,c);
         } else {
-            warn!("CellsModel.remove_row: trying to remove row index {} but length of rows is only {}",index,self.rows.borrow().len());
+            warn!("CellsModel.delete_row: trying to remove row index {} but length of rows is only {}",index,self.rows.borrow().len());
         }
     }
 
