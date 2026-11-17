@@ -23,6 +23,14 @@ function build_dylib()
     dylib = dylib_filename()
     clean(dylib)
 
+    # refresh the build.rs file to force rebuild of the slintwrapper.h header file
+    build_rs = joinpath(@__DIR__, rustprojname, "build", "build.rs")
+    if isfile(build_rs)
+        touch(build_rs)
+    else
+        error("build.rs file not found at $build_rs")
+    end
+
     run(Cmd(`cargo build --release`, dir=joinpath(@__DIR__, rustprojname)))
 
     release_dir = joinpath(@__DIR__, "release")

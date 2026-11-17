@@ -92,6 +92,8 @@ set JULIA_SLINT_REBUILD=1
 
 How to build the projekt:
 
+- delete deps\release to rebuild all
+
 ```julia
 ENV["JULIA_SLINT_REBUILD"]=1
 using Pkg; Pkg.activate("."); Pkg.build("Slint"; verbose = true);
