@@ -22,7 +22,8 @@ pub fn main() {
         .filter_or("RUST_LOG", "info");
     env_logger::init_from_env(env);
 
-    let compiler = Compiler::default();
+    let mut compiler = Compiler::default();
+    compiler.set_edition((1, 19));
 
     let code = r#"
     // Copyright © SixtyFPS GmbH <info@slint.dev>

@@ -217,7 +217,10 @@ unsafe extern "C" fn r_compile_from_file(slint_file: *const c_char, slint_comp: 
 
     let start_component = CStr::from_ptr(slint_comp).to_str().unwrap();
     
-    let compiler = Compiler::default();
+    let mut compiler = Compiler::default();
+    // Set the Slint edition explicitly to suppress the compiler's "no edition specified" info diagnostic.
+    // (1, 18) keeps the language behavior as it was before edition 1.19, which is what was used implicitly so far.
+    compiler.set_edition((1, 19));
 
     //let selector = BackendSelector::new().backend_name(String::from("winit-skia-software"));
     //if let Err(err) = selector.select() {
@@ -268,7 +271,10 @@ unsafe extern "C" fn r_compile_from_string(slint_string: *const c_char, slint_co
 
     let start_component = CStr::from_ptr(slint_comp).to_str().unwrap();
 
-    let compiler = Compiler::default();
+    let mut compiler = Compiler::default();
+    // Set the Slint edition explicitly to suppress the compiler's "no edition specified" info diagnostic.
+    // (1, 18) keeps the language behavior as it was before edition 1.19, which is what was used implicitly so far.
+    compiler.set_edition((1, 19));
 
     let result = spin_on::spin_on(compiler.build_from_source(slint_code.into(), Default::default()));
 

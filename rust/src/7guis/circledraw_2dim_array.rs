@@ -6,7 +6,7 @@ use slint::VecModel;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-slint::slint!(export { MainWindow } from "src/7guis/circledraw_2dim_array.slint";);
+slint::slint!(#[edition = "1.19"] export { MainWindow } from "src/7guis/circledraw_2dim_array.slint";);
 
 enum Change {
     CircleAdded { row: usize },
