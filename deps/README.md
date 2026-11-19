@@ -88,6 +88,33 @@ set JULIA_SLINT_REBUILD=1
 [Environment]::SetEnvironmentVariable("RUST_LOG", "")
 ```
 
+## TEST: Upgrading from CEnum v0.5.0 to v1.0.0
+
+```julia
+(@v1.13) pkg> activate .
+(Slint) pkg> activate contrib\\.
+(contrib) pkg> add Clang#master
+(contrib) pkg> up
+(contrib) pkg> st
+Status `C:\Z-Temp\Temp\Slint.jl\contrib\Project.toml`
+  [fa961155] CEnum v1.0.0
+  [40e3b903] Clang v0.19.3 `https://github.com/JuliaInterop/Clang.jl.git#master`
+  [8f399da3] Libdl v1.11.0
+(contrib) pkg> activate .
+# remove 
+#  [compat]
+#  CEnum = "0.5.0"
+# from Project.toml
+(Slint) pkg> up
+(Slint) pkg> st
+Project Slint v0.1.13
+Status `C:\Z-Temp\Temp\Slint.jl\Project.toml`
+  [fa961155] CEnum v1.0.0
+  [8f399da3] Libdl v1.11.0
+```
+
+Result: no problems
+
 ## Build
 
 How to build the projekt:
