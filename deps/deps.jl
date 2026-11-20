@@ -22,10 +22,10 @@ function check_deps()
     if !isfile(slintwrapper)
         error("$slintwrapper does not exist, Please run ENV[\"JULIA_SLINT_REBUILD\"]=1;Pkg.build(\"Slint\"), and restart Julia.")
     end
-    if ! isexecutable(slintwrapper)
+    if ! Sys.isexecutable(slintwrapper)
         chmod(slintwrapper, filemode(slintwrapper) | 0o755)
     end
-    if ! isexecutable(slintwrapper)
+    if ! Sys.isexecutable(slintwrapper)
         error("$slintwrapper is not executable, Please run ENV[\"JULIA_SLINT_REBUILD\"]=1;Pkg.build(\"Slint\"), and restart Julia.")
     end
     handle = Libdl.dlopen_e(slintwrapper)

@@ -1,0 +1,25 @@
+theme = "Dracula"
+layout = "Auto"
+recent_pairs = []
+syntax_theme = ""
+node_highlight = false
+
+[custom_palette]
+insert_bg = "#387d52"
+delete_bg = "#7e3b42"
+move_bg = "#5c5d64"
+update_bg = "#787d58"
+overlay_fg = "#f8f8f2"
+cross_highlight_bg = "#639dad"
+search_bg = "#a97f56"
+before_title_fg = "#cd0000"
+after_title_fg = "#00cd00"
+
+[render_options]
+leading_whitespace = true
+structural_punctuation = true
+whole_pair_updates = false
+paint_reindent_only_moves = true
+paint_displaced_moves = true
+paint_resized_moves = true
+whole_identifier_updates = true

@@ -51,7 +51,7 @@ function is_exec()
     dylib_file = joinpath(@__DIR__, dylib)
     if isfile(dylib_file)
         chmod(dylib_file, filemode(dylib_file) | 0o755)
-        if ! isexecutable(dylib_file)
+        if ! Sys.isexecutable(dylib_file)
             error("Can't load $dylib, file is not executable, Please run ENV[\"JULIA_SLINT_REBUILD\"]=1;Pkg.build(\"Slint\"), and restart Julia.")
         end
     else
