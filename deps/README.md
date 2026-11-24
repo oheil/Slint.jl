@@ -27,11 +27,15 @@
 ```text
 @JuliaRegistrator register
 
-# Release notes v0.1.5:
+Release notes:
 
 ## General notes
 
-- important REPL example working again
+- Slint 1.19.1
+
+## Breaking changes
+
+- blah
 
 ## Bug fixes
 
